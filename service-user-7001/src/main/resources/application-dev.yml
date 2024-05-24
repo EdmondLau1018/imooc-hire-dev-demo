@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: user-service-7001
+  banner:
+    location: classpath:banner/banner.txt
+server:
+  port: 7001
+  tomcat:
+    uri-encoding: UTF-8
+    # 这个配置设置 tomcat 服务器上传文件的时候吞吐量校验 默认超过 2M 的文件不会被捕获 -1 代表不校验文件大小
+    max-swallow-size: -1
