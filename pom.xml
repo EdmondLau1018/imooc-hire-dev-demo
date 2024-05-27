@@ -18,10 +18,9 @@
 
     <modules>
         <!--
-            pojo 依赖 common ，api 依赖 pojo ，具体业务模块依赖 api 提供 web 共用接口
-
+            com.imooc.test.pojo 依赖 common ，api 依赖 com.imooc.test.pojo ，具体业务模块依赖 api 提供 web 共用接口
             hire-common: 通用工程，工具类，枚举类，异常类，常用属性类，资源类等
-            hire-pojo:  所有实体类 pojo bean entity vo do dto
+            hire-com.imooc.test.pojo:  所有实体类 com.imooc.test.pojo bean entity vo do dto
             hire-api: web（接口公用依赖）
             ******************* 业务分割 *******************************
             service-user: 用户微服务

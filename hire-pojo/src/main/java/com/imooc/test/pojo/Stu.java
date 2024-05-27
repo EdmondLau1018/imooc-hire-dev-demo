@@ -1,4 +1,4 @@
-package pojo;
+package com.imooc.test.pojo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

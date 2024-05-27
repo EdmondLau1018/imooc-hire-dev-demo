@@ -3,9 +3,26 @@ spring:
     name: user-service-7001
   banner:
     location: classpath:banner/banner.txt
+#  数据源配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.32.100:3306/imooc_hire_dev?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password: 1018
 server:
   port: 7001
   tomcat:
     uri-encoding: UTF-8
     # 这个配置设置 tomcat 服务器上传文件的时候吞吐量校验 默认超过 2M 的文件不会被捕获 -1 代表不校验文件大小
     max-swallow-size: -1
+
+
+# 配置mybatis-plus 信息
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/*.xml
+  global-config:
+    # 取消项目启动加载 banner
+    banner: false
+    db-config:
+      # 项目生成的主键策略 （雪花算法）
+      id-type: assign_id
