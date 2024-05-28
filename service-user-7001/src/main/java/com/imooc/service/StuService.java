@@ -1,6 +1,5 @@
 package com.imooc.service;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.imooc.pojo.Stu;
 
 /**
@@ -11,6 +10,7 @@ import com.imooc.pojo.Stu;
  * @author Sharn
  * @since 2024-05-27
  */
-public interface StuService extends IService<Stu> {
+public interface StuService {
 
+    public Integer save(Stu stu);
 }
