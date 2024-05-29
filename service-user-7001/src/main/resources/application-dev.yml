@@ -1,9 +1,12 @@
 spring:
   application:
-    name: user-service-7001
+    name: user-service
   banner:
     location: classpath:banner/banner.txt
-#  数据源配置
+  cloud:
+    nacos:
+      server-addr: 192.168.32.100:8848
+  #  数据源配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://192.168.32.100:3306/imooc_hire_dev?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
