@@ -31,6 +31,7 @@
         <module>hire-api</module>
         <module>service-user-7001</module>
         <module>service-company-6001</module>
+        <module>hire-gateway</module>
     </modules>
 
     <properties>

@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    # nacos 相关配置
+    nacos:
+      discovery:
+        server-addr: 192.168.32.100:8848
+    # gateway 网关配置
+    gateway:
+      discovery:
+        locator:
+          enabled: true   # 开启动态路由 允许通过注册中心 服务名称获取名称和节点
+      routes:  # 网关路由配置
+        - id: userRoute
+          uri: lb://user-service   # 通过负载均衡寻找当前服务（在注册中心通过服务名称找到地址）
+          predicates:     # 断言：通过网络请求的路径判断请求转发的目标服务
+            - Path=/u/**    # 注意这里写的是 等于号 不是冒号
+        - id: companyRoute
+          uri: lb://company-service
+          predicates:
+            - Path=/c/**
+server:
+  port: 8000
+  tomcat:
+    uri-encoding: UTF-8
+    max-swallow-size: -1
+
