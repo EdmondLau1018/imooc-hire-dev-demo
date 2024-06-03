@@ -3,8 +3,10 @@ package com.imooc.controller;
 import com.imooc.pojo.Stu;
 import com.imooc.service.StuService;
 import com.imooc.grace.result.GraceJSONResult;
+import com.imooc.utils.SMSUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,8 +17,11 @@ public class HelloController {
 
     private final StuService stuService;
 
-    public HelloController(StuService stuService) {
+    private final SMSUtils smsUtils;
+
+    public HelloController(StuService stuService, SMSUtils smsUtils) {
         this.stuService = stuService;
+        this.smsUtils = smsUtils;
     }
 
     @GetMapping("/hello")
@@ -30,12 +35,22 @@ public class HelloController {
         return GraceJSONResult.ok();
     }
 
-    @GetMapping("/testAdd")
+    @PostMapping("/testAdd")
     public GraceJSONResult testAdd(){
         Stu stu = new Stu();
         stu.setName("imooc测试");
         stu.setAge(23);
         stuService.save(stu);
+        return GraceJSONResult.ok();
+    }
+
+    @PostMapping("/testSMS")
+    public GraceJSONResult testSMS(){
+        try {
+            smsUtils.sendSMS("15162295312","2233");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return GraceJSONResult.ok();
     }
 }
