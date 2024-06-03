@@ -2,6 +2,7 @@ package com.imooc.controller;
 
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.grace.result.GraceJSONResult;
+import com.imooc.utils.IPUtil;
 import com.imooc.utils.RedisOperator;
 import com.imooc.utils.SMSUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -33,12 +34,18 @@ public class PassportController extends BaseInfoProperties {
         if (StringUtils.isBlank(mobile)) {
             return GraceJSONResult.error();
         }
+        //  限制当前用户请求这个接口的时间 相当于是 利用 redis 完成 一种锁的机制
+        //  获取用户 ip （获取的是真实 ip 越过反向代理和网关）
+        String userIp = IPUtil.getRequestIp(request);
+        //  将 含有 用户 ip 的信息作为key 存储在 redis 中 如果用户在 某个时间段内重新发送请求
+        //  通过拦截器判断当前 ip 是否在redis 中存在
+        redisOperator.setnx60s(MOBILE_SMSCODE + ":" + userIp, mobile);
         //   生成验证码  (随机验证码为 六位数 转 String)
         String code = (int) (Math.random() * 9 + 1) * 100000 + "";
         log.info("生成的随机验证码为：{}", code);
         //  发送验证码到用户的手机上
         try {
-            smsUtils.sendSMS(mobile, code);
+//            smsUtils.sendSMS(mobile, code);
         } catch (Exception e) {
             e.printStackTrace();
         }

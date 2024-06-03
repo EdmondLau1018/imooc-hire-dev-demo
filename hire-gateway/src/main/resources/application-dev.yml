@@ -20,6 +20,10 @@ spring:
           uri: lb://company-service
           predicates:
             - Path=/c/**
+        - id: authRoute
+          uri: lb://auth-service
+          predicates:
+            - Path=/a/**,/passport/**
 server:
   port: 8000
   tomcat:
