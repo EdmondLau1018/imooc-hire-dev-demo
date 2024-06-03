@@ -22,7 +22,9 @@
             hire-common: 通用工程，工具类，枚举类，异常类，常用属性类，资源类等
             hire-com.imooc.test.pojo:  所有实体类 com.imooc.test.pojo bean entity vo do dto
             hire-api: web（接口公用依赖）
+            hire-gateway:网关 路由转发 暴露统一接口
             ******************* 业务分割 *******************************
+            service-auth：登录认证微服务（授权）
             service-user: 用户微服务
             service-company：企业微服务
         -->
@@ -32,6 +34,7 @@
         <module>service-user-7001</module>
         <module>service-company-6001</module>
         <module>hire-gateway</module>
+        <module>service-auth-8111</module>
     </modules>
 
     <properties>
