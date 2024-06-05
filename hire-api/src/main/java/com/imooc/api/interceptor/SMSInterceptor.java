@@ -1,6 +1,8 @@
 package com.imooc.api.interceptor;
 
 import com.imooc.base.BaseInfoProperties;
+import com.imooc.exceptions.GraceException;
+import com.imooc.grace.result.ResponseStatusEnum;
 import com.imooc.utils.IPUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -29,6 +31,8 @@ public class SMSInterceptor extends BaseInfoProperties implements HandlerInterce
         if (isExist) {
             //  发送短信的频率小于 60 秒钟 可以进行拦截
             log.error("当前请求：/passoprt/getSMSCode 被拦截，原因：请求频率过高");
+            //  通过 displayException 的方式 抛出异常（相当于在业务代码中直接调用方法 而不是抛出异常，减少异常对业务代码的侵入性）
+            GraceException.displayException(ResponseStatusEnum.SMS_NEED_WAIT_ERROR);
             return false;
         }
         return true;
