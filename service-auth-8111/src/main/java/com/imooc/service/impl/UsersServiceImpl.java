@@ -79,6 +79,7 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         user.setStartWorkDate(LocalDate.now());
         user.setPosition("程序员");
         user.setRole(UserRole.CANDIDATE.type);
+        user.setHrInWhichCompanyId("");
 
         //  用户信息创建时间
         user.setCreatedTime(LocalDateTime.now());

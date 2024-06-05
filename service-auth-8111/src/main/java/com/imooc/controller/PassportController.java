@@ -5,12 +5,14 @@ import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.grace.result.ResponseStatusEnum;
 import com.imooc.pojo.Users;
 import com.imooc.pojo.bo.RegisterLoginBO;
+import com.imooc.pojo.vo.UsersVO;
 import com.imooc.service.UsersService;
 import com.imooc.utils.IPUtil;
 import com.imooc.utils.RedisOperator;
 import com.imooc.utils.SMSUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -95,7 +98,15 @@ public class PassportController extends BaseInfoProperties {
         //  查询到对应的用户 需要删除 redis 中保存的 key
         redisOperator.del(MOBILE_SMSCODE + ":" + mobile);
 
+        //  用户登录成功 生成token存储在 redis  中
+        String uToken = TOKEN_USER_PREFIX + SYMBOL_DOT + UUID.randomUUID().toString();
+        redisOperator.set(REDIS_USER_TOKEN + ":" + user.getId(), uToken);
+
+        //  携带 token 信息 规避非必要信息返回的 VO 对象
+        UsersVO usersVO = new UsersVO();
+        BeanUtils.copyProperties(user, usersVO);
+        usersVO.setUserToken(uToken);
         //  返回用户信息
-        return GraceJSONResult.ok(user);
+        return GraceJSONResult.ok(usersVO);
     }
 }
