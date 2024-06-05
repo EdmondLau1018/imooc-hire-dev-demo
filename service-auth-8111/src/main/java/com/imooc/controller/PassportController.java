@@ -13,10 +13,7 @@ import com.imooc.utils.SMSUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -109,4 +106,18 @@ public class PassportController extends BaseInfoProperties {
         //  返回用户信息
         return GraceJSONResult.ok(usersVO);
     }
+
+    /**
+     * 根据前端的 userId 删除 redis 中的 uToken
+     * 实现用户退出登录的功能
+     *
+     * @return
+     */
+    @PostMapping("/logout")
+    public GraceJSONResult logout(@RequestParam String userId, HttpServletRequest request) {
+        // 后端：删除对应的 userToken
+        redisOperator.del(REDIS_USER_TOKEN + ":" + userId);
+        return GraceJSONResult.ok();
+    }
+
 }
