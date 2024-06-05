@@ -2,7 +2,10 @@ package com.imooc.controller;
 
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.grace.result.GraceJSONResult;
+import com.imooc.grace.result.ResponseStatusEnum;
+import com.imooc.pojo.Users;
 import com.imooc.pojo.bo.RegisterLoginBO;
+import com.imooc.service.UsersService;
 import com.imooc.utils.IPUtil;
 import com.imooc.utils.RedisOperator;
 import com.imooc.utils.SMSUtils;
@@ -25,9 +28,12 @@ public class PassportController extends BaseInfoProperties {
 
     private final SMSUtils smsUtils;
 
-    public PassportController(RedisOperator redisOperator, SMSUtils smsUtils) {
+    private final UsersService usersService;
+
+    public PassportController(RedisOperator redisOperator, SMSUtils smsUtils, UsersService usersService) {
         this.redisOperator = redisOperator;
         this.smsUtils = smsUtils;
+        this.usersService = usersService;
     }
 
     @PostMapping("/getSMSCode")
@@ -71,6 +77,25 @@ public class PassportController extends BaseInfoProperties {
         //   当使用 RequestBody 注解时 前端传递的参数一定得是 json 格式
         String mobile = registerLoginBO.getMobile();
         String smsCode = registerLoginBO.getSmsCode();
-        return GraceJSONResult.ok();
+
+        //  从 redis 中获取验证码 校验是否匹配
+        String redisCode = redisOperator.get(MOBILE_SMSCODE + ":" + mobile);
+        //  验证码不匹配 返回错误信息
+        if (StringUtils.isBlank(redisCode) || !redisCode.equalsIgnoreCase(smsCode)) {
+            return GraceJSONResult.errorCustom(ResponseStatusEnum.SMS_CODE_ERROR);
+        }
+
+        //  查询数据库 判断当前用户 是否存在
+        Users user = usersService.queryMobileIsExist(mobile);
+        //  如果查询到的用户数据为 空 表示用户没有注册过需要 创建新的用户信息入库
+        if (user == null) {
+            user = usersService.createUser(mobile);
+        }
+
+        //  查询到对应的用户 需要删除 redis 中保存的 key
+        redisOperator.del(MOBILE_SMSCODE + ":" + mobile);
+
+        //  返回用户信息
+        return GraceJSONResult.ok(user);
     }
 }
