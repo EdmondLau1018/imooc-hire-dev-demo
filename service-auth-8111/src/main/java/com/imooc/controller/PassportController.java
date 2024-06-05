@@ -2,16 +2,19 @@ package com.imooc.controller;
 
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.grace.result.GraceJSONResult;
+import com.imooc.pojo.bo.RegisterLoginBO;
 import com.imooc.utils.IPUtil;
 import com.imooc.utils.RedisOperator;
 import com.imooc.utils.SMSUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
 @Slf4j
 @RestController
@@ -52,6 +55,22 @@ public class PassportController extends BaseInfoProperties {
         //  将生成的 随机验证码 存储到 redis 中
         //  存储到 redis 中设置 验证码有效时间为 30 分钟
         redisOperator.set(MOBILE_SMSCODE + ":" + mobile, code, 30 * 60);
+        return GraceJSONResult.ok();
+    }
+
+    /**
+     * 用户手机登录接口
+     *
+     * @param registerLoginBO
+     * @param request
+     * @return
+     */
+    //  @Valid 注解：hibernate-validator 提供的校验 结合 BO 中通过注解设定的参数校验规则 用于判断 参数是否合法
+    @PostMapping("/login")
+    public GraceJSONResult login(@Valid @RequestBody RegisterLoginBO registerLoginBO, HttpServletRequest request) {
+        //   当使用 RequestBody 注解时 前端传递的参数一定得是 json 格式
+        String mobile = registerLoginBO.getMobile();
+        String smsCode = registerLoginBO.getSmsCode();
         return GraceJSONResult.ok();
     }
 }
