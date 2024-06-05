@@ -41,7 +41,7 @@ public class PassportController extends BaseInfoProperties {
         //  通过拦截器判断当前 ip 是否在redis 中存在
         redisOperator.setnx60s(MOBILE_SMSCODE + ":" + userIp, mobile);
         //   生成验证码  (随机验证码为 六位数 转 String)
-        String code = (int) (Math.random() * 9 + 1) * 100000 + "";
+        String code = (int) (Math.random() * 900000) + 100000 + "";
         log.info("生成的随机验证码为：{}", code);
         //  发送验证码到用户的手机上
         try {
