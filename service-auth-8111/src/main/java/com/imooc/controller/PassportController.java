@@ -1,5 +1,6 @@
 package com.imooc.controller;
 
+import com.google.gson.Gson;
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.grace.result.ResponseStatusEnum;
@@ -8,6 +9,7 @@ import com.imooc.pojo.bo.RegisterLoginBO;
 import com.imooc.pojo.vo.UsersVO;
 import com.imooc.service.UsersService;
 import com.imooc.utils.IPUtil;
+import com.imooc.utils.JWTUtils;
 import com.imooc.utils.RedisOperator;
 import com.imooc.utils.SMSUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -30,10 +31,13 @@ public class PassportController extends BaseInfoProperties {
 
     private final UsersService usersService;
 
-    public PassportController(RedisOperator redisOperator, SMSUtils smsUtils, UsersService usersService) {
+    private final JWTUtils jwtUtils;
+
+    public PassportController(RedisOperator redisOperator, SMSUtils smsUtils, UsersService usersService, JWTUtils jwtUtils) {
         this.redisOperator = redisOperator;
         this.smsUtils = smsUtils;
         this.usersService = usersService;
+        this.jwtUtils = jwtUtils;
     }
 
     @PostMapping("/getSMSCode")
@@ -95,9 +99,14 @@ public class PassportController extends BaseInfoProperties {
         //  查询到对应的用户 需要删除 redis 中保存的 key
         redisOperator.del(MOBILE_SMSCODE + ":" + mobile);
 
-        //  用户登录成功 生成token存储在 redis  中
-        String uToken = TOKEN_USER_PREFIX + SYMBOL_DOT + UUID.randomUUID().toString();
-        redisOperator.set(REDIS_USER_TOKEN + ":" + user.getId(), uToken);
+//        //  用户登录成功 生成token存储在 redis  中
+//        String uToken = TOKEN_USER_PREFIX + SYMBOL_DOT + UUID.randomUUID().toString();
+//        redisOperator.set(REDIS_USER_TOKEN + ":" + user.getId(), uToken);、
+
+        //  改成 使用 JWT 在客户端保存用户信息和状态 不通过服务端进行数据存储
+        String uToken = jwtUtils.createJWTWithPrefix(TOKEN_USER_PREFIX,
+                new Gson().toJson(user),   //   生成 JWT 携带的用户 subject 信息是 查询活创建用户的信息
+                Long.valueOf(10000));
 
         //  携带 token 信息 规避非必要信息返回的 VO 对象
         UsersVO usersVO = new UsersVO();
