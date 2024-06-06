@@ -1,15 +1,23 @@
 package com.imooc.filter;
 
+import com.google.gson.Gson;
 import com.imooc.base.BaseInfoProperties;
+import com.imooc.grace.result.GraceJSONResult;
+import com.imooc.grace.result.ResponseStatusEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Slf4j
@@ -45,9 +53,33 @@ public class SecurityFilterJWT extends BaseInfoProperties implements GlobalFilte
             }
         }
 
-        log.info("用户请求：{} 被拦截",url);
-        return chain.filter(exchange);   //这行代码代表放行 通过 链路 chain 放行交换机中的对应路由;
+        log.info("用户请求：{} 被拦截", url);
+        return renderErrorMsg(exchange,ResponseStatusEnum.UN_LOGIN);
 
+    }
+
+    public Mono<Void> renderErrorMsg(ServerWebExchange exchange, ResponseStatusEnum responseStatusEnum) {
+
+        //  获得 response
+        ServerHttpResponse httpResponse = exchange.getResponse();
+        //  构建 jsonResult 错误返回对象
+        GraceJSONResult jsonResult = GraceJSONResult.exception(responseStatusEnum.UN_LOGIN);
+
+        //  将返回对象的响应码修改为 500  (HttpStatus 也是一个枚举类)
+        httpResponse.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        //  设定返回对象的相应类型为 json
+        if (!httpResponse.getHeaders().containsKey("Content-type")) {
+            // 如果返回对象中不包含 Content-type 属性 那么添加这个属性 并且设定为 application/json \
+            //  MimeTypeUtils 是 spring Utils 提供的枚举类 包含各种返回类型
+            httpResponse.getHeaders().add("Content-type", MimeTypeUtils.APPLICATION_JSON_VALUE);
+        }
+
+        //  将 之前构建的 json 对象转换成json字符串 写入到 返回对象中
+        String resultJson = new Gson().toJson(jsonResult);
+        //  构建成数据流进行写入
+        DataBuffer buffer = httpResponse.bufferFactory().wrap(resultJson.getBytes(StandardCharsets.UTF_8));
+        return httpResponse.writeWith(Mono.just(buffer));
     }
 
     /**
