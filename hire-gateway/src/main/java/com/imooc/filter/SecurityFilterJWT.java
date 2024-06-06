@@ -14,6 +14,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
@@ -80,7 +81,14 @@ public class SecurityFilterJWT extends BaseInfoProperties implements GlobalFilte
             String prefix = tokenArr[0];
             String jwt = tokenArr[1];
 
-            return dealJWT(jwt, exchange, chain);
+            //  判断 prefix 是从哪个端发送过来的请求 然后根据对应的 端 确定 对应的key
+            if (prefix.equalsIgnoreCase(TOKEN_USER_PREFIX)) {
+                return dealJWT(jwt, exchange, chain, APP_USER_JSON);
+            } else if (prefix.equalsIgnoreCase(TOKEN_SAAS_PREFIX)) {
+                return dealJWT(jwt, exchange, chain, SAAS_USER_JSON);
+            } else {
+                return dealJWT(jwt, exchange, chain, ADMIN_USER_JSON);
+            }
 
         }
         return renderErrorMsg(exchange, ResponseStatusEnum.UN_LOGIN);
@@ -96,13 +104,16 @@ public class SecurityFilterJWT extends BaseInfoProperties implements GlobalFilte
      * @param chain
      * @return
      */
-    public Mono<Void> dealJWT(String jwt, ServerWebExchange exchange, GatewayFilterChain chain) {
+    public Mono<Void> dealJWT(String jwt, ServerWebExchange exchange, GatewayFilterChain chain, String key) {
 
         try {
             //  如果校验成功 返回的是 对应用户信息的 json 字符串 如果校验失败则抛出异常
             String body = jwtUtils.checkJWT(jwt);
             log.info("JWT 校验成功，userToken = {}", body);
-            return chain.filter(exchange);
+
+            //  将解析出的 用户信息 存到 header 中 （重构 exchange）
+            ServerWebExchange newExchange = setExchangeHeader(exchange, key, body);
+            return chain.filter(newExchange);
         } catch (ExpiredJwtException e) {
 
             //  捕获异常 JWT 信息失效（超时重新登录）
@@ -115,6 +126,27 @@ public class SecurityFilterJWT extends BaseInfoProperties implements GlobalFilte
             return renderErrorMsg(exchange, ResponseStatusEnum.JWT_SIGNATURE_ERROR);
         }
 
+    }
+
+    /**
+     * 将 JWT 解析后出现的用户 信息 封装在header 中
+     * 通过重构 request 和 exchange 实现
+     *
+     * @param exchange
+     * @param key
+     * @param value
+     * @return
+     */
+    public ServerWebExchange setExchangeHeader(ServerWebExchange exchange, String key, String value) {
+        //  构建一个 带有用户信息的 新的 request 对象
+        ServerHttpRequest request = exchange.getRequest().mutate()
+                .header(key, value)
+                .build();
+
+        //  用新的 request 对象替换旧的 构建新的 exchange 对象
+        ServerWebExchange newExchange = exchange.mutate().request(request).build();
+
+        return newExchange;
     }
 
     public Mono<Void> renderErrorMsg(ServerWebExchange exchange, ResponseStatusEnum responseStatusEnum) {
