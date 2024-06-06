@@ -4,11 +4,15 @@ import com.google.gson.Gson;
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.grace.result.ResponseStatusEnum;
+import com.imooc.utils.JWTUtils;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
@@ -28,8 +32,11 @@ public class SecurityFilterJWT extends BaseInfoProperties implements GlobalFilte
 
     private final ExcludeUrlProperties excludeUrlProperties;
 
-    public SecurityFilterJWT(ExcludeUrlProperties excludeUrlProperties) {
+    private final JWTUtils jwtUtils;
+
+    public SecurityFilterJWT(ExcludeUrlProperties excludeUrlProperties, JWTUtils jwtUtils) {
         this.excludeUrlProperties = excludeUrlProperties;
+        this.jwtUtils = jwtUtils;
     }
 
     /**
@@ -53,8 +60,60 @@ public class SecurityFilterJWT extends BaseInfoProperties implements GlobalFilte
             }
         }
 
-        log.info("用户请求：{} 被拦截", url);
-        return renderErrorMsg(exchange,ResponseStatusEnum.UN_LOGIN);
+        log.info("当前用户请求：{}", url);
+        //  拦截到的 请求 ，进行 JWT 校验业务逻辑
+        //  获取请求中 headers 中的 JWT 信息
+        HttpHeaders headers = exchange.getRequest().getHeaders();
+        //  通过名称获取 请求 headers 中携带的用户信息
+        String userToken = headers.getFirst("headerUserToken");
+        //  判断 header 中的用户信息是否符合协议标准
+        //  判断 header 中的信息是否为空
+        if (StringUtils.isNotBlank(userToken)) {
+            //  不为空 判断 userToken 是否 通过规定的 @ 进行分割
+            String[] tokenArr = userToken.split("@");
+            if (tokenArr.length < 2) {
+                //  token 不符合预先规定的格式
+                return renderErrorMsg(exchange, ResponseStatusEnum.UN_LOGIN);
+            }
+
+            // 获取 jwt 对应的 令牌 和 subject 信息
+            String prefix = tokenArr[0];
+            String jwt = tokenArr[1];
+
+            return dealJWT(jwt, exchange, chain);
+
+        }
+        return renderErrorMsg(exchange, ResponseStatusEnum.UN_LOGIN);
+
+    }
+
+    /**
+     * 用于调用 工具方法 checkJWT(jwt 校验) 的方法
+     * 返回 Mono 对象 在这个方法中可以抛出异常 或者 让链路放行当前请求
+     *
+     * @param jwt
+     * @param exchange
+     * @param chain
+     * @return
+     */
+    public Mono<Void> dealJWT(String jwt, ServerWebExchange exchange, GatewayFilterChain chain) {
+
+        try {
+            //  如果校验成功 返回的是 对应用户信息的 json 字符串 如果校验失败则抛出异常
+            String body = jwtUtils.checkJWT(jwt);
+            log.info("JWT 校验成功，userToken = {}", body);
+            return chain.filter(exchange);
+        } catch (ExpiredJwtException e) {
+
+            //  捕获异常 JWT 信息失效（超时重新登录）
+            e.printStackTrace();
+            return renderErrorMsg(exchange, ResponseStatusEnum.JWT_EXPIRE_ERROR);
+        } catch (Exception e) {
+
+            //  捕获异常 JWT 解析失败 （重新登录）
+            e.printStackTrace();
+            return renderErrorMsg(exchange, ResponseStatusEnum.JWT_SIGNATURE_ERROR);
+        }
 
     }
 
@@ -63,7 +122,7 @@ public class SecurityFilterJWT extends BaseInfoProperties implements GlobalFilte
         //  获得 response
         ServerHttpResponse httpResponse = exchange.getResponse();
         //  构建 jsonResult 错误返回对象
-        GraceJSONResult jsonResult = GraceJSONResult.exception(responseStatusEnum.UN_LOGIN);
+        GraceJSONResult jsonResult = GraceJSONResult.exception(responseStatusEnum);
 
         //  将返回对象的响应码修改为 500  (HttpStatus 也是一个枚举类)
         httpResponse.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);

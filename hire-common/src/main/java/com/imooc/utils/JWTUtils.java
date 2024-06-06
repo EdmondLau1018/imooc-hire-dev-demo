@@ -1,7 +1,11 @@
 package com.imooc.utils;
 
+import com.google.gson.Gson;
 import com.imooc.exceptions.GraceException;
 import com.imooc.grace.result.ResponseStatusEnum;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
@@ -118,6 +122,25 @@ public class JWTUtils {
                 setSubject(body).
                 signWith(secretKey).
                 compact();
+    }
+
+    /**
+     * jwt 校验方法 如果校验成功 则返回解析出的用户信息 json
+     * @param jwtString
+     * @return
+     */
+    public String checkJWT(String jwtString){
+        //  对密钥进行 base64 编码
+        String base64 = new BASE64Encoder().encode(jwtResource.getKey().getBytes(StandardCharsets.UTF_8));
+        //  生成密钥对象 自动选择加密算法
+        SecretKey secretKey = Keys.hmacShaKeyFor(base64.getBytes(StandardCharsets.UTF_8));
+        //  使用 Jwts 校验 密钥对象
+        JwtParser jwtParser = Jwts.parserBuilder().setSigningKey(secretKey).build();
+        //  解析 jwt 对象
+        Jws<Claims> claimsJws = jwtParser.parseClaimsJws(jwtString);
+        //  如果解析成功 从 Claims 对象中可以获得 subject 用户信息
+        String subject = claimsJws.getBody().getSubject();
+        return subject;
     }
 
 }

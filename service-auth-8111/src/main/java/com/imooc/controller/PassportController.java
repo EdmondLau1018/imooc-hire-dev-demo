@@ -103,10 +103,10 @@ public class PassportController extends BaseInfoProperties {
 //        String uToken = TOKEN_USER_PREFIX + SYMBOL_DOT + UUID.randomUUID().toString();
 //        redisOperator.set(REDIS_USER_TOKEN + ":" + user.getId(), uToken);、
 
-        //  改成 使用 JWT 在客户端保存用户信息和状态 不通过服务端进行数据存储
+        //  改成 使z用 JWT 在客户端保存用户信息和状态 不通过服务端进行数据存储
         String uToken = jwtUtils.createJWTWithPrefix(TOKEN_USER_PREFIX,
                 new Gson().toJson(user),   //   生成 JWT 携带的用户 subject 信息是 查询活创建用户的信息
-                Long.valueOf(10000));
+                Long.valueOf(120 * 1000));
 
         //  携带 token 信息 规避非必要信息返回的 VO 对象
         UsersVO usersVO = new UsersVO();
