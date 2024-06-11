@@ -1,6 +1,10 @@
 package com.imooc.exceptions;
 
 import com.imooc.grace.result.GraceJSONResult;
+import com.imooc.grace.result.ResponseStatusEnum;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -8,6 +12,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.security.SignatureException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +54,25 @@ public class GraceExceptionHandler {
         Map<String, String> map = getErrors(result);
         //  将信息封装成json对象 抛出给前端
         return GraceJSONResult.errorMap(map);
+    }
+
+    /**
+     * 捕获 用户身份 JWT 校验时发生的异常
+     * 通过 GraceJsonResult 返回
+     * @param e
+     * @return
+     */
+    @ExceptionHandler({
+            SignatureException.class,
+            ExpiredJwtException.class,
+            UnsupportedJwtException.class,
+            MalformedJwtException.class,
+            io.jsonwebtoken.security.SignatureException.class
+    })
+    @ResponseBody
+    public GraceJSONResult resultSignatureException(SignatureException e){
+        e.printStackTrace();
+        return GraceJSONResult.exception(ResponseStatusEnum.JWT_SIGNATURE_ERROR);
     }
 
     /**
