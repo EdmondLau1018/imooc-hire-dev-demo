@@ -1,6 +1,5 @@
 package com.imooc.utils;
 
-import com.google.gson.Gson;
 import com.imooc.exceptions.GraceException;
 import com.imooc.grace.result.ResponseStatusEnum;
 import io.jsonwebtoken.Claims;
@@ -8,6 +7,9 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
 import sun.misc.BASE64Encoder;
 
@@ -15,12 +17,17 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+@RefreshScope       //  注解：从配置中心获取配置 动态扫描配置内容 配置中心的配置更改后这个也会更改
+@Slf4j
 @Component
 public class JWTUtils {
 
     private static final String SYMBOL_AT = "@";
 
     private final JWTResource jwtResource;
+
+    @Value("${jwt.key}")
+    public String JWT_KEY;
 
     public JWTUtils(JWTResource jwtResource) {
         this.jwtResource = jwtResource;
@@ -42,6 +49,7 @@ public class JWTUtils {
 
     /**
      * 生成带有前缀的 JWT （不含过期时间）
+     *
      * @param prefix
      * @param body
      * @return
@@ -77,7 +85,11 @@ public class JWTUtils {
     public String dealJWT(String body, Long expireTimes) {
 
         //  对 密钥进行 base64 编码
-        String base64 = new BASE64Encoder().encode(jwtResource.getKey().getBytes(StandardCharsets.UTF_8));
+//        String base64 = new BASE64Encoder().encode(jwtResource.getKey().getBytes(StandardCharsets.UTF_8));
+        //  将本地保存的 jwt 密钥 修改为 nacos 配置中心保存的密钥
+        String base64 = new BASE64Encoder().encode(JWT_KEY.getBytes(StandardCharsets.UTF_8));
+        log.info("生成 jwt --- 从 配置中心中获取的 jwt 密钥信息： {}", JWT_KEY);
+
         //  根据 编码后的 base64 生成一个密钥对象
         SecretKey secretKey = Keys.hmacShaKeyFor(base64.getBytes(StandardCharsets.UTF_8));
         String jwt = "";
@@ -126,12 +138,15 @@ public class JWTUtils {
 
     /**
      * jwt 校验方法 如果校验成功 则返回解析出的用户信息 json
+     *
      * @param jwtString
      * @return
      */
-    public String checkJWT(String jwtString){
+    public String checkJWT(String jwtString) {
         //  对密钥进行 base64 编码
-        String base64 = new BASE64Encoder().encode(jwtResource.getKey().getBytes(StandardCharsets.UTF_8));
+//        String base64 = new BASE64Encoder().encode(jwtResource.getKey().getBytes(StandardCharsets.UTF_8));
+        String base64 = new BASE64Encoder().encode(JWT_KEY.getBytes(StandardCharsets.UTF_8));
+        log.info("校验 jwt --- 从 配置中心中获取的 jwt 密钥信息： {}", JWT_KEY);
         //  生成密钥对象 自动选择加密算法
         SecretKey secretKey = Keys.hmacShaKeyFor(base64.getBytes(StandardCharsets.UTF_8));
         //  使用 Jwts 校验 密钥对象

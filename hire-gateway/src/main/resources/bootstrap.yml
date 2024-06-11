@@ -1,0 +1,11 @@
+spring:
+  cloud:
+    nacos:
+      config:
+        server-addr: 192.168.32.100:8848
+        file-extension: yaml
+        # 这一项配置可以配置读取多个 nacos 配置文件 可以加载多个 data-id 的配置文件进行共享
+        extension-configs:
+          - data-id: jwt_config.yaml
+            group: DEFAULT_GROUP
+            refresh: true

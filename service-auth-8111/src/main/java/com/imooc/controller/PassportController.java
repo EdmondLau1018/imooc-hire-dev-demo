@@ -125,7 +125,7 @@ public class PassportController extends BaseInfoProperties {
     @PostMapping("/logout")
     public GraceJSONResult logout(@RequestParam String userId, HttpServletRequest request) {
         // 后端：删除对应的 userToken
-        redisOperator.del(REDIS_USER_TOKEN + ":" + userId);
+//        redisOperator.del(REDIS_USER_TOKEN + ":" + userId);
         return GraceJSONResult.ok();
     }
 
