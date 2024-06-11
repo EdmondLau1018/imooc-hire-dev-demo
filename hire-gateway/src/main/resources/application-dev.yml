@@ -23,7 +23,16 @@ spring:
         - id: authRoute
           uri: lb://auth-service
           predicates:
-            - Path=/a/**,/passport/**
+            - Path=/a/**,/passport/**,/saas/**
+      #  网关跨域配置 允许所有 域名的请求调用当前服务 并且允许添加headers
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns: "*"
+            allowedHeaders: "*"
+            allowedMethods: "*"
+            allowCredentials: true
+
 server:
   port: 8000
   tomcat:
