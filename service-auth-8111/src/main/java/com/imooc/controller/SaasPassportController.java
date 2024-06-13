@@ -5,10 +5,13 @@ import com.imooc.base.BaseInfoProperties;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.grace.result.ResponseStatusEnum;
 import com.imooc.pojo.Users;
+import com.imooc.pojo.vo.SaasUserVO;
 import com.imooc.service.UsersService;
 import com.imooc.utils.JWTUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -121,6 +124,16 @@ public class SaasPassportController extends BaseInfoProperties {
         }
     }
 
+    /**
+     * app 用户点击 确认登陆SaaS 按钮 接口
+     * 根据用户传递的 token 和 preToken 找到 存储在 redis 中的用户信息
+     * 将登录状态的 HR 用户信息临时存放在 redis 中
+     *
+     * @param userId
+     * @param qrToken
+     * @param preToken
+     * @return
+     */
     @PostMapping("/goQRLogin")
     public GraceJSONResult goQRLogin(String userId, String qrToken, String preToken) {
 
@@ -145,6 +158,67 @@ public class SaasPassportController extends BaseInfoProperties {
         }
         return GraceJSONResult.ok();
 
+    }
+
+    /**
+     * 前端定时发送的请求 检查用户的登陆状态 （SAAS 页面自动刷新）
+     * 根据 preToken 在 redis 中寻找 用户登录接口的 临时用户信息
+     * 将临时用户信息转存为 不过期的用户信息
+     * 生成新的 jwtToken （SaaS） 返回给前端
+     *
+     * @param preToken
+     * @return
+     */
+    @PostMapping("/checkLogin")
+    public GraceJSONResult checkLogin(String preToken) {
+
+        //  获取判断前端参数中的 preToken 信息
+        if (StringUtils.isBlank(preToken))
+            return GraceJSONResult.errorCustom(ResponseStatusEnum.USER_NOT_EXIST_ERROR);
+        //  通过前端 preToken 组成的 key 查询 redis 获取临时用户信息
+        String userJson = redis.get(REDIS_SAAS_USER_INFO + ":temp:" + preToken);
+
+        // 根据临时用户信息生成新的 jwtToken 并且长期有效
+        String saasUserToken = jwtUtils.createJWTWithPrefix(TOKEN_SAAS_PREFIX, userJson, Long.valueOf(8 * 60 * 60 * 1000));
+        //  将当前登录的用户信息存储在 redis 中 设置长期有效
+        redis.set(REDIS_SAAS_USER_INFO + ":" + saasUserToken, userJson);
+
+        //  将根据登录用户信息生成的新的 saasUserToken (jwt) 返回给前端
+        return GraceJSONResult.ok(saasUserToken);
+    }
+
+    /**
+     * 获取用户的基本信息 并且展示在前端
+     * 没有 websocket 前端通过定时器发送的请求
+     *
+     * @param token
+     * @return
+     */
+    @GetMapping("/info")
+    public GraceJSONResult info(String token) {
+
+        //  从 redis 中 根据 传递的 jwtToken 查询到登录用户信息
+        String saasUserToken = token;
+        String saasUserJson = redis.get(REDIS_SAAS_USER_INFO + ":" + saasUserToken);
+
+        //  将查询出的 用户信息 json 转换成对象 vo 返回给前端 （通过 vo 关键信息脱敏）
+        Users saasUser = new Gson().fromJson(saasUserJson, Users.class);
+        SaasUserVO saasUserVO = new SaasUserVO();
+        BeanUtils.copyProperties(saasUser, saasUserVO);
+
+        return GraceJSONResult.ok(saasUserVO);
+
+    }
+
+    /**
+     * 用户退出接口 用于后续拓展
+     *
+     * @return
+     */
+    @PostMapping("/logout")
+    public GraceJSONResult logout() {
+
+        return GraceJSONResult.ok();
     }
 
 }
