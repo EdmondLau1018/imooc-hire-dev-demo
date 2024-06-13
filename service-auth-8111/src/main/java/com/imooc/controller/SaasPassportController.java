@@ -1,8 +1,11 @@
 package com.imooc.controller;
 
+import com.google.gson.Gson;
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.grace.result.ResponseStatusEnum;
+import com.imooc.pojo.Users;
+import com.imooc.service.UsersService;
 import com.imooc.utils.JWTUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -22,8 +25,11 @@ public class SaasPassportController extends BaseInfoProperties {
 
     private final JWTUtils jwtUtils;
 
-    public SaasPassportController(JWTUtils jwtUtils) {
+    private final UsersService usersService;
+
+    public SaasPassportController(JWTUtils jwtUtils, UsersService usersService) {
         this.jwtUtils = jwtUtils;
+        this.usersService = usersService;
     }
 
     /**
@@ -80,12 +86,13 @@ public class SaasPassportController extends BaseInfoProperties {
     /**
      * 判断二维码是否被扫描 如果qrToken 被读取 向前端返回二维码被扫描的信息
      * 当前判断 qrToken 是否被读取的信息 由前端通过定时器发送
+     *
      * @param qrToken
      * @param request
      * @return
      */
     @PostMapping("/codeHasBeenRead")
-    public GraceJSONResult codeHasBeenRead(String qrToken,HttpServletRequest request){
+    public GraceJSONResult codeHasBeenRead(String qrToken, HttpServletRequest request) {
 
         //  获取 redis 中存储的 qrToken 是否被读取的信息
         String redisToken = redis.get(SAAS_PLATFORM_LOGIN_TOKEN_READ + ":" + qrToken);
@@ -112,6 +119,32 @@ public class SaasPassportController extends BaseInfoProperties {
             list.add(0);
             return GraceJSONResult.ok(list);
         }
+    }
+
+    @PostMapping("/goQRLogin")
+    public GraceJSONResult goQRLogin(String userId, String qrToken, String preToken) {
+
+        //  根据前端传递的 qrToken 作为  key 获取扫码后 存储在 redis 中的 preToken
+        String preTokenArr = redis.get(SAAS_PLATFORM_LOGIN_TOKEN_READ + ":" + qrToken);
+        if (StringUtils.isNotBlank(preTokenArr)) {
+
+            //  截取逗号之后的内容 就是redis 中存储的 preToken 信息
+            String preTokenRedis = preTokenArr.split(",")[1];
+            if (preTokenRedis.equalsIgnoreCase(preToken)) {
+                //  验证用户信息成功，根据用户 id 获取用户信息
+                Users saasUser = usersService.getById(userId);
+
+                //  判断当前是否获取了对应的 HR 用户
+                if (saasUser == null)
+                    return GraceJSONResult.errorCustom(ResponseStatusEnum.USER_NOT_EXIST_ERROR);
+
+                //  将 获取的 hr 信息 存储在 redis 中 有效时间设置为 五分钟
+                //  H5 在未登录的状态下获取不到用户信息 （如果使用 webSocket 通信则没有这种问题）
+                redis.set(REDIS_SAAS_USER_INFO + ":temp:" + preToken, new Gson().toJson(saasUser), 5 * 60);
+            }
+        }
+        return GraceJSONResult.ok();
+
     }
 
 }
