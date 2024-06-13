@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -73,6 +75,43 @@ public class SaasPassportController extends BaseInfoProperties {
         redis.set(SAAS_PLATFORM_LOGIN_TOKEN_READ + ":" + qrToken, "1," + preToken, 5 * 60);
 
         return GraceJSONResult.ok(preToken);
+    }
+
+    /**
+     * 判断二维码是否被扫描 如果qrToken 被读取 向前端返回二维码被扫描的信息
+     * 当前判断 qrToken 是否被读取的信息 由前端通过定时器发送
+     * @param qrToken
+     * @param request
+     * @return
+     */
+    @PostMapping("/codeHasBeenRead")
+    public GraceJSONResult codeHasBeenRead(String qrToken,HttpServletRequest request){
+
+        //  获取 redis 中存储的 qrToken 是否被读取的信息
+        String redisToken = redis.get(SAAS_PLATFORM_LOGIN_TOKEN_READ + ":" + qrToken);
+        //  用于存储返回给前端的 token 状态 和 token 内容
+        List<Object> list = new ArrayList<>();
+
+        if (StringUtils.isNotBlank(redisToken)) {
+
+            //  因为 token 是通过逗号分割的字符串，先切分再将 读取状态 和 token 内容返回给前端
+            String[] tokenArr = redisToken.split(",");
+            //  判断redis 中的 token 是否符合对应的格式 （判断是否获取正确的 redis读取状态 token）
+            if (tokenArr.length > 2) {
+                list.add(Integer.valueOf(tokenArr[0]));      //  添加redis token 读取状态
+                list.add(tokenArr[1]);          //  添加 qrToken  的值
+                return GraceJSONResult.ok(list);
+            } else {
+                //  token 不符合预定义状态
+                list.add(0);
+                return GraceJSONResult.ok(list);
+            }
+
+        } else {
+            //  未获取到 redis 中存储的 token 内容
+            list.add(0);
+            return GraceJSONResult.ok(list);
+        }
     }
 
 }
