@@ -3,3 +3,9 @@ spring:
     name: gateway-service
   profiles:
     active: dev
+
+# 自定义 IP 限流配置 在 20 秒内连续请求超过3次 会被限流 30 秒
+blackIp:
+  continueCounts: ${counts:3}
+  timeInterval: ${interval:20}
+  limitTimes: ${times:30}

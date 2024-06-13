@@ -93,6 +93,7 @@ public enum ResponseStatusEnum {
     SYSTEM_ERROR_ZUUL(560, false, "请求系统过于繁忙，请稍后再试！"),
     SYSTEM_PARAMS_SETTINGS_ERROR(5611, false, "参数设置不规范！"),
     ZOOKEEPER_BAD_VERSION_ERROR(5612, false, "数据过时，请刷新页面重试！"),
+    SYSTEM_ERROR_BLACK_IP(5621,false,"请求过于频繁，请稍后重试"),
 
     DATA_DICT_EXIST_ERROR(5631, false, "数据字典已存在，不可重复添加或修改！"),
     DATA_DICT_DELETE_ERROR(5632, false, "删除数据字典失败！"),
