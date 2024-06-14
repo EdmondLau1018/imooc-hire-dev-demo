@@ -3,6 +3,7 @@ package com.imooc.controller;
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.pojo.bo.CreateAdminBO;
+import com.imooc.pojo.bo.ResetPwdBO;
 import com.imooc.service.AdminService;
 import com.imooc.utils.PagedGridResult;
 import lombok.extern.slf4j.Slf4j;
@@ -64,6 +65,17 @@ public class AdminController extends BaseInfoProperties {
     public GraceJSONResult delete(String username) {
 
         adminService.deleteAdmin(username);
+        return GraceJSONResult.ok();
+    }
+
+    /**
+     * 使用 DDD 的 AR 模式进行 admin 用户 密码修改接口
+     * @param resetPwdBO
+     * @return
+     */
+    @PostMapping("/resetPwd")
+    public GraceJSONResult resetPwd(@RequestBody ResetPwdBO resetPwdBO){
+        resetPwdBO.modifyPwd();
         return GraceJSONResult.ok();
     }
 }
