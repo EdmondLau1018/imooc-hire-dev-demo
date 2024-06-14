@@ -88,4 +88,22 @@ public class AdminServiceImpl extends BaseInfoProperties implements AdminService
                         .like("username", accountName));
         return setterPagedGrid(adminList, page);
     }
+
+    /**
+     * 根据 账户名称查找和删除管理员用户
+     * @param username
+     */
+    @Override
+    public void deleteAdmin(String username) {
+
+        int rows = adminMapper.delete(
+                new QueryWrapper<Admin>()
+                        .eq("username", username)
+                        //  ne 代表在 where 条件中添加不等于
+                        .ne("username", "admin"));
+
+        //  如果受影响的行数为 0 则删除失败
+        if (rows == 0)
+            GraceException.displayException(ResponseStatusEnum.ADMIN_DELETE_ERROR);
+    }
 }

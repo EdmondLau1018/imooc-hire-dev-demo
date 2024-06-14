@@ -32,4 +32,10 @@ public interface AdminService {
      */
     public PagedGridResult getAdminList(String accountName,Integer page,Integer limit);
 
+    /**
+     * 根据账号名称 查找和删除admin用户
+     * @param username
+     */
+    public void deleteAdmin(String username);
+
 }

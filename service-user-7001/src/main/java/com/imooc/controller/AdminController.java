@@ -36,6 +36,7 @@ public class AdminController extends BaseInfoProperties {
 
     /**
      * 获取 用户名相似的 管理员列表 模糊查询
+     *
      * @param accountName
      * @param page
      * @param limit
@@ -51,5 +52,18 @@ public class AdminController extends BaseInfoProperties {
         PagedGridResult gridResult = adminService.getAdminList(accountName, page, limit);
 
         return GraceJSONResult.ok(gridResult);
+    }
+
+    /**
+     * 根据 username 查找并删除对应的管理员用户信息
+     *
+     * @param username
+     * @return
+     */
+    @PostMapping("/delete")
+    public GraceJSONResult delete(String username) {
+
+        adminService.deleteAdmin(username);
+        return GraceJSONResult.ok();
     }
 }
