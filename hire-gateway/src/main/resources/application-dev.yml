@@ -21,7 +21,7 @@ spring:
         - id: userRoute
           uri: lb://user-service   # 通过负载均衡寻找当前服务（在注册中心通过服务名称找到地址）
           predicates:     # 断言：通过网络请求的路径判断请求转发的目标服务
-            - Path=/u/**    # 注意这里写的是 等于号 不是冒号
+            - Path=/u/**,/admininfo/**    # 注意这里写的是 等于号 不是冒号
         - id: companyRoute
           uri: lb://company-service
           predicates:
