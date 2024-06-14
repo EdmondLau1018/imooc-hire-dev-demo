@@ -3,6 +3,8 @@ package com.imooc.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.pagehelper.PageHelper;
+import com.imooc.base.BaseInfoProperties;
 import com.imooc.exceptions.GraceException;
 import com.imooc.grace.result.ResponseStatusEnum;
 import com.imooc.mapper.AdminMapper;
@@ -11,10 +13,12 @@ import com.imooc.pojo.bo.CreateAdminBO;
 import com.imooc.service.AdminService;
 import com.imooc.utils.JWTUtils;
 import com.imooc.utils.MD5Utils;
+import com.imooc.utils.PagedGridResult;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * <p>
@@ -25,7 +29,7 @@ import java.time.LocalDateTime;
  * @since 2024-05-27
  */
 @Service
-public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements AdminService {
+public class AdminServiceImpl extends BaseInfoProperties implements AdminService {
 
     private final AdminMapper adminMapper;
 
@@ -49,7 +53,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
 
         //  创建新用户 写入admin 用户信息
         Admin newAdmin = new Admin();
-        BeanUtils.copyProperties(createAdminBO,newAdmin);
+        BeanUtils.copyProperties(createAdminBO, newAdmin);
 
         //  生成六位随机整数作为盐 salt
         String salt = (int) (Math.random() * 900000) + 100000 + "";
@@ -63,5 +67,25 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         newAdmin.setUpdatedTime(LocalDateTime.now());
 
         adminMapper.insert(newAdmin);
+    }
+
+    /**
+     * 针对 admin 用户信息的分页查询
+     *
+     * @param accountName
+     * @param page
+     * @param limit
+     * @return
+     */
+    @Override
+    public PagedGridResult getAdminList(String accountName, Integer page, Integer limit) {
+
+        //  一个帮助分页的拦截器 ，相当于在 sql 后面追加 对应的 分页 limit 参数
+        PageHelper.startPage(page, limit);
+        //  查询数据库中 账户名称相似的 admin 信息
+        List<Admin> adminList = adminMapper.selectList(
+                new QueryWrapper<Admin>()
+                        .like("username", accountName));
+        return setterPagedGrid(adminList, page);
     }
 }

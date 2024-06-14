@@ -4,11 +4,9 @@ import com.imooc.base.BaseInfoProperties;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.pojo.bo.CreateAdminBO;
 import com.imooc.service.AdminService;
+import com.imooc.utils.PagedGridResult;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -26,12 +24,32 @@ public class AdminController extends BaseInfoProperties {
     /**
      * 用已有的管理员账户分配账号
      * 创建新的管理员账号
+     *
      * @param createAdminBO
      * @return
      */
     @PostMapping("/create")
-    public GraceJSONResult create(@RequestBody @Valid CreateAdminBO createAdminBO){
+    public GraceJSONResult create(@RequestBody @Valid CreateAdminBO createAdminBO) {
         adminService.createAdmin(createAdminBO);
         return GraceJSONResult.ok();
+    }
+
+    /**
+     * 获取 用户名相似的 管理员列表 模糊查询
+     * @param accountName
+     * @param page
+     * @param limit
+     * @return
+     */
+    @PostMapping("/list")
+    public GraceJSONResult list(String accountName, Integer page, Integer limit) {
+
+        //  设定参数默认值
+        if (page == null) page = 1;
+        if (limit == null) limit = 10;
+
+        PagedGridResult gridResult = adminService.getAdminList(accountName, page, limit);
+
+        return GraceJSONResult.ok(gridResult);
     }
 }
