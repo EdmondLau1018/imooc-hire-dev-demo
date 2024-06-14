@@ -2,6 +2,7 @@ package com.imooc.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.imooc.pojo.Admin;
+import com.imooc.pojo.bo.AdminBO;
 
 /**
  * <p>
@@ -12,5 +13,9 @@ import com.imooc.pojo.Admin;
  * @since 2024-05-27
  */
 public interface AdminService extends IService<Admin> {
+
+    public boolean login(AdminBO adminBO);
+
+    public Admin getAdminInfo(AdminBO adminBO);
 
 }
