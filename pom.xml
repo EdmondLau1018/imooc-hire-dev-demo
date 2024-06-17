@@ -35,6 +35,8 @@
         <module>service-company-6001</module>
         <module>hire-gateway</module>
         <module>service-auth-8111</module>
+        <module>rabbitmq-producer</module>
+        <module>rabbitmq-consumer</module>
     </modules>
 
     <properties>
