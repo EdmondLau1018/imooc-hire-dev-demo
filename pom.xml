@@ -37,6 +37,7 @@
         <module>service-auth-8111</module>
         <module>rabbitmq-producer</module>
         <module>rabbitmq-consumer</module>
+        <module>service-resource-4001</module>
     </modules>
 
     <properties>
