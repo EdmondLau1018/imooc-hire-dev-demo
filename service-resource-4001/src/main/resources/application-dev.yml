@@ -23,7 +23,7 @@ spring:
     port: 5672
     virtual-host: /
     username: imooc
-    password: imooc
+    password: ENC(lsfCPe1pNl8A+ady3fqXYg==)
 
 # 配置mybatis-plus 信息
 mybatis-plus:
@@ -34,3 +34,9 @@ mybatis-plus:
     db-config:
       # 项目生成的主键策略 （雪花算法）
       id-type: assign_id
+
+# jasypt 加密密钥和加密算法（默认）
+jasypt:
+  encryptor:
+    algorithm: PBEWithMD5AndDES
+    password: Sharn
