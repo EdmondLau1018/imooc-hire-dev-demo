@@ -1,19 +1,19 @@
 package com.imooc.controller;
 
 import com.google.gson.Gson;
+import com.imooc.api.mq.RabbitMQSMSConfig;
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.grace.result.ResponseStatusEnum;
 import com.imooc.pojo.Users;
 import com.imooc.pojo.bo.RegisterLoginBO;
+import com.imooc.pojo.mq.SMSContentQO;
 import com.imooc.pojo.vo.UsersVO;
 import com.imooc.service.UsersService;
-import com.imooc.utils.IPUtil;
-import com.imooc.utils.JWTUtils;
-import com.imooc.utils.RedisOperator;
-import com.imooc.utils.SMSUtils;
+import com.imooc.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,11 +33,14 @@ public class PassportController extends BaseInfoProperties {
 
     private final JWTUtils jwtUtils;
 
-    public PassportController(RedisOperator redisOperator, SMSUtils smsUtils, UsersService usersService, JWTUtils jwtUtils) {
+    private final RabbitTemplate rabbitTemplate;
+
+    public PassportController(RedisOperator redisOperator, SMSUtils smsUtils, UsersService usersService, JWTUtils jwtUtils, RabbitTemplate rabbitTemplate) {
         this.redisOperator = redisOperator;
         this.smsUtils = smsUtils;
         this.usersService = usersService;
         this.jwtUtils = jwtUtils;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     @PostMapping("/getSMSCode")
@@ -59,6 +62,13 @@ public class PassportController extends BaseInfoProperties {
         //  发送验证码到用户的手机上
         try {
 //            smsUtils.sendSMS(mobile, code);
+            //  异步解耦，向消息队列中发送 发送短信的消息
+            SMSContentQO smsContentQO = new SMSContentQO();
+            smsContentQO.setMobile(mobile);
+            smsContentQO.setContent(code);
+            rabbitTemplate.convertAndSend(RabbitMQSMSConfig.SMS_EXCHANGE,
+                    "imooc.sms.login.send",
+                    GsonUtils.object2String(smsContentQO));
         } catch (Exception e) {
             e.printStackTrace();
         }

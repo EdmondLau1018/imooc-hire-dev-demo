@@ -27,6 +27,12 @@ spring:
     port: 6379
     database: 0
     password: 1018
+  rabbitmq:
+    host: 192.168.32.100
+    port: 5672
+    virtual-host: /
+    username: imooc
+    password: imooc
 
 server:
   port: 8111
