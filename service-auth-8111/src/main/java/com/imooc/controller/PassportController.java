@@ -13,6 +13,7 @@ import com.imooc.service.UsersService;
 import com.imooc.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.amqp.core.ReturnedMessage;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
@@ -68,6 +69,8 @@ public class PassportController extends BaseInfoProperties {
             SMSContentQO smsContentQO = new SMSContentQO();
             smsContentQO.setMobile(mobile);
             smsContentQO.setContent(code);
+
+            //  发送消息 到交换机 回调函数 （Confirm 机制）
             rabbitTemplate.setConfirmCallback(new RabbitTemplate.ConfirmCallback() {
 
                 /**
@@ -87,6 +90,20 @@ public class PassportController extends BaseInfoProperties {
                     } else {
                         log.info("交换机接收消息失败，失败原因：{}", s);
                     }
+                }
+            });
+
+            //  消息从交换机路由到队列 回调函数 （Return 机制）
+            rabbitTemplate.setReturnsCallback(new RabbitTemplate.ReturnsCallback() {
+
+                /**
+                 * 消息无法路由到队列的时候才会调用这个回调函数
+                 * @param returnedMessage
+                 */
+                @Override
+                public void returnedMessage(ReturnedMessage returnedMessage) {
+
+                    log.info("消息路由到队列的过程中出现错误，返回的信息为：{}", returnedMessage.toString());
                 }
             });
 
