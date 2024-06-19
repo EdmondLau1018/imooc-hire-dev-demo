@@ -33,6 +33,8 @@ spring:
     virtual-host: /
     username: imooc
     password: ENC(lsfCPe1pNl8A+ady3fqXYg==)
+    # confirm 模式（消息不丢失）
+    publisher-confirm-type: correlated
 
 server:
   port: 8111

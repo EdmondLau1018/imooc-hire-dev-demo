@@ -13,12 +13,14 @@ import com.imooc.service.UsersService;
 import com.imooc.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -66,9 +68,33 @@ public class PassportController extends BaseInfoProperties {
             SMSContentQO smsContentQO = new SMSContentQO();
             smsContentQO.setMobile(mobile);
             smsContentQO.setContent(code);
+            rabbitTemplate.setConfirmCallback(new RabbitTemplate.ConfirmCallback() {
+
+                /**
+                 *  MQ Server 接收到了不管是否成功这个函数都会被回调
+                 * @param correlationData   消息相关联的数据（配置信息）
+                 * @param b         交换机是否成功接收到信息 true 成功 false 失败
+                 * @param s         失败原因
+                 */
+                @Override
+                public void confirm(CorrelationData correlationData, boolean b, String s) {
+
+                    log.info("correlation_data = {}", correlationData.getId().toString());
+                    //  判断消息是否成功发送
+                    if (b) {
+                        //  ack 返回值为 true 代表消息被成功接收
+                        log.info("交换机成功收到消息：{}", s);
+                    } else {
+                        log.info("交换机接收消息失败，失败原因：{}", s);
+                    }
+                }
+            });
+
             rabbitTemplate.convertAndSend(RabbitMQSMSConfig.SMS_EXCHANGE,
                     "imooc.sms.login.send",
-                    GsonUtils.object2String(smsContentQO));
+                    GsonUtils.object2String(smsContentQO),
+                    //  给发送的消息添加 CorrelationData 一般设置的是 它的 id
+                    new CorrelationData(UUID.randomUUID().toString()));
         } catch (Exception e) {
             e.printStackTrace();
         }
