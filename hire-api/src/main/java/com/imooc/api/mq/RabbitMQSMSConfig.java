@@ -44,6 +44,8 @@ public class RabbitMQSMSConfig {
                 .durable(SMS_QUEUE)
                 //  新建队列的时候添加参数 消息过期时间
                 .withArgument("x-message-ttl", 10 * 1000)
+                .withArgument("x-dead-letter-exchange",RabbitMQSMSConfigDead.SMS_EXCHANGE_DEAD)
+                .withArgument("x-dead-letter-routing-key",RabbitMQSMSConfigDead.SMS_ROUTING_KEY_LOGIN_DEAD)
                 .build();
     }
 
