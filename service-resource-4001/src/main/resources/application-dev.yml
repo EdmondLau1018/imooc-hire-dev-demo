@@ -24,6 +24,10 @@ spring:
     virtual-host: /
     username: imooc
     password: ENC(lsfCPe1pNl8A+ady3fqXYg==)
+    # 消费者信息确认模式修改为手动
+    listener:
+      simple:
+        acknowledge-mode: manual
 
 # 配置mybatis-plus 信息
 mybatis-plus:
