@@ -28,6 +28,8 @@ spring:
     listener:
       simple:
         acknowledge-mode: manual
+        # MQ 消费限流（每次获取 n 条数据 确认之后重新获取）
+        prefetch: 2  # 每次从队列中获取 2 条消息确认之后再从队列中重新获取 相当于每次获取两条 确认之后再获取两条
 
 # 配置mybatis-plus 信息
 mybatis-plus:

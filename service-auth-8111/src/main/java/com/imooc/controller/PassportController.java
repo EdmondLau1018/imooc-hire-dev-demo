@@ -13,6 +13,9 @@ import com.imooc.service.UsersService;
 import com.imooc.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessagePostProcessor;
 import org.springframework.amqp.core.ReturnedMessage;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -107,10 +110,32 @@ public class PassportController extends BaseInfoProperties {
                 }
             });
 
+            //  发送消息的时候添加参数：过期时间
+//            MessagePostProcessor processor = new MessagePostProcessor() {
+//
+//                /**
+//                 * 设置发送信息的属性
+//                 * @param message
+//                 * @return
+//                 * @throws AmqpException
+//                 */
+//                @Override
+//                public Message postProcessMessage(Message message) throws AmqpException {
+//
+//                    //  设置发送信息的属性 如果超时 10 秒钟自动丢失 ttl 为 10 秒钟
+//                    message.getMessageProperties().setExpiration(String.valueOf(10 * 1000));
+//                    return message;
+//                }
+//            };
             rabbitTemplate.convertAndSend(RabbitMQSMSConfig.SMS_EXCHANGE,
                     "imooc.sms.login.send",
                     GsonUtils.object2String(smsContentQO),
                     //  给发送的消息添加 CorrelationData 一般设置的是 它的 id
+                    message -> {
+                        //  设置 message 属性的 lambda 写法
+                        message.getMessageProperties().setExpiration(String.valueOf(10 * 1000));
+                        return message;
+                    },
                     new CorrelationData(UUID.randomUUID().toString()));
         } catch (Exception e) {
             e.printStackTrace();

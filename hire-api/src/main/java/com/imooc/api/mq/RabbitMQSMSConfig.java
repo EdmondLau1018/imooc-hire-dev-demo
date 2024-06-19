@@ -20,6 +20,7 @@ public class RabbitMQSMSConfig {
     public static final String SMS_QUEUE = "sms_queue";
 
     public static final String SMS_ROUTING_KEY_LOGIN = "imooc.sms.login.send";
+
     /**
      * 定义交换机 将交换机注入到 spring 容器中
      *
@@ -40,11 +41,15 @@ public class RabbitMQSMSConfig {
     @Bean(SMS_QUEUE)
     public Queue queue() {
         return QueueBuilder
-                .durable(SMS_QUEUE).build();
+                .durable(SMS_QUEUE)
+                //  新建队列的时候添加参数 消息过期时间
+                .withArgument("x-message-ttl", 10 * 1000)
+                .build();
     }
 
     /**
      * 创建 队列和交换机的绑定关系
+     *
      * @param exchange
      * @param queue
      * @return
