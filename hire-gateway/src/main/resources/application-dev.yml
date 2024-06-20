@@ -30,6 +30,14 @@ spring:
           uri: lb://auth-service
           predicates:
             - Path=/a/**,/passport/**,/saas/**,/admin/**
+        - id: resourceRoute
+          uri: lb://resource-service
+          predicates:
+            - Path=/r/**
+        - id: workRoute
+          uri: lb://work-service
+          predicates:
+            - Path=/resume/**
       #  网关跨域配置 允许所有 域名的请求调用当前服务 并且允许添加headers
       globalcors:
         cors-configurations:

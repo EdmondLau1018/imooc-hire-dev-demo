@@ -68,7 +68,8 @@ public class RabbitMQConsumer {
                 String msg = messageBody;
                 // 类型转换
                 SMSContentQO smsContentQO = GsonUtils.stringToBean(msg, SMSContentQO.class);
-                smsUtils.sendSMS(smsContentQO.getMobile(), smsContentQO.getContent());
+//                smsUtils.sendSMS(smsContentQO.getMobile(), smsContentQO.getContent());
+                log.info("模拟发送短信的业务逻辑，发送到的手机号为：{}，验证码为：{}",smsContentQO.getMobile(),smsContentQO.getContent());
 
                 // 手动确认信息
                 /**
