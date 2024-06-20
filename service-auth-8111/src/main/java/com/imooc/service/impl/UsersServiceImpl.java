@@ -2,6 +2,7 @@ package com.imooc.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.imooc.api.feign.WorkMicroServiceFeign;
 import com.imooc.enums.Sex;
 import com.imooc.enums.ShowWhichName;
 import com.imooc.enums.UserRole;
@@ -10,7 +11,6 @@ import com.imooc.pojo.Users;
 import com.imooc.service.UsersService;
 import com.imooc.utils.DesensitizationUtil;
 import com.imooc.utils.LocalDateUtils;
-import org.apache.tomcat.jni.Local;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -29,10 +29,13 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
     private final UsersMapper usersMapper;
 
+    private final WorkMicroServiceFeign workMicroServiceFeign;
+
     private static final String USER_FACE1 = "http://122.152.205.72:88/group1/M00/00/05/CpoxxF6ZUySASMbOAABBAXhjY0Y649.png";
 
-    public UsersServiceImpl(UsersMapper usersMapper) {
+    public UsersServiceImpl(UsersMapper usersMapper, WorkMicroServiceFeign workMicroServiceFeign) {
         this.usersMapper = usersMapper;
+        this.workMicroServiceFeign = workMicroServiceFeign;
     }
 
     /**
@@ -87,6 +90,9 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
         //  调用 mapper 信息入库
         usersMapper.insert(user);
+
+        //  调用远程服务，初始化简历（在简历表中新增一条记录）
+        workMicroServiceFeign.initResume(user.getId());
 
         return user;
     }
