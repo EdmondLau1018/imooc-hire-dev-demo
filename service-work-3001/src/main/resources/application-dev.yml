@@ -23,6 +23,17 @@ spring:
       pool-name: DataSourceHikariCP        # 连接池的名字
       max-lifetime: 18000000               # 连接池的最大生命时长（毫秒），超时则会被释放（retired）
       connection-test-query: SELECT 1
+  rabbitmq:
+    host: 192.168.32.100
+    port: 5672
+    virtual-host: /
+    username: imooc
+    password: ENC(lsfCPe1pNl8A+ady3fqXYg==)
+#    # confirm 模式（消息发送到交换机）
+#    publisher-confirm-type: correlated
+#    # return 机制开启（消息从交换机路由到队列）
+#    publisher-returns: true
+
 # 服务器应用配置
 server:
   port: 3001
@@ -62,3 +73,9 @@ seata:
       server-addr: 192.168.32.100:8848
       username: nacos
       password: nacos
+
+#  配置 jasypt 加密信息
+jasypt:
+  encryptor:
+    algorithm: PBEWithMD5AndDES
+    password: Sharn

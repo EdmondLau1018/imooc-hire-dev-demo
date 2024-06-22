@@ -28,4 +28,12 @@ public interface UsersService extends IService<Users> {
      */
     public Users createUser(String mobile);
 
+    /**
+     * 创建用户并且初始化简历
+     * 使用 MQ 实现事务异步解耦
+     * @param mobile
+     * @return
+     */
+    public Users createUserAndInitResumeMQ(String mobile);
+
 }

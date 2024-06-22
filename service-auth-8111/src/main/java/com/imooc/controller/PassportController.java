@@ -171,7 +171,7 @@ public class PassportController extends BaseInfoProperties {
         Users user = usersService.queryMobileIsExist(mobile);
         //  如果查询到的用户数据为 空 表示用户没有注册过需要 创建新的用户信息入库
         if (user == null) {
-            user = usersService.createUser(mobile);
+            user = usersService.createUserAndInitResumeMQ(mobile);
         }
 
         //  查询到对应的用户 需要删除 redis 中保存的 key
