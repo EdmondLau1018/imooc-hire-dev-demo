@@ -40,3 +40,25 @@ mybatis-plus:
     db-config:
       # 项目生成的主键策略 （雪花算法）
       id-type: assign_id
+
+# 配置 seata 分布式事务相关信息
+seata:
+  enabled: true
+  # 事务组的名称 这个是可以自定义的
+  tx-service-group: imooc_tx_group
+  service:
+    vgroup-mapping:
+      imooc_tx_group: SEATA_GROUP
+    grouplist:
+      # 配置 seata 所在事务组服务端 ip 地址
+      SEATA_GROUP: 192.168.32.100:8091
+  config:
+    nacos:
+      server-addr: 192.168.32.100:8848
+      username: nacos
+      password: nacos
+  registry:
+    nacos:
+      server-addr: 192.168.32.100:8848
+      username: nacos
+      password: nacos

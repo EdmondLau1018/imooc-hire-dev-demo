@@ -3,8 +3,8 @@ package com.imooc.service.impl;
 import com.imooc.mapper.ResumeMapper;
 import com.imooc.pojo.Resume;
 import com.imooc.service.ResumeService;
+import io.seata.spring.annotation.GlobalTransactional;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -22,7 +22,8 @@ public class ResumeServiceImpl implements ResumeService {
      *
      * @param userId 用户 id
      */
-    @Transactional      //  新增数据 加上本地事务注解
+    //  @Transactional      //  新增数据 加上本地事务注解
+    @GlobalTransactional    //  将本地事务切换为分布式事务
     @Override
     public void initResume(String userId) {
 
