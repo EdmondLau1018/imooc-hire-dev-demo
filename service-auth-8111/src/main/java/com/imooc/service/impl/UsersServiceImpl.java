@@ -8,6 +8,7 @@ import com.imooc.enums.Sex;
 import com.imooc.enums.ShowWhichName;
 import com.imooc.enums.UserRole;
 import com.imooc.mapper.UsersMapper;
+import com.imooc.mq.InitResumeMQProducerHandler;
 import com.imooc.pojo.Users;
 import com.imooc.service.UsersService;
 import com.imooc.utils.DesensitizationUtil;
@@ -38,12 +39,15 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
     private final RabbitTemplate rabbitTemplate;
 
+    private final InitResumeMQProducerHandler resumeMQProducerHandler;
+
     private static final String USER_FACE1 = "http://122.152.205.72:88/group1/M00/00/05/CpoxxF6ZUySASMbOAABBAXhjY0Y649.png";
 
-    public UsersServiceImpl(UsersMapper usersMapper, WorkMicroServiceFeign workMicroServiceFeign, RabbitTemplate rabbitTemplate) {
+    public UsersServiceImpl(UsersMapper usersMapper, WorkMicroServiceFeign workMicroServiceFeign, RabbitTemplate rabbitTemplate, InitResumeMQProducerHandler resumeMQProducerHandler) {
         this.usersMapper = usersMapper;
         this.workMicroServiceFeign = workMicroServiceFeign;
         this.rabbitTemplate = rabbitTemplate;
+        this.resumeMQProducerHandler = resumeMQProducerHandler;
     }
 
     /**
@@ -131,11 +135,18 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
      * @param mobile
      * @return
      */
+    @Transactional
     @Override
     public Users createUserAndInitResumeMQ(String mobile) {
 
         //  调用创建用户的方法
         Users user = createUser(mobile);
+
+        //  在发送消息之前将消息保存到本地
+        resumeMQProducerHandler.saveLocalMsg(InitResumeMQConfig.INIT_RESUME_EXCHANGE,
+                InitResumeMQConfig.INIT_RESUME_ROUTING_KEY,
+                user.getId());
+
         //  向 MQ 发送 消息
         rabbitTemplate.convertAndSend(InitResumeMQConfig.INIT_RESUME_EXCHANGE,
                 InitResumeMQConfig.INIT_RESUME_ROUTING_KEY,
