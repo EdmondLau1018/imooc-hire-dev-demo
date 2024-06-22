@@ -6,6 +6,8 @@ import com.imooc.pojo.MqLocalMsgRecord;
 import com.imooc.service.MqLocalMsgRecordService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * <p>
  *  服务实现类
@@ -17,4 +19,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class MqLocalMsgRecordServiceImpl extends ServiceImpl<MqLocalMsgRecordMapper, MqLocalMsgRecord> implements MqLocalMsgRecordService {
 
+    private final MqLocalMsgRecordMapper recordMapper;
+
+    public MqLocalMsgRecordServiceImpl(MqLocalMsgRecordMapper recordMapper) {
+        this.recordMapper = recordMapper;
+    }
+
+    @Override
+    public List<MqLocalMsgRecord> getBatchLocalMsgRecordList(List<String> msgIds) {
+        return recordMapper.selectBatchIds(msgIds);
+    }
 }

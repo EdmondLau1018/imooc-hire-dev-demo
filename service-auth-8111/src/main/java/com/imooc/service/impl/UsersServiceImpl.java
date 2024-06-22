@@ -148,11 +148,11 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
                 user.getId());
 
         //  向 MQ 发送 消息
-        rabbitTemplate.convertAndSend(InitResumeMQConfig.INIT_RESUME_EXCHANGE,
-                InitResumeMQConfig.INIT_RESUME_ROUTING_KEY,
-                user.getId(),
-                //  给发送的消息新增 关联 id
-                new CorrelationData(UUID.randomUUID().toString()));
+//        rabbitTemplate.convertAndSend(InitResumeMQConfig.INIT_RESUME_EXCHANGE,
+//                InitResumeMQConfig.INIT_RESUME_ROUTING_KEY,
+//                user.getId(),
+//                //  给发送的消息新增 关联 id
+//                new CorrelationData(UUID.randomUUID().toString()));
 
         return user;
     }
