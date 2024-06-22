@@ -8,6 +8,10 @@ spring:
     database: 0
     password: 1018
   cloud:
+    # 开启基于 nacos 规则的客户端负载均衡 建议在网关和所有微服务中都添加这段配置
+    loadbalancer:
+      nacos:
+        enabled: true
     # nacos 相关配置
     nacos:
       discovery:
