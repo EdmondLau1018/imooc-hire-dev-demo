@@ -25,6 +25,18 @@ import java.util.Map;
 public class GraceExceptionHandler {
 
     /**
+     * 新增异常捕获方法 捕获服务中出现的数学运算错误
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(ArithmeticException.class)
+    @ResponseBody
+    public GraceJSONResult returnArithmeticException(ArithmeticException e){
+        e.printStackTrace();
+        return GraceJSONResult.errorMsg(e.getMessage());
+    }
+
+    /**
      * 通过 AOP 的方式 拦截和处理请求
      * 将异常的返回结果包装成一个 json 字符串
      *

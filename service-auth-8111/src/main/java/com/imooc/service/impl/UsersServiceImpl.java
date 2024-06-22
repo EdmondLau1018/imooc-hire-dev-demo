@@ -6,12 +6,21 @@ import com.imooc.api.feign.WorkMicroServiceFeign;
 import com.imooc.enums.Sex;
 import com.imooc.enums.ShowWhichName;
 import com.imooc.enums.UserRole;
+import com.imooc.exceptions.GraceException;
+import com.imooc.grace.result.GraceJSONResult;
+import com.imooc.grace.result.ResponseStatusEnum;
 import com.imooc.mapper.UsersMapper;
 import com.imooc.pojo.Users;
 import com.imooc.service.UsersService;
 import com.imooc.utils.DesensitizationUtil;
 import com.imooc.utils.LocalDateUtils;
+import io.seata.core.context.RootContext;
+import io.seata.core.exception.TransactionException;
+import io.seata.tm.api.GlobalTransaction;
+import io.seata.tm.api.GlobalTransactionContext;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -49,6 +58,7 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         return users;
     }
 
+    @Transactional
     @Override
     public Users createUser(String mobile) {
 
@@ -92,7 +102,24 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         usersMapper.insert(user);
 
         //  调用远程服务，初始化简历（在简历表中新增一条记录）
-        workMicroServiceFeign.initResume(user.getId());
+        GraceJSONResult graceJSONResult = workMicroServiceFeign.initResume(user.getId());
+
+        //  判断远程调用的服务返回结果是否正确 如果不正确 手动回滚事务
+        if (graceJSONResult.getStatus() != 200) {
+
+            try {
+                //  手动回滚当前事务
+                if (StringUtils.isNotBlank(RootContext.getXID())) {
+                    GlobalTransaction globalTransaction = GlobalTransactionContext.reload(RootContext.getXID());
+                    globalTransaction.rollback();
+                }
+            } catch (TransactionException e) {
+                e.printStackTrace();
+            } finally {
+                //  返回当前 用户注册错误
+                GraceException.displayException(ResponseStatusEnum.USER_REGISTER_ERROR);
+            }
+        }
 
         return user;
     }
