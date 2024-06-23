@@ -14,6 +14,6 @@ public interface ResumeService  {
      * 根据 userid 初始化用户简历
      * @param userId
      */
-    public void initResume(String userId);
+    public void initResume(String userId,String msgId);
 
 }

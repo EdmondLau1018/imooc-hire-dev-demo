@@ -13,9 +13,6 @@ import com.imooc.service.UsersService;
 import com.imooc.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.amqp.AmqpException;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessagePostProcessor;
 import org.springframework.amqp.core.ReturnedMessage;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -73,28 +70,28 @@ public class PassportController extends BaseInfoProperties {
             smsContentQO.setMobile(mobile);
             smsContentQO.setContent(code);
 
-            //  发送消息 到交换机 回调函数 （Confirm 机制）
-            rabbitTemplate.setConfirmCallback(new RabbitTemplate.ConfirmCallback() {
-
-                /**
-                 *  MQ Server 接收到了不管是否成功这个函数都会被回调
-                 * @param correlationData   消息相关联的数据（配置信息）
-                 * @param b         交换机是否成功接收到信息 true 成功 false 失败
-                 * @param s         失败原因
-                 */
-                @Override
-                public void confirm(CorrelationData correlationData, boolean b, String s) {
-
-                    log.info("correlation_data = {}", correlationData.getId().toString());
-                    //  判断消息是否成功发送
-                    if (b) {
-                        //  ack 返回值为 true 代表消息被成功接收
-                        log.info("交换机成功收到消息：{}", s);
-                    } else {
-                        log.info("交换机接收消息失败，失败原因：{}", s);
-                    }
-                }
-            });
+//            //  发送消息 到交换机 回调函数 （Confirm 机制）
+//            rabbitTemplate.setConfirmCallback(new RabbitTemplate.ConfirmCallback() {
+//
+//                /**
+//                 *  MQ Server 接收到了不管是否成功这个函数都会被回调
+//                 * @param correlationData   消息相关联的数据（配置信息）
+//                 * @param b         交换机是否成功接收到信息 true 成功 false 失败
+//                 * @param s         失败原因
+//                 */
+//                @Override
+//                public void confirm(CorrelationData correlationData, boolean b, String s) {
+//
+//                    log.info("correlation_data = {}", correlationData.getId().toString());
+//                    //  判断消息是否成功发送
+//                    if (b) {
+//                        //  ack 返回值为 true 代表消息被成功接收
+//                        log.info("交换机成功收到消息：{}", s);
+//                    } else {
+//                        log.info("交换机接收消息失败，失败原因：{}", s);
+//                    }
+//                }
+//            });
 
             //  消息从交换机路由到队列 回调函数 （Return 机制）
             rabbitTemplate.setReturnsCallback(new RabbitTemplate.ReturnsCallback() {

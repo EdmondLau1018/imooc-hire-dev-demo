@@ -77,7 +77,7 @@ public class InitResumeMQProducerHandler {
             //  随机生成消息关联 id
             rabbitTemplate.convertAndSend(msgRecord.getTargetExchange(),
                     msgRecord.getRoutingKey(),
-                    msgRecord.getMsgContent(),
+                    msgRecord.getMsgContent() + "," + msgRecord.getId(),
                     new CorrelationData(UUID.randomUUID().toString()));
         }
     }

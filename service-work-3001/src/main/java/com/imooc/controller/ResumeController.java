@@ -28,7 +28,7 @@ public class ResumeController {
     @PostMapping("/init")
     public GraceJSONResult initResume(@RequestParam("userId") String userId){
 
-        resumeService.initResume(userId);
+//        resumeService.initResume(userId);
         return GraceJSONResult.ok();
     }
 }
