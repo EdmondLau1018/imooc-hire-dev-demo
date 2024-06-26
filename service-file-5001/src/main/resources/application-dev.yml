@@ -1,6 +1,6 @@
 spring:
   application:
-    name: file-service-5001
+    name: file-service
   banner:
     location: classpath:banner/banner.txt
   cloud:
