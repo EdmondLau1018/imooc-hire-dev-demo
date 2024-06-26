@@ -42,6 +42,10 @@ spring:
           uri: lb://work-service
           predicates:
             - Path=/resume/**
+        - id: fileRoute
+          uri: lb://file-service
+          predicates:
+            - Path=/f/**,/static/**,/file/**,/speech/**
       #  网关跨域配置 允许所有 域名的请求调用当前服务 并且允许添加headers
       globalcors:
         cors-configurations:

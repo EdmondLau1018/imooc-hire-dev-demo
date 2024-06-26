@@ -39,6 +39,7 @@
         <module>rabbitmq-consumer</module>
         <module>service-resource-4001</module>
         <module>service-work-3001</module>
+        <module>service-file-5001</module>
     </modules>
 
     <properties>
