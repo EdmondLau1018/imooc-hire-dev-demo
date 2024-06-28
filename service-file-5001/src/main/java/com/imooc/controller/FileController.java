@@ -12,6 +12,8 @@ import java.io.IOException;
 @RestController
 public class FileController {
 
+    public static final String HOST = "http://192.168.32.1:8000/";
+
     /**
      * 用户上传头像的接口
      *
@@ -42,8 +44,8 @@ public class FileController {
         //  将用户传递在服务器内存中的文件对象写入到磁盘指定位置
         file.transferTo(newFile);
 
-        // 生成图片被访问地址
-        String userFaceUrl = "static/face/" + newFileName;
+        // 生成图片被访问地址（上传文件后生成文件的静态资源访问地址）
+        String userFaceUrl = HOST + "static/face/" + newFileName;
         return GraceJSONResult.ok(userFaceUrl);
     }
 }

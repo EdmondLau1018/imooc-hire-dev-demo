@@ -61,6 +61,16 @@ public class SecurityFilterJWT extends BaseInfoProperties implements GlobalFilte
             }
         }
 
+        //  新增静态资源访问路径 也不需要通过 JWT 校验
+        String fileStart = excludeUrlProperties.getFileStart();
+        if (StringUtils.isNoneBlank(fileStart)) {
+            boolean match = antPathMatcher.matchStart(fileStart, "/static/**");
+            //  如果用户通过浏览器发送的请求是 静态文件请求 ，不需要校验直接放行
+            if (match) {
+                return chain.filter(exchange);
+            }
+        }
+
         log.info("当前用户请求：{}", url);
         //  拦截到的 请求 ，进行 JWT 校验业务逻辑
         //  获取请求中 headers 中的 JWT 信息
