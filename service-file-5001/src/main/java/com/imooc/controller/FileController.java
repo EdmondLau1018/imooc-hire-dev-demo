@@ -19,7 +19,7 @@ public class FileController {
      */
     @PostMapping("/uploadFace")
     public GraceJSONResult uploadFace(@RequestParam("file") MultipartFile file,
-                                      @RequestParam("userId") String userId,
+                                      @RequestParam("userFileId") String userFileId,
                                       HttpServletRequest request) throws IOException {
 
         //  获取文件原名
@@ -27,7 +27,7 @@ public class FileController {
         //  获取文件后缀的名称 取最后一个 . 之后的内容
         String suffixName = originalFilename.substring(originalFilename.lastIndexOf("."));
         //  生成新的用户头像图片名称
-        String newFileName = userId + suffixName;
+        String newFileName = userFileId + suffixName;
         //  设置文件存储路径
         String rootPath = "\\F:\\personal_codes_for_git\\imgs" + File.separator;
         //  设置文件上传的全路径
