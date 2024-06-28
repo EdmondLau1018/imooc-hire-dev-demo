@@ -11,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.security.SignatureException;
 import java.util.HashMap;
@@ -23,6 +24,20 @@ import java.util.Map;
  */
 @ControllerAdvice  //  Springboot 拦截器注解
 public class GraceExceptionHandler {
+
+    /**
+     * 捕获异常，文件上传的 大小超过配置文件中的限制
+     * 再控制台中抛出的异常名称为 ： SizeLimitExceededException
+     * 使用 MaxUploadSizeExceededException 才能捕获到
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    @ResponseBody
+    public GraceJSONResult returnMaxUploadSizeExceededException(MaxUploadSizeExceededException e){
+        e.printStackTrace();
+        return GraceJSONResult.exception(ResponseStatusEnum.FILE_MAX_SIZE_500KB_ERROR);
+    }
 
     /**
      * 新增异常捕获方法 捕获服务中出现的数学运算错误
