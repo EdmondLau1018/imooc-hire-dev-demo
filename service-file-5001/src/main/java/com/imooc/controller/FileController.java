@@ -81,8 +81,9 @@ public class FileController {
             return GraceJSONResult.errorCustom(ResponseStatusEnum.FILE_UPLOAD_FAILD);
         }
 
-        //  构建新的文件名称
-        filename = userFileId + File.separator + filename;
+        //  构建新的文件名称  在 windows 中 File.separator 代表的是 \ (反斜杠)
+        //  这里想的是将用户 id 作为目录存储子在桶中 所以这里相当于在拼接图片在桶中的存储路径
+        filename = userFileId + "/" + filename;
         //  使用 构建的 minio 工具类上传文件的代码
         MinIOUtils.uploadFile(minIOConfig.getBucketName(), filename, file.getInputStream());
 
