@@ -18,3 +18,10 @@ server:
     uri-encoding: UTF-8
     # 这个配置设置 tomcat 服务器上传文件的时候吞吐量校验 默认超过 2M 的文件不会被捕获 -1 代表不校验文件大小
 #    max-swallow-size: -1
+# MinIO 配置
+minio:
+  endpoint: http://192.168.32.100:9000      # MinIO服务地址
+  fileHost: http://192.168.32.100:9000      # 文件地址host
+  bucketName: imooc                        # 存储桶bucket名称
+  accessKey: imooc                         # 用户名
+  secretKey: imooc1018                   # 密码

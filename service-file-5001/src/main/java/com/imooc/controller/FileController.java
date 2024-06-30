@@ -1,6 +1,10 @@
 package com.imooc.controller;
 
+import com.imooc.MinIOConfig;
+import com.imooc.MinIOUtils;
 import com.imooc.grace.result.GraceJSONResult;
+import com.imooc.grace.result.ResponseStatusEnum;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,15 +18,21 @@ public class FileController {
 
     public static final String HOST = "http://192.168.32.1:8000/";
 
+    private final MinIOConfig minIOConfig;
+
+    public FileController(MinIOConfig minIOConfig) {
+        this.minIOConfig = minIOConfig;
+    }
+
     /**
      * 用户上传头像的接口
      *
      * @return
      */
-    @PostMapping("/uploadFace")
-    public GraceJSONResult uploadFace(@RequestParam("file") MultipartFile file,
-                                      @RequestParam("userFileId") String userFileId,
-                                      HttpServletRequest request) throws IOException {
+    @PostMapping("/uploadFaceLocal")
+    public GraceJSONResult uploadFaceLocal(@RequestParam("file") MultipartFile file,
+                                           @RequestParam("userFileId") String userFileId,
+                                           HttpServletRequest request) throws IOException {
 
         //  获取文件原名
         String originalFilename = file.getOriginalFilename();
@@ -47,5 +57,41 @@ public class FileController {
         // 生成图片被访问地址（上传文件后生成文件的静态资源访问地址）
         String userFaceUrl = HOST + "static/face/" + newFileName;
         return GraceJSONResult.ok(userFaceUrl);
+    }
+
+    /**
+     * minio 接收用户上传头像
+     *
+     * @param file
+     * @param userFileId
+     * @return
+     * @throws IOException
+     */
+    @PostMapping("/uploadFace")
+    public GraceJSONResult uploadFace(@RequestParam("file") MultipartFile file,
+                                      @RequestParam("userFileId") String userFileId) throws Exception {
+
+        if (StringUtils.isBlank(userFileId)) {
+            //  上传 用户头像的 id 为空 ，抛出文件上传异常错误
+            return GraceJSONResult.errorCustom(ResponseStatusEnum.FILE_UPLOAD_FAILD);
+        }
+        //  获得文件的原始名称
+        String filename = file.getOriginalFilename();
+        if (StringUtils.isBlank(filename)) {
+            return GraceJSONResult.errorCustom(ResponseStatusEnum.FILE_UPLOAD_FAILD);
+        }
+
+        //  构建新的文件名称
+        filename = userFileId + File.separator + filename;
+        //  使用 构建的 minio 工具类上传文件的代码
+        MinIOUtils.uploadFile(minIOConfig.getBucketName(), filename, file.getInputStream());
+
+        String imageUrl = minIOConfig.getFileHost()
+                + "/" +
+                minIOConfig.getBucketName()
+                + "/" +
+                filename;
+
+        return GraceJSONResult.ok(imageUrl);
     }
 }

@@ -22,5 +22,20 @@
             <artifactId>hire-api</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+
+        <!--minio java 客户端-->
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>8.4.5</version>
+        </dependency>
+
+        <!--okhttp 这是 minio 的依赖-->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>4.8.1</version>
+        </dependency>
+
     </dependencies>
 </project>
