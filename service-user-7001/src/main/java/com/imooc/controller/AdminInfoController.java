@@ -2,15 +2,19 @@ package com.imooc.controller;
 
 import com.imooc.api.interceptor.JWTCurrentUserInterceptor;
 import com.imooc.base.BaseInfoProperties;
+import com.imooc.exceptions.GraceException;
 import com.imooc.grace.result.GraceJSONResult;
+import com.imooc.grace.result.ResponseStatusEnum;
 import com.imooc.pojo.Admin;
 import com.imooc.pojo.bo.AdminBO;
 import com.imooc.pojo.bo.CreateAdminBO;
 import com.imooc.pojo.bo.ResetPwdBO;
+import com.imooc.pojo.bo.UpdateAdminBO;
 import com.imooc.pojo.vo.AdminInfoVO;
 import com.imooc.service.AdminService;
 import com.imooc.utils.PagedGridResult;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -101,5 +105,20 @@ public class AdminInfoController extends BaseInfoProperties {
 
         //  返回结果
         return GraceJSONResult.ok(adminInfoVO);
+    }
+
+    @PostMapping("/updateMyInfo")
+    public GraceJSONResult updateMyInfo(@RequestBody @Valid UpdateAdminBO updateAdminBO){
+
+        //  从 ThreadLocal 对象中获取当前登陆的 admin 用户
+        Admin currentAdmin = JWTCurrentUserInterceptor.adminUser.get();
+        if (currentAdmin == null) {
+            currentAdmin = adminService.getAdminInfoByName("admin");
+        }
+
+        updateAdminBO.setId(currentAdmin.getId());
+        adminService.updateAdmin(updateAdminBO);
+
+        return GraceJSONResult.ok();
     }
 }

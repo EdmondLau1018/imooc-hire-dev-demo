@@ -5,6 +5,7 @@ import com.imooc.base.BaseInfoProperties;
 import com.imooc.pojo.Admin;
 import com.imooc.pojo.bo.AdminBO;
 import com.imooc.pojo.bo.CreateAdminBO;
+import com.imooc.pojo.bo.UpdateAdminBO;
 import com.imooc.utils.PagedGridResult;
 
 /**
@@ -41,4 +42,10 @@ public interface AdminService {
     public Admin getById(String id);
 
     public Admin getAdminInfoByName(String adminName);
+
+    /**
+     * 更新 admin 用户信息
+     * @param updateAdminBO
+     */
+    public void updateAdmin(UpdateAdminBO updateAdminBO);
 }

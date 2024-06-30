@@ -10,6 +10,7 @@ import com.imooc.mapper.AdminMapper;
 import com.imooc.pojo.Admin;
 import com.imooc.pojo.bo.AdminBO;
 import com.imooc.pojo.bo.CreateAdminBO;
+import com.imooc.pojo.bo.UpdateAdminBO;
 import com.imooc.service.AdminService;
 import com.imooc.utils.JWTUtils;
 import com.imooc.utils.MD5Utils;
@@ -117,6 +118,19 @@ public class AdminServiceImpl extends BaseInfoProperties implements AdminService
     public Admin getAdminInfoByName(String adminName) {
 
         return adminMapper.selectOne(new QueryWrapper<Admin>().eq("username",adminName));
+    }
+
+    /**
+     * 更新 admin 用户信息实现
+     * @param updateAdminBO
+     */
+    @Override
+    public void updateAdmin(UpdateAdminBO updateAdminBO) {
+
+        Admin admin = new Admin();
+        BeanUtils.copyProperties(updateAdminBO,admin);
+        admin.setUpdatedTime(LocalDateTime.now());
+        adminMapper.updateById(admin);
     }
 
 }
