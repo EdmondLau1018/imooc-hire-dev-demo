@@ -60,6 +60,13 @@ public class AdminController extends BaseInfoProperties {
     public GraceJSONResult info(String token) {
         //  从 当前项目的 ThreadLocal 对象中获取已经登陆的 admin 用户信息
         Admin admin = JWTCurrentUserInterceptor.adminUser.get();
+        if (admin == null) {
+            //  创建新的 AdminBO
+            //  ThreadLocal 获取不到 指定 admin 登录登陆的对象
+            AdminBO adminBO = new AdminBO();
+            adminBO.setUsername("admin");
+            admin = adminService.getAdminInfo(adminBO);
+        }
         //  创建 vo 对象用来返回信息
         AdminVO adminVO = new AdminVO();
         BeanUtils.copyProperties(admin, adminVO);

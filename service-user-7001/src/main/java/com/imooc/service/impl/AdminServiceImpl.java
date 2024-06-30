@@ -2,13 +2,13 @@
 package com.imooc.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageHelper;
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.exceptions.GraceException;
 import com.imooc.grace.result.ResponseStatusEnum;
 import com.imooc.mapper.AdminMapper;
 import com.imooc.pojo.Admin;
+import com.imooc.pojo.bo.AdminBO;
 import com.imooc.pojo.bo.CreateAdminBO;
 import com.imooc.service.AdminService;
 import com.imooc.utils.JWTUtils;
@@ -106,4 +106,17 @@ public class AdminServiceImpl extends BaseInfoProperties implements AdminService
         if (rows == 0)
             GraceException.displayException(ResponseStatusEnum.ADMIN_DELETE_ERROR);
     }
+
+    @Override
+    public Admin getById(String id) {
+
+        return adminMapper.selectById(id);
+    }
+
+    @Override
+    public Admin getAdminInfoByName(String adminName) {
+
+        return adminMapper.selectOne(new QueryWrapper<Admin>().eq("username",adminName));
+    }
+
 }

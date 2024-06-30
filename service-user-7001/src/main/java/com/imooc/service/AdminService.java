@@ -38,4 +38,7 @@ public interface AdminService {
      */
     public void deleteAdmin(String username);
 
+    public Admin getById(String id);
+
+    public Admin getAdminInfoByName(String adminName);
 }

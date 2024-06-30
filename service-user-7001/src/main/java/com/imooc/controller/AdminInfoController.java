@@ -1,12 +1,17 @@
 package com.imooc.controller;
 
+import com.imooc.api.interceptor.JWTCurrentUserInterceptor;
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.grace.result.GraceJSONResult;
+import com.imooc.pojo.Admin;
+import com.imooc.pojo.bo.AdminBO;
 import com.imooc.pojo.bo.CreateAdminBO;
 import com.imooc.pojo.bo.ResetPwdBO;
+import com.imooc.pojo.vo.AdminInfoVO;
 import com.imooc.service.AdminService;
 import com.imooc.utils.PagedGridResult;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -14,11 +19,11 @@ import javax.validation.Valid;
 @Slf4j
 @RestController
 @RequestMapping("/admininfo")
-public class AdminController extends BaseInfoProperties {
+public class AdminInfoController extends BaseInfoProperties {
 
     private final AdminService adminService;
 
-    public AdminController(AdminService adminService) {
+    public AdminInfoController(AdminService adminService) {
         this.adminService = adminService;
     }
 
@@ -70,12 +75,31 @@ public class AdminController extends BaseInfoProperties {
 
     /**
      * 使用 DDD 的 AR 模式进行 admin 用户 密码修改接口
+     *
      * @param resetPwdBO
      * @return
      */
     @PostMapping("/resetPwd")
-    public GraceJSONResult resetPwd(@RequestBody ResetPwdBO resetPwdBO){
+    public GraceJSONResult resetPwd(@RequestBody ResetPwdBO resetPwdBO) {
         resetPwdBO.modifyPwd();
         return GraceJSONResult.ok();
+    }
+
+    @PostMapping("/myInfo")
+    public GraceJSONResult myInfo() {
+
+        //  获取当前 ThreadLocal 中存储的 admin 用户信息
+        Admin admin = JWTCurrentUserInterceptor.adminUser.get();
+        if (admin == null) {
+            admin = adminService.getAdminInfoByName("admin");
+        }
+        //  根据 当前线程对象中的 admin 用户信息查找对应的 admin 用户信息
+        Admin adminInfo = adminService.getById(admin.getId());
+        //  对象信息拷贝 保留前端需要的信息
+        AdminInfoVO adminInfoVO = new AdminInfoVO();
+        BeanUtils.copyProperties(adminInfo, adminInfoVO);
+
+        //  返回结果
+        return GraceJSONResult.ok(adminInfoVO);
     }
 }

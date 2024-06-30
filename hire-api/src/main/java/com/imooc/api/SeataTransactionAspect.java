@@ -29,10 +29,10 @@ public class SeataTransactionAspect {
     @Before("execution(* com.imooc.service.impl..*.*(..))")
     public void beginGlobalTransaction(JoinPoint joinPoint) throws TransactionException {
 
-        //  从全局事务上下文获取全局事务处理对象
-        GlobalTransaction globalTransaction = GlobalTransactionContext.getCurrentOrCreate();
-        //  开启全局事务
-        globalTransaction.begin();
+//        //  从全局事务上下文获取全局事务处理对象
+//        GlobalTransaction globalTransaction = GlobalTransactionContext.getCurrentOrCreate();
+//        //  开启全局事务
+//        globalTransaction.begin();
     }
 
     /**
