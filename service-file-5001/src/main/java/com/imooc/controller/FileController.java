@@ -4,13 +4,17 @@ import com.imooc.MinIOConfig;
 import com.imooc.MinIOUtils;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.grace.result.ResponseStatusEnum;
+import com.imooc.pojo.bo.Base64FileBO;
+import com.imooc.utils.Base64ToFile;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.io.File;
 import java.io.IOException;
+import java.util.UUID;
 
 @RequestMapping("/file")
 @RestController
@@ -92,6 +96,47 @@ public class FileController {
                 minIOConfig.getBucketName()
                 + "/" +
                 filename;
+
+        return GraceJSONResult.ok(imageUrl);
+    }
+
+    /**
+     * 用户更换头像接口，接收前端传递的 base64 字符串
+     * 将 这个字符串转换成 临时文件存储在本地
+     * 上传到 minio 所在的服务器上
+     *
+     * @param base64FileBO
+     * @return
+     */
+    @PostMapping("/uploadAdminFace")
+    public GraceJSONResult uploadAdminFace(@RequestBody @Valid Base64FileBO base64FileBO) throws Exception {
+
+        //  获取文件生成的 base64 字符串
+        String base64 = base64FileBO.getBase64File();
+
+        String suffix = ".png";    //   文件统一使用 png 格式作为文件后缀
+        //  随机生成文件名称
+        String fileName = UUID.randomUUID().toString();
+        //  拼接对象存储名称
+        String objectName = fileName + suffix;
+
+        //  将上传的文件先存储在本地临时目录中
+        String rootPath = "F:\\personal_codes_for_git\\imgs" + File.separator;
+        //  拼接 对象名称和临时文件存储库路径 组成存储在本地的文件路径
+        String filePath = rootPath + File.separator + "adminFace" + File.separator + objectName;
+
+        //  将前端传递的 base64 字符串转换成 临时文件存储在本地
+        Base64ToFile.Base64ToFile(base64, filePath);
+
+        //  调用 minio 工具类，将本地的临时文件上传到对象存储中的指定位置
+        MinIOUtils.uploadFile(minIOConfig.getBucketName(), objectName, filePath);
+
+        //  构建静态资源文件访问的 url 返回给前端
+        String imageUrl = minIOConfig.getFileHost()
+                + "/" +
+                minIOConfig.getBucketName()
+                + "/" +
+                objectName;
 
         return GraceJSONResult.ok(imageUrl);
     }
