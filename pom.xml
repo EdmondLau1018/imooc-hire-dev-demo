@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.imooc</groupId>
-    <artifactId>imooc-hire-dev-demo</artifactId>
+    <groupId>com.com.imooc</groupId>
+    <artifactId>com.imooc-hire-dev-demo</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
 
@@ -18,9 +18,9 @@
 
     <modules>
         <!--
-            com.imooc.test.pojo 依赖 common ，api 依赖 com.imooc.test.pojo ，具体业务模块依赖 api 提供 web 共用接口
+            com.com.imooc.test.pojo 依赖 common ，api 依赖 com.com.imooc.test.pojo ，具体业务模块依赖 api 提供 web 共用接口
             hire-common: 通用工程，工具类，枚举类，异常类，常用属性类，资源类等
-            hire-com.imooc.test.pojo:  所有实体类 com.imooc.test.pojo bean entity vo do dto
+            hire-com.com.imooc.test.pojo:  所有实体类 com.com.imooc.test.pojo bean entity vo do dto
             hire-api: web（接口公用依赖）
             hire-gateway:网关 路由转发 暴露统一接口
             ******************* 业务分割 *******************************

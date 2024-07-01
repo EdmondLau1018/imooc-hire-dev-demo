@@ -125,7 +125,7 @@ public class PassportController extends BaseInfoProperties {
 //                }
 //            };
             rabbitTemplate.convertAndSend(RabbitMQSMSConfig.SMS_EXCHANGE,
-                    "imooc.sms.login.send",
+                    "com.imooc.sms.login.send",
                     GsonUtils.object2String(smsContentQO),
                     //  给发送的消息添加 CorrelationData 一般设置的是 它的 id
                     message -> {

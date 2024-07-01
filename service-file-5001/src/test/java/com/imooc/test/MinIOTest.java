@@ -18,7 +18,7 @@ public class MinIOTest {
                             //  minio 所在地址 (注意测试服务器在没有配置开启 SSL的 情况下 发送的是 http 请求)
                             .endpoint("http://192.168.32.100:9000")
                             //  登录 minio 的认证方式 客户杜纳用户名和密码
-                            .credentials("imooc", "imooc1018")
+                            .credentials("com.imooc", "imooc1018")
                             .build();
 
             //  检测是否存在对应的桶 如果不存在则创建

@@ -24,7 +24,7 @@ public class JasyptTest {
         encryptor.setConfig(config);
 
         //设置原密码 打印输出加密后的密码
-        String oriPassword = "imooc";
+        String oriPassword = "com.imooc";
         String enPassword = encryptor.encrypt(oriPassword);
 
         System.out.println(enPassword);

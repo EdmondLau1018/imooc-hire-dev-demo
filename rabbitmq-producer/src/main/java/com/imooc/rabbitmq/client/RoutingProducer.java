@@ -18,8 +18,8 @@ public class RoutingProducer {
         connectionFactory.setHost("192.168.32.100");
         connectionFactory.setPort(5672);
         connectionFactory.setVirtualHost("/");
-        connectionFactory.setUsername("imooc");
-        connectionFactory.setPassword("imooc");
+        connectionFactory.setUsername("com.imooc");
+        connectionFactory.setPassword("com.imooc");
 
         //  创建连接会话 connection
         Connection connection = connectionFactory.newConnection();

@@ -31,7 +31,7 @@ spring:
     host: 192.168.32.100
     port: 5672
     virtual-host: /
-    username: imooc
+    username: com.imooc
     password: ENC(lsfCPe1pNl8A+ady3fqXYg==)
     # confirm 模式（消息发送到交换机）
     publisher-confirm-type: correlated

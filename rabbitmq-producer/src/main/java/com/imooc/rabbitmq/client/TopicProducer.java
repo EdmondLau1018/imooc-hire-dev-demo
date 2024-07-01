@@ -18,8 +18,8 @@ public class TopicProducer {
         connectionFactory.setHost("192.168.32.100");
         connectionFactory.setPort(5672);
         connectionFactory.setVirtualHost("/");
-        connectionFactory.setUsername("imooc");
-        connectionFactory.setPassword("imooc");
+        connectionFactory.setUsername("com.imooc");
+        connectionFactory.setPassword("com.imooc");
 
         //  创建连接会话 connection
         Connection connection = connectionFactory.newConnection();
@@ -68,8 +68,8 @@ public class TopicProducer {
         channel.basicPublish(topicExchange, "order.create", null, msg2.getBytes(StandardCharsets.UTF_8));
         channel.basicPublish(topicExchange, "order.update", null, msg3.getBytes(StandardCharsets.UTF_8));
         channel.basicPublish(topicExchange, "order.update", null, msg4.getBytes(StandardCharsets.UTF_8));
-        channel.basicPublish(topicExchange, "imooc.pay.order", null, msg5.getBytes(StandardCharsets.UTF_8));
-        channel.basicPublish(topicExchange, "imooc.pay.order", null, msg6.getBytes(StandardCharsets.UTF_8));
+        channel.basicPublish(topicExchange, "com.imooc.pay.order", null, msg5.getBytes(StandardCharsets.UTF_8));
+        channel.basicPublish(topicExchange, "com.imooc.pay.order", null, msg6.getBytes(StandardCharsets.UTF_8));
 
 
         //  释放资源，关闭channel 信道和connection 连接
