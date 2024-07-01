@@ -31,6 +31,17 @@ public class IndustryController extends BaseInfoProperties {
         return GraceJSONResult.ok(industryService.getTopIndustryList());
     }
 
+    /**
+     * app 端 根据 根节点行业 id 查询三级行业 信息
+     * @param topIndustryId
+     * @return
+     */
+    @GetMapping("/app/getThirdListByTop/{topIndustryId}")
+    public GraceJSONResult getThirdListByTop(@PathVariable("topIndustryId") String topIndustryId){
+
+        return GraceJSONResult.ok(industryService.getThirdListByTop(topIndustryId));
+    }
+
     /******************************************业务分割：运营管理端 admin 接口**********************************************************/
 
     /**

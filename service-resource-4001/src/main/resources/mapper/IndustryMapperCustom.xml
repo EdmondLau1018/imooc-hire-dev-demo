@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.imooc.mapper.IndustryMapperCustom">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.imooc.pojo.Industry">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="sort" property="sort"/>
+        <result column="father_id" property="fatherId"/>
+        <result column="is_leaf" property="isLeaf"/>
+        <result column="level" property="level"/>
+    </resultMap>
+
+    <!--三级查询 通过 下一级的 father_id 是 上一级的 id 查询到 三级行业节点信息 返回 行业对象-->
+    <select id="getThirdListByTop" parameterType="map" resultType="com.imooc.pojo.Industry">
+        SELECT *
+        FROM industry `THIRD`
+        WHERE `THIRD`.father_id IN
+              (SELECT `SECOND`.id
+               FROM industry `SECOND`
+               WHERE `SECOND`.father_id
+                         IN (#{paramMap.topIndustryId}));
+    </select>
+
+
+</mapper>

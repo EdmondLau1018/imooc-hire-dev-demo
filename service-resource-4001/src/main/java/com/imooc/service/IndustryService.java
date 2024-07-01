@@ -54,4 +54,12 @@ public interface IndustryService extends IService<Industry> {
      */
     public Long getChildrenIndustryCounts(String industryId);
 
+    /**
+     * 根据 行业根节点信息获取 三级行业信息
+     * 三级查询
+     * @param topIndustryId
+     * @return
+     */
+    public List<Industry> getThirdListByTop(String topIndustryId);
+
 }

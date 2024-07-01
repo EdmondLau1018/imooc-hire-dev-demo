@@ -3,11 +3,14 @@ package com.imooc.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.imooc.mapper.IndustryMapper;
+import com.imooc.mapper.IndustryMapperCustom;
 import com.imooc.pojo.Industry;
 import com.imooc.service.IndustryService;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -22,8 +25,11 @@ public class IndustryServiceImpl extends ServiceImpl<IndustryMapper, Industry> i
 
     private final IndustryMapper industryMapper;
 
-    public IndustryServiceImpl(IndustryMapper industryMapper) {
+    private final IndustryMapperCustom industryMapperCustom;
+
+    public IndustryServiceImpl(IndustryMapper industryMapper, IndustryMapperCustom industryMapperCustom) {
         this.industryMapper = industryMapper;
+        this.industryMapperCustom = industryMapperCustom;
     }
 
     /**
@@ -102,6 +108,7 @@ public class IndustryServiceImpl extends ServiceImpl<IndustryMapper, Industry> i
 
     /**
      * 获取当前节点下子节点的数量 返回 long 类型
+     *
      * @param industryId
      * @return
      */
@@ -110,5 +117,22 @@ public class IndustryServiceImpl extends ServiceImpl<IndustryMapper, Industry> i
 
         Long count = industryMapper.selectCount(new QueryWrapper<Industry>().eq("father_id", industryId));
         return count;
+    }
+
+    /**
+     * 根据行业根节点信息查询三级行业节点信息
+     *
+     * @param topIndustryId
+     * @return
+     */
+    @Override
+    public List<Industry> getThirdListByTop(String topIndustryId) {
+
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("topIndustryId", topIndustryId);
+
+        List<Industry> industryList = industryMapperCustom.getThirdListByTop(paramMap);
+
+        return industryList;
     }
 }
