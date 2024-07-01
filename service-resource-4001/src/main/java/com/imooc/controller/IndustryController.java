@@ -4,9 +4,12 @@ import com.imooc.base.BaseInfoProperties;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.pojo.Industry;
 import com.imooc.service.IndustryService;
+import com.imooc.utils.GsonUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @RestController
 @RequestMapping("/industry")
@@ -28,18 +31,50 @@ public class IndustryController extends BaseInfoProperties {
     @GetMapping("/app/initTopList")
     public GraceJSONResult initTopList(HttpServletRequest request) {
 
-        return GraceJSONResult.ok(industryService.getTopIndustryList());
+        //  先从 redis 中查询是否存在 请求的内容
+        String topIndustryListStr = redis.get(TOP_INDUSTRY_LIST);
+        List<Industry> topIndustryList = null;
+
+        //  判断 redis 中存储的字符串结果是否存在 如果存在 将字符串结果转换为 List
+        //  如果不存在 从 数据库中查询出对应的结果设置到 redis 对应的 key 上
+        if (StringUtils.isNotBlank(topIndustryListStr)) {
+            topIndustryList = GsonUtils.stringToListAnother(topIndustryListStr, Industry.class);
+        } else {
+            //  不存在的 情况 ，查询数据库 将结果转换成 String 设置到 redis 对应的 key 上
+            topIndustryList = industryService.getTopIndustryList();
+
+            redis.set(TOP_INDUSTRY_LIST, GsonUtils.object2String(topIndustryList));
+        }
+
+        return GraceJSONResult.ok(topIndustryList);
     }
 
     /**
      * app 端 根据 根节点行业 id 查询三级行业 信息
+     *
      * @param topIndustryId
      * @return
      */
     @GetMapping("/app/getThirdListByTop/{topIndustryId}")
-    public GraceJSONResult getThirdListByTop(@PathVariable("topIndustryId") String topIndustryId){
+    public GraceJSONResult getThirdListByTop(@PathVariable("topIndustryId") String topIndustryId) {
 
-        return GraceJSONResult.ok(industryService.getThirdListByTop(topIndustryId));
+        //  拼接 三级行业节点的  redis key
+        String thirdKey = THIRD_INDUSTRY_LIST + ":byTopId:" + topIndustryId;
+
+        //  从 redis 中 获取对应的查询结果
+        String thirdIndustryListStr = redis.get(thirdKey);
+        List<Industry> thirdIndustryList = null;
+
+        if (StringUtils.isNotBlank(thirdIndustryListStr)) {
+            thirdIndustryList = GsonUtils.stringToListAnother(thirdIndustryListStr, Industry.class);
+        } else {
+            //  数据库查询结果
+            thirdIndustryList = industryService.getThirdListByTop(topIndustryId);
+            //  同步到 redis 对应的 key 中
+            redis.set(thirdKey, GsonUtils.object2String(thirdIndustryList));
+        }
+
+        return GraceJSONResult.ok(thirdIndustryList);
     }
 
     /******************************************业务分割：运营管理端 admin 接口**********************************************************/

@@ -18,6 +18,12 @@ spring:
     nacos:
       discovery:
         server-addr: 192.168.32.100:8848
+  # redis 配置 提升 app 端查询的时候接口响应的 QPS
+  redis:
+    host: 192.168.32.100
+    port: 6379
+    database: 0
+    password: 1018
   rabbitmq:
     host: 192.168.32.100
     port: 5672

@@ -18,6 +18,11 @@ import java.util.Map;
 @Repository
 public interface IndustryMapperCustom {
 
+    /**
+     * 自连接三级查询 根据行业一级节点 id 获取行业三级节点信息
+     * @param map
+     * @return
+     */
     public List<Industry> getThirdListByTop(@Param("paramMap")Map<String,Object> map);
 
 }

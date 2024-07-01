@@ -128,6 +128,7 @@ public class IndustryServiceImpl extends ServiceImpl<IndustryMapper, Industry> i
     @Override
     public List<Industry> getThirdListByTop(String topIndustryId) {
 
+        //  构建查询参数
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("topIndustryId", topIndustryId);
 

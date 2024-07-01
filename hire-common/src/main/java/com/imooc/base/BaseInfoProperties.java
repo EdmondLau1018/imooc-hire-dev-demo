@@ -1,20 +1,10 @@
 package com.imooc.base;
 
 import com.github.pagehelper.PageInfo;
-import com.google.gson.Gson;
-import com.imooc.grace.result.GraceJSONResult;
-import com.imooc.grace.result.ResponseStatusEnum;
 import com.imooc.utils.PagedGridResult;
 import com.imooc.utils.RedisOperator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.util.MimeTypeUtils;
-import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Mono;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class BaseInfoProperties {
@@ -49,6 +39,11 @@ public class BaseInfoProperties {
     public static final String REDIS_SAAS_USER_TOKEN = "redis_saas_user_token";
     public static final String REDIS_SAAS_USER_INFO = "redis_saas_user_info";
 
+    public static final String TOP_INDUSTRY_LIST = "top_industry_list";
+    public static final String THIRD_INDUSTRY_LIST = "third_industry_list";
+
+    public static final String DATA_DICTIONARY_LIST_TYPECODE = "data_dictionary_list_typecode";
+
     // 某个字典code下所对应的所有字典列表
     public static final String REDIS_DATA_DICTIONARY_ITEM_LIST = "redis_data_dictionary_item_list";
 
@@ -57,6 +52,7 @@ public class BaseInfoProperties {
     public static final String REDIS_COMPANY_MORE_INFO = "company_more_info";
     public static final String REDIS_COMPANY_PHOTOS = "redis_company_photos";
     public static final String REDIS_COMPANY_IS_VIP = "redis_company_is_vip";
+    public static final String REDIS_COMPANY_HR_COUNTS = "redis_company_hr_counts";
 
     // 用户简历信息
     public static final String REDIS_RESUME_INFO = "redis_resume_info";
@@ -115,7 +111,7 @@ public class BaseInfoProperties {
     // 支付中心地址 - 创建商户订单
 //    public static final String PAYMENT_URL_CREATE_MERCHANT_ORDER = "http://192.168.1.6:9060/payment/createMerchantOrder";		// dev
     public static final String PAYMENT_URL_CREATE_MERCHANT_ORDER = "http://172.17.172.127:9060/payment/createMerchantOrder";		// prod
-//    String PAYMENT_URL_CREATE_MERCHANT_ORDER = "http://payment.t.mukewang.com/foodie-payment/payment/createMerchantOrder";		// produce
+    //    String PAYMENT_URL_CREATE_MERCHANT_ORDER = "http://payment.t.mukewang.com/foodie-payment/payment/createMerchantOrder";		// produce
     // 支付中心地址 - 获得微信支付二维码
 //    public static final String PAYMENT_URL_GET_WXPAY_QRCODE = "http://192.168.1.6:9060/payment/getWXPayQRCode";		// dev
     public static final String PAYMENT_URL_GET_WXPAY_QRCODE = "http://172.17.172.127:9060/payment/getWXPayQRCode";		// prod
