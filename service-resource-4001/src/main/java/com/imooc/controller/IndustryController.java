@@ -4,10 +4,9 @@ import com.imooc.base.BaseInfoProperties;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.pojo.Industry;
 import com.imooc.service.IndustryService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/industry")
@@ -37,5 +36,15 @@ public class IndustryController extends BaseInfoProperties {
         return GraceJSONResult.ok();
     }
 
+    /**
+     *  获取行业节点列表 father_id 为 0 的所有节点
+     * @param request
+     * @return
+     */
+    @GetMapping("/getTopList")
+    public GraceJSONResult getTopList(HttpServletRequest request){
+
+        return GraceJSONResult.ok(industryService.getTopIndustryList());
+    }
 
 }

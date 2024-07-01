@@ -6,6 +6,8 @@ import com.imooc.pojo.Industry;
 import com.imooc.service.IndustryService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * <p>
  * 行业表 服务实现类
@@ -51,5 +53,20 @@ public class IndustryServiceImpl implements IndustryService {
     public void createNode(Industry industry) {
 
         industryMapper.insert(industry);
+    }
+
+    /**
+     * 获取行业节点列表
+     * @return
+     */
+    @Override
+    public List<Industry> getTopIndustryList() {
+
+        List<Industry> industryList = industryMapper.selectList(
+                new QueryWrapper<Industry>()
+                        .eq("father_id", 0)
+                        .orderByAsc("sort"));
+
+        return industryList;
     }
 }
