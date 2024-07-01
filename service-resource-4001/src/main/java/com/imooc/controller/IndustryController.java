@@ -59,4 +59,16 @@ public class IndustryController extends BaseInfoProperties {
 
         return GraceJSONResult.ok(industryService.getChildrenIndustryList(topIndustryId));
     }
+
+    /**
+     * 更新行业节点信息
+     * @param industry
+     * @return
+     */
+    @PostMapping("/updateNode")
+    public GraceJSONResult updateNode(@RequestBody Industry industry){
+
+        industryService.updateNode(industry);
+        return GraceJSONResult.ok();
+    }
 }

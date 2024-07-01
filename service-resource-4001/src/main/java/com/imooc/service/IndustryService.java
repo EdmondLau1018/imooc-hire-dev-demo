@@ -41,4 +41,10 @@ public interface IndustryService {
      */
     public List<Industry> getChildrenIndustryList(String industryId);
 
+    /**
+     * 更新行业节点
+     * @param industry
+     */
+    public void updateNode(Industry industry);
+
 }

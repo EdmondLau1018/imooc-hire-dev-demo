@@ -84,4 +84,14 @@ public class IndustryServiceImpl implements IndustryService {
                         .orderByAsc("sort"));
         return list;
     }
+
+    /**
+     * 更新行业节点
+     * @param industry
+     */
+    @Override
+    public void updateNode(Industry industry) {
+
+        industryMapper.updateById(industry);
+    }
 }
