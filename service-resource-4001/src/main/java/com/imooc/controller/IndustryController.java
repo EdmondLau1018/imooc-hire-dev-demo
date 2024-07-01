@@ -18,6 +18,21 @@ public class IndustryController extends BaseInfoProperties {
         this.industryService = industryService;
     }
 
+    /******************************************业务分割：app 端接口 **********************************************************/
+    /**
+     * app 端 获取行业节点列表 father_id 为 0 的所有节点
+     *
+     * @param request
+     * @return
+     */
+    @GetMapping("/app/initTopList")
+    public GraceJSONResult initTopList(HttpServletRequest request) {
+
+        return GraceJSONResult.ok(industryService.getTopIndustryList());
+    }
+
+    /******************************************业务分割：运营管理端 admin 接口**********************************************************/
+
     /**
      * 创建行业节点
      *
