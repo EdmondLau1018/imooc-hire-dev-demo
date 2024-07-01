@@ -37,14 +37,26 @@ public class IndustryController extends BaseInfoProperties {
     }
 
     /**
-     *  获取行业节点列表 father_id 为 0 的所有节点
+     * 获取行业节点列表 father_id 为 0 的所有节点
+     *
      * @param request
      * @return
      */
     @GetMapping("/getTopList")
-    public GraceJSONResult getTopList(HttpServletRequest request){
+    public GraceJSONResult getTopList(HttpServletRequest request) {
 
         return GraceJSONResult.ok(industryService.getTopIndustryList());
     }
 
+    /**
+     * 根据行业 id 获取子节点
+     * 行业id可以为 0 获取的就是行业根节点
+     * @param topIndustryId
+     * @return
+     */
+    @GetMapping("/children/{topIndustryId}")
+    public GraceJSONResult getChildrenIndustryList(@PathVariable("topIndustryId") String topIndustryId) {
+
+        return GraceJSONResult.ok(industryService.getChildrenIndustryList(topIndustryId));
+    }
 }

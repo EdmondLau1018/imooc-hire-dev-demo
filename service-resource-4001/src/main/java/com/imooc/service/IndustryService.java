@@ -34,4 +34,11 @@ public interface IndustryService {
      */
     public List<Industry> getTopIndustryList();
 
+    /**
+     * 获取行业子节点
+     * @param industryId
+     * @return
+     */
+    public List<Industry> getChildrenIndustryList(String industryId);
+
 }

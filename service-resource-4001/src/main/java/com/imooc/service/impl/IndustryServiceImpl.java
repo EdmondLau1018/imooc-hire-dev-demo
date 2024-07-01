@@ -69,4 +69,19 @@ public class IndustryServiceImpl implements IndustryService {
 
         return industryList;
     }
+
+    /**
+     *  根据 industryId 获取对应行业子节点
+     * @param industryId
+     * @return
+     */
+    @Override
+    public List<Industry> getChildrenIndustryList(String industryId) {
+
+        List<Industry> list = industryMapper.selectList(
+                new QueryWrapper<Industry>()
+                        .eq("father_id", industryId)
+                        .orderByAsc("sort"));
+        return list;
+    }
 }
