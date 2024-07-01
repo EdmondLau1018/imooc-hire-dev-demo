@@ -28,7 +28,7 @@ public class JJWTTest {
         //  根据 编码后的 base64 生成一个密钥对象
         SecretKey secretKey = Keys.hmacShaKeyFor(base64.getBytes(StandardCharsets.UTF_8));
         //  用户个人信息 json 字符串
-        Stu stu = new Stu(1001, "imooc", "female");
+        Stu stu = new Stu(1001, "com.imooc", "female");
         String stuJson = new Gson().toJson(stu);
         //  生成 JWT 加密后的字符串
         String testJwt = Jwts.builder().

@@ -12,7 +12,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableRetry    //  当前服务开启重试机制
 @SpringBootApplication
 @EnableDiscoveryClient
-@MapperScan(basePackages = "com.imooc.mapper")
+@MapperScan(basePackages = "com.com.imooc.mapper")
 @EnableFeignClients("com.imooc.api.feign")      //  当前服务是远程服务的调用方，需要是扫描 feign 客户端所在的包
 public class AuthServiceApplication {
     public static void main(String[] args) {

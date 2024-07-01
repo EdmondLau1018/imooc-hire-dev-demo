@@ -15,8 +15,8 @@ public class TopicConsumerOrder {
         factory.setHost("192.168.32.100");
         factory.setPort(5672);
         factory.setVirtualHost("/");
-        factory.setUsername("imooc");
-        factory.setPassword("imooc");
+        factory.setUsername("com.imooc");
+        factory.setPassword("com.imooc");
 
         //  创建 connection 会话
         Connection connection = factory.newConnection();

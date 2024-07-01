@@ -19,7 +19,7 @@ public class RabbitMQSMSConfig {
     //  定义队列名称
     public static final String SMS_QUEUE = "sms_queue";
 
-    public static final String SMS_ROUTING_KEY_LOGIN = "imooc.sms.login.send";
+    public static final String SMS_ROUTING_KEY_LOGIN = "com.imooc.sms.login.send";
 
     /**
      * 定义交换机 将交换机注入到 spring 容器中
@@ -62,6 +62,6 @@ public class RabbitMQSMSConfig {
         return BindingBuilder
                 .bind(queue)
                 .to(exchange)
-                .with("imooc.sms.#").noargs();
+                .with("com.imooc.sms.#").noargs();
     }
 }

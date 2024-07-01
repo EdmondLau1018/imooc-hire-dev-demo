@@ -27,7 +27,7 @@ spring:
     host: 192.168.32.100
     port: 5672
     virtual-host: /
-    username: imooc
+    username: com.imooc
     password: ENC(lsfCPe1pNl8A+ady3fqXYg==)
     # 消费者信息确认模式修改为手动
     listener:
