@@ -1,6 +1,7 @@
 package com.imooc.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.imooc.mapper.IndustryMapper;
 import com.imooc.pojo.Industry;
 import com.imooc.service.IndustryService;
@@ -17,7 +18,7 @@ import java.util.List;
  * @since 2024-07-01
  */
 @Service
-public class IndustryServiceImpl implements IndustryService {
+public class IndustryServiceImpl extends ServiceImpl<IndustryMapper, Industry> implements IndustryService {
 
     private final IndustryMapper industryMapper;
 
@@ -47,6 +48,7 @@ public class IndustryServiceImpl implements IndustryService {
 
     /**
      * 创建行业 根节点 向行业表冲插入一条数据
+     *
      * @param industry
      */
     @Override
@@ -57,6 +59,7 @@ public class IndustryServiceImpl implements IndustryService {
 
     /**
      * 获取行业节点列表
+     *
      * @return
      */
     @Override
@@ -71,7 +74,8 @@ public class IndustryServiceImpl implements IndustryService {
     }
 
     /**
-     *  根据 industryId 获取对应行业子节点
+     * 根据 industryId 获取对应行业子节点
+     *
      * @param industryId
      * @return
      */
@@ -87,11 +91,24 @@ public class IndustryServiceImpl implements IndustryService {
 
     /**
      * 更新行业节点
+     *
      * @param industry
      */
     @Override
     public void updateNode(Industry industry) {
 
         industryMapper.updateById(industry);
+    }
+
+    /**
+     * 获取当前节点下子节点的数量 返回 long 类型
+     * @param industryId
+     * @return
+     */
+    @Override
+    public Long getChildrenIndustryCounts(String industryId) {
+
+        Long count = industryMapper.selectCount(new QueryWrapper<Industry>().eq("father_id", industryId));
+        return count;
     }
 }

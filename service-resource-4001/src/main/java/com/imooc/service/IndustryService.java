@@ -13,7 +13,7 @@ import java.util.List;
  * @author Sharn
  * @since 2024-07-01
  */
-public interface IndustryService {
+public interface IndustryService extends IService<Industry> {
 
     /**
      * 根据行业名称判断行业节点是否存在
@@ -46,5 +46,12 @@ public interface IndustryService {
      * @param industry
      */
     public void updateNode(Industry industry);
+
+    /**
+     * 获取当前节点下子节点的数量
+     * @param industryId
+     * @return
+     */
+    public Long getChildrenIndustryCounts(String industryId);
 
 }
