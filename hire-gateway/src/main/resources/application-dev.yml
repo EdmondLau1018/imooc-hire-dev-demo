@@ -29,7 +29,7 @@ spring:
         - id: companyRoute
           uri: lb://company-service
           predicates:
-            - Path=/c/**
+            - Path=/c/**,/company/**
         - id: authRoute
           uri: lb://auth-service
           predicates:
@@ -37,7 +37,7 @@ spring:
         - id: resourceRoute
           uri: lb://resource-service
           predicates:
-            - Path=/r/**
+            - Path=/r/**,/industry/**
         - id: workRoute
           uri: lb://work-service
           predicates:

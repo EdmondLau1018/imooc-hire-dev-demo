@@ -140,4 +140,56 @@ public class FileController {
 
         return GraceJSONResult.ok(imageUrl);
     }
+
+    /**
+     * 上传企业 logo 接口
+     *
+     * @param file
+     * @return
+     */
+    @PostMapping("/uploadLogo")
+    public GraceJSONResult uploadLogo(@RequestParam("file") MultipartFile file) throws Exception {
+
+        //  获取文件的 原始名称
+        String filename = file.getOriginalFilename();
+        if (StringUtils.isBlank(filename)) {
+            return GraceJSONResult.errorCustom(ResponseStatusEnum.FILE_UPLOAD_FAILD);
+        }
+
+        //  拼接 向 minio 中上传的文件路径
+        filename = "company/logo/" + filename;
+
+        //   向 minio 服务器中 上传文件返回对应的 url
+        String imageUrl = MinIOUtils.uploadFile(minIOConfig.getBucketName(),
+                filename,
+                file.getInputStream(),
+                true);
+
+        return GraceJSONResult.ok(imageUrl);
+    }
+
+    /**
+     * 上传企业营业执照（也相当于上传图片）
+     *
+     * @param file
+     * @return
+     */
+    @PostMapping("/uploadBizLicense")
+    public GraceJSONResult uploadBizLicense(@RequestParam("file") MultipartFile file) throws Exception {
+
+        //  获取文件原名
+        String filename = file.getOriginalFilename();
+        if (StringUtils.isBlank(filename))
+            return GraceJSONResult.errorCustom(ResponseStatusEnum.FILE_UPLOAD_FAILD);
+
+        //  拼接上传文件的路径
+        filename = "company/bizLicense/" + filename;
+
+        String imageUrl= MinIOUtils.uploadFile(minIOConfig.getBucketName(),
+                filename,
+                file.getInputStream(),
+                true);
+
+        return GraceJSONResult.ok(imageUrl);
+    }
 }
