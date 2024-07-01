@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.com.imooc.mapper.StuMapper">
+<mapper namespace="com.imooc.mapper.StuMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.com.imooc.pojo.Stu">
+    <resultMap id="BaseResultMap" type="com.imooc.pojo.Stu">
         <id column="id" property="id" />
         <result column="name" property="name" />
         <result column="age" property="age" />
