@@ -307,6 +307,15 @@ public class MinIOUtils {
                         .build());
     }
 
+    /**
+     * 上传文件的工具方法 ，使用 inputStream 上传文件之后根据 是否需要返回url 决定是否返回url
+     * @param bucketName
+     * @param objectName
+     * @param inputStream
+     * @param needUrl
+     * @return
+     * @throws Exception
+     */
     public static String uploadFile(String bucketName, String objectName, InputStream inputStream, boolean needUrl) throws Exception {
         minioClient.putObject(
                 PutObjectArgs.builder()

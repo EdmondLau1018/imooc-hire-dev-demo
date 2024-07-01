@@ -22,6 +22,6 @@ server:
 minio:
   endpoint: http://192.168.32.100:9000      # MinIO服务地址
   fileHost: http://192.168.32.100:9000      # 文件地址host
-  bucketName: com.imooc                        # 存储桶bucket名称
-  accessKey: com.imooc                         # 用户名
+  bucketName: imooc                        # 存储桶bucket名称
+  accessKey: imooc                         # 用户名
   secretKey: imooc1018                   # 密码
