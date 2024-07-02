@@ -92,7 +92,9 @@ public class IndustryController extends BaseInfoProperties {
         if (!industryService.getIndustryIsExistByName(industry.getName()))
             return GraceJSONResult.errorMsg("该行业已存在，请重新取名~~~~");
 
-        //  行业不存在 创建 行业根节点
+        //  在创建行业节点之前 清空 redis 中的信息
+        resetRedisIndustry(industry);
+        //  行业不存在 创建 行业节点
         industryService.createNode(industry);
         return GraceJSONResult.ok();
     }
@@ -131,6 +133,9 @@ public class IndustryController extends BaseInfoProperties {
     @PostMapping("/updateNode")
     public GraceJSONResult updateNode(@RequestBody Industry industry) {
 
+        //  新增：修改节点之前 清除 redis 中缓存的节点信息
+        resetRedisIndustry(industry);
+
         industryService.updateNode(industry);
         return GraceJSONResult.ok();
     }
@@ -157,9 +162,34 @@ public class IndustryController extends BaseInfoProperties {
             }
         }
 
+        //  新增：运营管理端删除节点之前清空 redis 中的内容
+        resetRedisIndustry(industry);
         //  三级节点可以直接删除 || 不含有子节点的一二级节点也可以删除
         industryService.removeById(industryId);
 
         return GraceJSONResult.ok();
+    }
+
+
+    /**
+     * 运营管理端在对 行业节点信息进行修改或者删除后 调用的方法
+     * 目的是清除 redis 中缓存的行业信息数据
+     * @param industry
+     */
+    public void resetRedisIndustry(Industry industry) {
+
+        //  如果 发生变化的是一级节点，直接通过对应的 key 删除信息
+        if (industry.getLevel() == 1) {
+
+            redis.del(TOP_INDUSTRY_LIST);
+        }else if (industry.getLevel() == 3) {
+
+            //  发生变化的是 三级节点，根据三级节点的 id 查询出 一级节点的 id 组成对应的 key 后 从redis中删除
+            String topIndustryId = industryService.getTopIndustryId(industry.getId());
+            //  拼接 redis key
+            String topIdKey = THIRD_INDUSTRY_LIST + ":topId:" + topIndustryId;
+
+            redis.del(topIdKey);
+        }
     }
 }

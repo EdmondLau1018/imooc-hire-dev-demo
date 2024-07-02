@@ -24,4 +24,14 @@
     </select>
 
 
+    <!--三级查询 通过三级节点的 father_id 反向查询 一级节点的 id-->
+    <select id="getTopIndustryId" parameterType="map" resultType="string">
+        SELECT `TOP`.id
+        FROM industry `THIRD`
+                 RIGHT JOIN
+             industry `SECOND` ON `THIRD`.father_id = `SECOND`.id
+                 RIGHT JOIN industry `TOP` ON `SECOND`.father_id = `TOP`.id
+        WHERE `THIRD`.id = #{paramMap.thirdIndustryId};
+    </select>
+
 </mapper>

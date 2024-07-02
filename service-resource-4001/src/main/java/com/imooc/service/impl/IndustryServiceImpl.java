@@ -136,4 +136,22 @@ public class IndustryServiceImpl extends ServiceImpl<IndustryMapper, Industry> i
 
         return industryList;
     }
+
+    /**
+     * 根据 三级节点 id 反向查询一级节点 id
+     *
+     * @param thirdIndustryId
+     * @return
+     */
+    @Override
+    public String getTopIndustryId(String thirdIndustryId) {
+
+        //  拼接查询参数
+        Map<String, Object> map = new HashMap<>();
+        map.put("thirdIndustryId", thirdIndustryId);
+        //  执行查询
+        String topIndustryId = industryMapperCustom.getTopIndustryId(map);
+
+        return topIndustryId;
+    }
 }

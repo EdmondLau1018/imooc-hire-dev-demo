@@ -62,4 +62,12 @@ public interface IndustryService extends IService<Industry> {
      */
     public List<Industry> getThirdListByTop(String topIndustryId);
 
+    /**
+     * 根据 三级节点 id 反向查询一级节点 id
+     *
+     * @param thirdIndustryId
+     * @return
+     */
+    public String getTopIndustryId(String thirdIndustryId);
+
 }
