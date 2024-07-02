@@ -10,6 +10,7 @@ import com.imooc.utils.LocalDateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.amqp.core.MessagePostProcessor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -51,8 +52,16 @@ public class IndustryController extends BaseInfoProperties {
         } else {
             //  不存在的 情况 ，查询数据库 将结果转换成 String 设置到 redis 对应的 key 上
             topIndustryList = industryService.getTopIndustryList();
+//            redis.set(TOP_INDUSTRY_LIST, GsonUtils.object2String(topIndustryList));
 
-            redis.set(TOP_INDUSTRY_LIST, GsonUtils.object2String(topIndustryList));
+            // 判断 + 设空 避免缓存穿透的情况发生
+            if (!CollectionUtils.isEmpty(topIndustryList)) {
+                //  数据库中查询的数据 非空 ，将查询结果设置到 redis 中
+                redis.set(TOP_INDUSTRY_LIST, GsonUtils.object2String(topIndustryList));
+            } else {
+                //  查询数据库的结果空值，给 redis 对应的 key 设置 20 分钟空值数组
+                redis.set(TOP_INDUSTRY_LIST, "[]", 20 * 60);
+            }
         }
 
         return GraceJSONResult.ok(topIndustryList);
@@ -80,7 +89,13 @@ public class IndustryController extends BaseInfoProperties {
             //  数据库查询结果
             thirdIndustryList = industryService.getThirdListByTop(topIndustryId);
             //  同步到 redis 对应的 key 中
-            redis.set(thirdKey, GsonUtils.object2String(thirdIndustryList));
+            // redis.set(thirdKey, GsonUtils.object2String(thirdIndustryList));
+            //  缓存穿透防御机制
+            if (!CollectionUtils.isEmpty(thirdIndustryList)) {
+                redis.set(thirdKey, GsonUtils.object2String(thirdIndustryList));
+            } else {
+                redis.set(thirdKey, "[]", 20 * 60);
+            }
         }
 
         return GraceJSONResult.ok(thirdIndustryList);
