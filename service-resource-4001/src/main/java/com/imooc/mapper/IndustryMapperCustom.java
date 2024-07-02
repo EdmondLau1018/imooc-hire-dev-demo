@@ -28,6 +28,11 @@ public interface IndustryMapperCustom {
     public List<Industry> getThirdListByTop(@Param("paramMap") Map<String, Object> map);
 
 
+    /**
+     * 根据三级节点 id 查询 对应的 一级节点 id
+     * @param map
+     * @return
+     */
     public String getTopIndustryId(@Param("paramMap") Map<String, Object> map);
 
     /**
