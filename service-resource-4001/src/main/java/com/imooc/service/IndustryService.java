@@ -2,6 +2,7 @@ package com.imooc.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.imooc.pojo.Industry;
+import com.imooc.pojo.vo.TopIndustryWithThirdListVO;
 
 import java.util.List;
 
@@ -69,5 +70,12 @@ public interface IndustryService extends IService<Industry> {
      * @return
      */
     public String getTopIndustryId(String thirdIndustryId);
+
+    /**
+     * 获取 三级行业节点列表
+     * 和对应的 一级节点 id （多对一关系）
+     * @return
+     */
+    public List<TopIndustryWithThirdListVO> getAllThirdIndustryList();
 
 }

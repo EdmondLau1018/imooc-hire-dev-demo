@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.imooc.mapper.IndustryMapper;
 import com.imooc.mapper.IndustryMapperCustom;
 import com.imooc.pojo.Industry;
+import com.imooc.pojo.vo.TopIndustryWithThirdListVO;
 import com.imooc.service.IndustryService;
 import org.springframework.stereotype.Service;
 
@@ -153,5 +154,15 @@ public class IndustryServiceImpl extends ServiceImpl<IndustryMapper, Industry> i
         String topIndustryId = industryMapperCustom.getTopIndustryId(map);
 
         return topIndustryId;
+    }
+
+    /**
+     * 查询三级行业节点 列表和一级行业节点 id
+     * 实现
+     * @return
+     */
+    @Override
+    public List<TopIndustryWithThirdListVO> getAllThirdIndustryList() {
+        return industryMapperCustom.getAllThirdIndustryList();
     }
 }

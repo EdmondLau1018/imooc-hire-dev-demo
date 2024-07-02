@@ -1,6 +1,7 @@
 package com.imooc.mapper;
 
 import com.imooc.pojo.Industry;
+import com.imooc.pojo.vo.TopIndustryWithThirdListVO;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -28,5 +29,11 @@ public interface IndustryMapperCustom {
 
 
     public String getTopIndustryId(@Param("paramMap") Map<String, Object> map);
+
+    /**
+     * 查询 所有的三级列表和对应的 一级 id保留一对多的关系
+     * @return
+     */
+    public List<TopIndustryWithThirdListVO> getAllThirdIndustryList();
 
 }

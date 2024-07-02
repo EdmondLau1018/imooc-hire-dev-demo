@@ -12,6 +12,20 @@
         <result column="level" property="level"/>
     </resultMap>
 
+    <!--一对多结果集映射 使用 collection 标签映射多方-->
+    <resultMap id="topIndustryWithThirdList" type="com.imooc.pojo.vo.TopIndustryWithThirdListVO">
+        <id column="topId" property="topId"/>
+        <!--collection 的 property 映射的是多方的 列表属性名，ofType 映射多方列表元素的泛型-->
+        <collection property="thirdIndustryList" ofType="com.imooc.pojo.Industry">
+            <id column="id" property="id" jdbcType="VARCHAR"/>
+            <result column="name" property="name"/>
+            <result column="sort" property="sort"/>
+            <result column="father_id" property="fatherId"/>
+            <result column="is_leaf" property="isLeaf"/>
+            <result column="level" property="level"/>
+        </collection>
+    </resultMap>
+
     <!--三级查询 通过 下一级的 father_id 是 上一级的 id 查询到 三级行业节点信息 返回 行业对象-->
     <select id="getThirdListByTop" parameterType="map" resultType="com.imooc.pojo.Industry">
         SELECT *
@@ -34,4 +48,15 @@
         WHERE `THIRD`.id = #{paramMap.thirdIndustryId};
     </select>
 
+    <!-- 查询三级行业列表 和 一级行业 id 保留一对多的关系-->
+    <select id="getAllThirdIndustryList" resultMap="topIndustryWithThirdList">
+        SELECT top.id topId,
+               third.*
+        FROM industry third
+                 LEFT JOIN industry `second`
+                           ON third.father_id = `second`.id
+                 LEFT JOIN industry top
+                           ON `second`.father_id = top.id
+        WHERE third.level = 3;
+    </select>
 </mapper>
