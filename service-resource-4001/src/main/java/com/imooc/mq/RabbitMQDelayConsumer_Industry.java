@@ -1,6 +1,5 @@
 package com.imooc.mq;
 
-import com.google.gson.Gson;
 import com.imooc.api.mq.DelayConfig_Industry;
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.pojo.Industry;
@@ -27,7 +26,8 @@ public class RabbitMQDelayConsumer_Industry extends BaseInfoProperties {
 
 
     /**
-     * 死信队列消费者 监听死信队列
+     * 延时队列消费者 监听延时队列
+     * 延时消息：同步 redis 中的数据 和 DB 中的数据 保持数据一致性
      */
     @RabbitListener(queues = {DelayConfig_Industry.QUEUE_DELAY_REFRESH})
     public void watchQueue(Message message, Channel channel) throws Exception {
