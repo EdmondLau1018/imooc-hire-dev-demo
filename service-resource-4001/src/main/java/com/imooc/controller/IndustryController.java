@@ -1,14 +1,20 @@
 package com.imooc.controller;
 
+import com.imooc.api.mq.DelayConfig_Industry;
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.pojo.Industry;
 import com.imooc.service.IndustryService;
 import com.imooc.utils.GsonUtils;
+import com.imooc.utils.LocalDateUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.amqp.core.MessagePostProcessor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @RestController
@@ -17,8 +23,11 @@ public class IndustryController extends BaseInfoProperties {
 
     private final IndustryService industryService;
 
-    public IndustryController(IndustryService industryService) {
+    private final RabbitTemplate rabbitTemplate;
+
+    public IndustryController(IndustryService industryService, RabbitTemplate rabbitTemplate) {
         this.industryService = industryService;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     /******************************************业务分割：app 端接口 **********************************************************/
@@ -93,7 +102,7 @@ public class IndustryController extends BaseInfoProperties {
             return GraceJSONResult.errorMsg("该行业已存在，请重新取名~~~~");
 
         //  在创建行业节点之前 清空 redis 中的信息
-        resetRedisIndustry(industry);
+        // resetRedisIndustry(industry);
         //  行业不存在 创建 行业节点
         industryService.createNode(industry);
         return GraceJSONResult.ok();
@@ -134,7 +143,7 @@ public class IndustryController extends BaseInfoProperties {
     public GraceJSONResult updateNode(@RequestBody Industry industry) {
 
         //  新增：修改节点之前 清除 redis 中缓存的节点信息
-        resetRedisIndustry(industry);
+        // resetRedisIndustry(industry);
 
         industryService.updateNode(industry);
         return GraceJSONResult.ok();
@@ -163,7 +172,7 @@ public class IndustryController extends BaseInfoProperties {
         }
 
         //  新增：运营管理端删除节点之前清空 redis 中的内容
-        resetRedisIndustry(industry);
+        // resetRedisIndustry(industry);
         //  三级节点可以直接删除 || 不含有子节点的一二级节点也可以删除
         industryService.removeById(industryId);
 
@@ -216,5 +225,41 @@ public class IndustryController extends BaseInfoProperties {
             }
         }
 
+    }
+
+    /**
+     * 调用延迟队列 发送延迟消息
+     * 默认同步的时间是 第二天凌晨三点钟
+     * 同步 DB  redis 中的信息
+     *
+     * @return
+     */
+    @PostMapping("/refreshIndustry")
+    public GraceJSONResult refreshIndustry() {
+
+        //  计算第二天凌晨三点钟到现在的时间 // 第二天凌晨三点钟
+        LocalDateTime futureTime = LocalDateUtils.parseLocalDateTime(
+                LocalDateUtils.getTomorrow() + " 03:00:00", LocalDateUtils.DATETIME_PATTERN);
+
+        //  计算当前时间与 预期发布时间的时间差 单位 毫秒
+        Long publishTimes = LocalDateUtils.getChronoUnitBetween(LocalDateTime.now(),
+                futureTime,
+                ChronoUnit.MILLIS,
+                true);
+
+        // 格式转换
+        // int delayTimes = publishTimes.intValue();
+        int delayTimes = 10 * 1000;
+
+        //  设置消息属性 当前消息为延迟消息
+        MessagePostProcessor processor = DelayConfig_Industry.setDelayedTimes(delayTimes);
+
+        //  发送消息到延迟队列
+        rabbitTemplate.convertAndSend(DelayConfig_Industry.EXCHANGE_DELAY_REFRESH,
+                DelayConfig_Industry.DELAY_REFRESH_INDUSTRY,
+                "调用延迟队列消息，处理redis DB 数据不一致问题",
+                processor);
+
+        return GraceJSONResult.ok("调用延迟队列成功~~~");
     }
 }
