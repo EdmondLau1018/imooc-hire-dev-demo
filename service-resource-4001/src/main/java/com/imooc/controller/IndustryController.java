@@ -174,6 +174,7 @@ public class IndustryController extends BaseInfoProperties {
     /**
      * 运营管理端在对 行业节点信息进行修改或者删除后 调用的方法
      * 目的是清除 redis 中缓存的行业信息数据
+     *
      * @param industry
      */
     public void resetRedisIndustry(Industry industry) {
@@ -182,14 +183,38 @@ public class IndustryController extends BaseInfoProperties {
         if (industry.getLevel() == 1) {
 
             redis.del(TOP_INDUSTRY_LIST);
-        }else if (industry.getLevel() == 3) {
+            //  数据发生变化之后重新查询 数据库设置到 redis 中 防止用户请求直接打到数据库
+            List<Industry> topIndustryList = industryService.getTopIndustryList();
+            redis.set(TOP_INDUSTRY_LIST, GsonUtils.object2String(topIndustryList));
+
+            //  缓存双删机制：重新查询之后覆盖 redis 中的数据 ，睡眠 n 毫秒删除并重新覆盖
+            try {
+                Thread.sleep(300);
+                redis.del(TOP_INDUSTRY_LIST);
+                redis.set(TOP_INDUSTRY_LIST, GsonUtils.object2String(topIndustryList));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } else if (industry.getLevel() == 3) {
 
             //  发生变化的是 三级节点，根据三级节点的 id 查询出 一级节点的 id 组成对应的 key 后 从redis中删除
             String topIndustryId = industryService.getTopIndustryId(industry.getId());
             //  拼接 redis key
             String topIdKey = THIRD_INDUSTRY_LIST + ":topId:" + topIndustryId;
-
             redis.del(topIdKey);
+
+            //  重新加载数据 防止 缓存击穿 + 缓存双删
+            List<Industry> thirdList = industryService.getThirdListByTop(topIndustryId);
+            redis.set(topIdKey, GsonUtils.object2String(thirdList));
+
+            try {
+                Thread.sleep(300);
+                redis.del(topIdKey);
+                redis.set(topIdKey, GsonUtils.object2String(thirdList));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
+
     }
 }
