@@ -74,3 +74,15 @@ seata:
       server-addr: 192.168.32.100:8848
       username: nacos
       password: nacos
+
+# canal 相关配置
+canal:
+  destination: imooc
+  server: 192.168.32.100:11111
+  user-name: root
+  password: 1018
+
+# 避免 canal 打印过多信息
+logging:
+  level:
+    top.javatool.canal.client: warn
