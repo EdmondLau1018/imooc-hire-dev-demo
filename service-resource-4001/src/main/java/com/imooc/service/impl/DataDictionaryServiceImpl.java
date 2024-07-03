@@ -1,16 +1,21 @@
 package com.imooc.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.pagehelper.PageHelper;
+import com.imooc.base.BaseInfoProperties;
 import com.imooc.exceptions.GraceException;
 import com.imooc.grace.result.ResponseStatusEnum;
 import com.imooc.mapper.DataDictionaryMapper;
 import com.imooc.pojo.DataDictionary;
 import com.imooc.pojo.bo.DataDictionaryBO;
 import com.imooc.service.DataDictionaryService;
+import com.imooc.utils.PagedGridResult;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * <p>
@@ -21,7 +26,7 @@ import org.springframework.stereotype.Service;
  * @since 2024-07-01
  */
 @Service
-public class DataDictionaryServiceImpl extends ServiceImpl<DataDictionaryMapper, DataDictionary> implements DataDictionaryService {
+public class DataDictionaryServiceImpl extends BaseInfoProperties implements DataDictionaryService {
 
     private final DataDictionaryMapper dataDictionaryMapper;
 
@@ -34,6 +39,7 @@ public class DataDictionaryServiceImpl extends ServiceImpl<DataDictionaryMapper,
      *
      * @param dataDictionaryBO
      */
+    @Transactional
     @Override
     public void createOrUpdateDataDictionary(DataDictionaryBO dataDictionaryBO) {
 
@@ -61,5 +67,31 @@ public class DataDictionaryServiceImpl extends ServiceImpl<DataDictionaryMapper,
             dataDictionaryMapper.updateById(dataDictionary);
         }
 
+    }
+
+    /**
+     * 数据字典项分页查询
+     *
+     * @param typeName
+     * @param itemValue
+     * @param page
+     * @param pageSize
+     * @return
+     */
+    @Override
+    public PagedGridResult getDictionaryListPaged(String typeName, String itemValue, Integer page, Integer pageSize) {
+
+        PageHelper.startPage(page, pageSize);
+
+        // 执行查询
+        List<DataDictionary> dataDictionaryList = dataDictionaryMapper.selectList(
+                new QueryWrapper<DataDictionary>()
+                        .like("type_name", typeName)
+                        .like("item_value", itemValue)
+                        .orderByAsc("type_code")
+                        .orderByAsc("sort"));
+
+        //  返回分页封装后的查询结果
+        return setterPagedGrid(dataDictionaryList, page);
     }
 }

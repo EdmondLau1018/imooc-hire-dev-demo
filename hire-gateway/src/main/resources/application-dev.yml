@@ -37,7 +37,7 @@ spring:
         - id: resourceRoute
           uri: lb://resource-service
           predicates:
-            - Path=/r/**,/industry/**
+            - Path=/r/**,/industry/**,/dataDict/**
         - id: workRoute
           uri: lb://work-service
           predicates:

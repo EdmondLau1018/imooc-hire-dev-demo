@@ -4,10 +4,8 @@ import com.imooc.base.BaseInfoProperties;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.pojo.bo.DataDictionaryBO;
 import com.imooc.service.DataDictionaryService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.imooc.utils.PagedGridResult;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -23,12 +21,34 @@ public class DataDictController extends BaseInfoProperties {
 
     /**
      * 创建（或新增）数据字典项接口
+     *
      * @return
      */
     @PostMapping("/create")
-    public GraceJSONResult create(@RequestBody @Valid DataDictionaryBO dataDictionaryBO){
+    public GraceJSONResult create(@RequestBody @Valid DataDictionaryBO dataDictionaryBO) {
 
         dataDictionaryService.createOrUpdateDataDictionary(dataDictionaryBO);
         return GraceJSONResult.ok();
+    }
+
+    /**
+     * 数据字典列表分页查询
+     *
+     * @param typeName
+     * @param itemValue
+     * @param page
+     * @param limit
+     * @return
+     */
+    @PostMapping("/list")
+    public GraceJSONResult list(String typeName, String itemValue, Integer page, Integer limit) {
+
+        if (page == null) page = 1;
+        if (limit == null) limit = 10;
+
+        PagedGridResult gridResult = dataDictionaryService
+                .getDictionaryListPaged(typeName, itemValue, page, limit);
+
+        return GraceJSONResult.ok(gridResult);
     }
 }
