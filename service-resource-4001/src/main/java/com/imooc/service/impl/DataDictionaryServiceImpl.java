@@ -3,6 +3,7 @@ package com.imooc.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.imooc.base.BaseInfoProperties;
+import com.imooc.enums.YesOrNo;
 import com.imooc.exceptions.GraceException;
 import com.imooc.grace.result.ResponseStatusEnum;
 import com.imooc.mapper.DataDictionaryMapper;
@@ -119,5 +120,22 @@ public class DataDictionaryServiceImpl extends BaseInfoProperties implements Dat
         int rows = dataDictionaryMapper.deleteById(dictId);
         if (rows == 0)
             GraceException.displayException(ResponseStatusEnum.DATA_DICT_DELETE_ERROR);
+    }
+
+    /**
+     * 根据字典编码查询字典项
+     * @param typeCode
+     * @return
+     */
+    @Override
+    public List<DataDictionary> getDataBydCode(String typeCode) {
+
+        List<DataDictionary> dataDictionaryList = dataDictionaryMapper.
+                selectList(new QueryWrapper<DataDictionary>().
+                        eq("type_code", typeCode)
+                        .eq("enable", YesOrNo.YES.type)
+                );
+
+        return dataDictionaryList;
     }
 }

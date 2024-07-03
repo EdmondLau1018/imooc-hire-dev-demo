@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/dataDict")
@@ -24,6 +25,29 @@ public class DataDictController extends BaseInfoProperties {
     public DataDictController(DataDictionaryService dataDictionaryService) {
         this.dataDictionaryService = dataDictionaryService;
     }
+
+    /******************************************业务分割：app 端接口 **********************************************************/
+
+    /**
+     * 根据字典码获取数据字典列表
+     *
+     * @param typeCode
+     * @return
+     */
+    @PostMapping("/app/getDataByCode")
+    public GraceJSONResult getDataByCode(String typeCode) {
+
+        if (StringUtils.isBlank(typeCode))
+            return GraceJSONResult.errorMsg("字典项不能为空~~~");
+
+        //  调用 service 查询对应的结果
+        List<DataDictionary> dictionaryList = dataDictionaryService.getDataBydCode(typeCode);
+
+        return GraceJSONResult.ok(dictionaryList);
+    }
+
+
+    /******************************************业务分割：运营管理端接口 **********************************************************/
 
     /**
      * 创建（或新增）数据字典项接口
@@ -74,6 +98,7 @@ public class DataDictController extends BaseInfoProperties {
 
     /**
      * 数据字典修改接口
+     *
      * @param dataDictionaryBO
      * @return
      */
@@ -91,11 +116,12 @@ public class DataDictController extends BaseInfoProperties {
 
     /**
      * 根据数据字典 id 删除数据字典
+     *
      * @param dictId
      * @return
      */
     @PostMapping("/delete")
-    public GraceJSONResult delete(String dictId){
+    public GraceJSONResult delete(String dictId) {
 
         dataDictionaryService.deleteDataDictionary(dictId);
         return GraceJSONResult.ok();

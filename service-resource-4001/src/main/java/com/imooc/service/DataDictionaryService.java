@@ -4,6 +4,8 @@ import com.imooc.pojo.DataDictionary;
 import com.imooc.pojo.bo.DataDictionaryBO;
 import com.imooc.utils.PagedGridResult;
 
+import java.util.List;
+
 /**
  * <p>
  * 数据字典表 服务类
@@ -44,4 +46,11 @@ public interface DataDictionaryService {
      * @param dictId
      */
     public void deleteDataDictionary(String dictId);
+
+    /**
+     * 根据字典编码查询字典项
+     * @param typeCode
+     * @return
+     */
+    public List<DataDictionary> getDataBydCode(String typeCode);
 }
