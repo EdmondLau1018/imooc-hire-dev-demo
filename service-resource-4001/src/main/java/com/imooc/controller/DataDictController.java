@@ -7,6 +7,7 @@ import com.imooc.grace.result.ResponseStatusEnum;
 import com.imooc.pojo.DataDictionary;
 import com.imooc.pojo.bo.DataDictionaryBO;
 import com.imooc.service.DataDictionaryService;
+import com.imooc.utils.GsonUtils;
 import com.imooc.utils.PagedGridResult;
 import com.sun.org.apache.regexp.internal.RE;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +22,8 @@ import java.util.List;
 public class DataDictController extends BaseInfoProperties {
 
     private final DataDictionaryService dataDictionaryService;
+
+    private static final String DDKEY_PREFIX = DATA_DICTIONARY_LIST_TYPECODE + ":";
 
     public DataDictController(DataDictionaryService dataDictionaryService) {
         this.dataDictionaryService = dataDictionaryService;
@@ -40,10 +43,20 @@ public class DataDictController extends BaseInfoProperties {
         if (StringUtils.isBlank(typeCode))
             return GraceJSONResult.errorMsg("字典项不能为空~~~");
 
-        //  调用 service 查询对应的结果
-        List<DataDictionary> dictionaryList = dataDictionaryService.getDataBydCode(typeCode);
+        //  拼接 redis 查询的 key
+        String ddKey = DDKEY_PREFIX + typeCode;
+        //  从 redis 中查询缓存信息
+        String redisDDStr = redis.get(ddKey);
+        List<DataDictionary> redisDataDictionaryList = null;
+        if (StringUtils.isNotBlank(redisDDStr)) {
+            //  进行格式转换
+            redisDataDictionaryList = GsonUtils.stringToListAnother(redisDDStr,DataDictionary.class);
+        }
 
-        return GraceJSONResult.ok(dictionaryList);
+        //  调用 service 查询对应的结果
+//        List<DataDictionary> dictionaryList = dataDictionaryService.getDataBydCode(typeCode);
+
+        return GraceJSONResult.ok(redisDataDictionaryList);
     }
 
 
