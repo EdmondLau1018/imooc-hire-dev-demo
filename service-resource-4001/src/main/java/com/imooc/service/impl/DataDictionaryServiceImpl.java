@@ -94,4 +94,30 @@ public class DataDictionaryServiceImpl extends BaseInfoProperties implements Dat
         //  返回分页封装后的查询结果
         return setterPagedGrid(dataDictionaryList, page);
     }
+
+    /**
+     * 获取数据字典 id
+     *
+     * @param dictId
+     * @return
+     */
+    @Override
+    public DataDictionary getDataDictionary(String dictId) {
+
+        return dataDictionaryMapper.selectById(dictId);
+    }
+
+    /**
+     * 根据 id 删除数据字典接口实现
+     *
+     * @param dictId
+     */
+    @Transactional
+    @Override
+    public void deleteDataDictionary(String dictId) {
+
+        int rows = dataDictionaryMapper.deleteById(dictId);
+        if (rows == 0)
+            GraceException.displayException(ResponseStatusEnum.DATA_DICT_DELETE_ERROR);
+    }
 }

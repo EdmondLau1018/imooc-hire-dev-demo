@@ -1,5 +1,6 @@
 package com.imooc.service;
 
+import com.imooc.pojo.DataDictionary;
 import com.imooc.pojo.bo.DataDictionaryBO;
 import com.imooc.utils.PagedGridResult;
 
@@ -31,4 +32,16 @@ public interface DataDictionaryService {
      */
     public PagedGridResult getDictionaryListPaged(String typeName, String itemValue, Integer page, Integer pageSize);
 
+    /**
+     * 获取数据字典 id
+     * @param dictId
+     * @return
+     */
+    public DataDictionary getDataDictionary(String dictId);
+
+    /**
+     * 删除数据字典接口
+     * @param dictId
+     */
+    public void deleteDataDictionary(String dictId);
 }

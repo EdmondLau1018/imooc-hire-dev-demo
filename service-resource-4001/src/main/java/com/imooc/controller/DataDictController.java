@@ -1,10 +1,16 @@
 package com.imooc.controller;
 
 import com.imooc.base.BaseInfoProperties;
+import com.imooc.exceptions.GraceException;
 import com.imooc.grace.result.GraceJSONResult;
+import com.imooc.grace.result.ResponseStatusEnum;
+import com.imooc.pojo.DataDictionary;
 import com.imooc.pojo.bo.DataDictionaryBO;
 import com.imooc.service.DataDictionaryService;
 import com.imooc.utils.PagedGridResult;
+import com.sun.org.apache.regexp.internal.RE;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -50,5 +56,48 @@ public class DataDictController extends BaseInfoProperties {
                 .getDictionaryListPaged(typeName, itemValue, page, limit);
 
         return GraceJSONResult.ok(gridResult);
+    }
+
+    /**
+     * 根据数据字典 id 获取单个数据字典信息
+     * 在修改之前查询单个数据字典的信息
+     *
+     * @param dictId
+     * @return
+     */
+    @PostMapping("/item")
+    public GraceJSONResult item(String dictId) {
+
+        DataDictionary dataDictionary = dataDictionaryService.getDataDictionary(dictId);
+        return GraceJSONResult.ok(dataDictionary);
+    }
+
+    /**
+     * 数据字典修改接口
+     * @param dataDictionaryBO
+     * @return
+     */
+    @PostMapping("/modify")
+    public GraceJSONResult modify(@RequestBody @Valid DataDictionaryBO dataDictionaryBO) {
+
+
+        //  判断当前 BO 中是否存在 id 如果不存在 则直接抛出异常
+        if (StringUtils.isBlank(dataDictionaryBO.getId()))
+            return GraceJSONResult.errorMsg("数据字典修改发生错误，未获取到当前数据字典 id ~~");
+
+        dataDictionaryService.createOrUpdateDataDictionary(dataDictionaryBO);
+        return GraceJSONResult.ok();
+    }
+
+    /**
+     * 根据数据字典 id 删除数据字典
+     * @param dictId
+     * @return
+     */
+    @PostMapping("/delete")
+    public GraceJSONResult delete(String dictId){
+
+        dataDictionaryService.deleteDataDictionary(dictId);
+        return GraceJSONResult.ok();
     }
 }
