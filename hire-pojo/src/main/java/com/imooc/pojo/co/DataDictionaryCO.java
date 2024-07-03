@@ -1,5 +1,6 @@
 package com.imooc.pojo.co;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,7 +12,8 @@ import org.springframework.data.annotation.Id;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class DataDictionary {
+@TableName("data_dictionary")
+public class DataDictionaryCO {
 
     @Id
     private String id;
