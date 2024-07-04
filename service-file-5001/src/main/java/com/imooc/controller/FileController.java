@@ -185,11 +185,56 @@ public class FileController {
         //  拼接上传文件的路径
         filename = "company/bizLicense/" + filename;
 
-        String imageUrl= MinIOUtils.uploadFile(minIOConfig.getBucketName(),
+        String imageUrl = MinIOUtils.uploadFile(minIOConfig.getBucketName(),
                 filename,
                 file.getInputStream(),
                 true);
 
         return GraceJSONResult.ok(imageUrl);
+    }
+
+    /**
+     * 上传企业认证授权证书接口
+     *
+     * @param file
+     * @return
+     */
+    @PostMapping("/uploadAuthLetter")
+    public GraceJSONResult uploadAuthLetter(@RequestParam("file") MultipartFile file) throws Exception {
+
+        //  获取文件的原始名称
+        String filename = file.getOriginalFilename();
+        if (StringUtils.isBlank(filename)) {
+            return GraceJSONResult.errorCustom(ResponseStatusEnum.FILE_UPLOAD_FAILD);
+        }
+        //  拼接新的文件名称
+        filename = "/company/AuthLetter/" + dealFilename("", filename);
+
+        String imageUrl = MinIOUtils.uploadFile(minIOConfig.getBucketName(),
+                filename,
+                file.getInputStream(),
+                true);
+
+        return GraceJSONResult.ok(imageUrl);
+    }
+
+    /**
+     * 上传文件的文件名处理方法
+     * 通常情况下是唯一的 companyId + 文件名后缀
+     *
+     * @param companyId
+     * @param fileName
+     * @return
+     */
+    private String dealFilename(String companyId, String fileName) {
+
+        //  获取文件的后缀名称
+        String suffixName = fileName.substring(fileName.lastIndexOf("."));
+        //  获取文件的名称（不含后缀）
+        String fname = fileName.substring(0, fileName.lastIndexOf("."));
+        String uuid = UUID.randomUUID().toString();
+
+        fileName = fname + "-" + uuid + suffixName;
+        return fileName;
     }
 }
