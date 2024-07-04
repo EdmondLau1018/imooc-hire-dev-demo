@@ -3,6 +3,7 @@ package com.imooc.controller;
 
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.grace.result.GraceJSONResult;
+import com.imooc.pojo.Users;
 import com.imooc.pojo.bo.ModifyUserBO;
 import com.imooc.pojo.vo.UsersVO;
 import com.imooc.service.UsersService;
@@ -77,5 +78,29 @@ public class UserInfoController extends BaseInfoProperties {
             hrCounts = Long.valueOf(hrCountsStr);
         }
         return GraceJSONResult.ok(hrCounts);
+    }
+
+    /**
+     * 绑定 HR 用户和对应的 企业关系
+     * 远程调用接口
+     *
+     * @param hrUserId
+     * @param realname
+     * @param companyId
+     * @return
+     */
+    @PostMapping("/bindingHRToCompany")
+    public GraceJSONResult bindingHRToCompany(@RequestParam("hrUserId") String hrUserId,
+                                              @RequestParam("realname") String realname,
+                                              @RequestParam("companyId") String companyId) {
+
+        //  调用 service 更新用户信息
+        usersService.updateUserCompanyId(hrUserId, realname, companyId);
+
+        //  查询更新后的用户信息
+        Users hrUser = usersService.getById(hrUserId);
+
+        // 将获取用户的 手机号返回给 调用方
+        return GraceJSONResult.ok(hrUser.getMobile());
     }
 }

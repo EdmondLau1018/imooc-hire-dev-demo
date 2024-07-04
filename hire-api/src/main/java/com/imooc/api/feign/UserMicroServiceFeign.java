@@ -15,4 +15,17 @@ public interface UserMicroServiceFeign {
      */
     @PostMapping("/userinfo/getCountsByCompanyId")
     public GraceJSONResult getCountsByCompanyId(@RequestParam("companyId") String companyId);
-}
+
+    /**
+     * 远程调用接口：绑定 HR 和 企业关系 （更新用户表的 in_which_company_id 字段）
+     * @param hrUserId
+     * @param realname
+     * @param companyId
+     * @return
+     */
+    @PostMapping("/userinfo/bindingHRToCompany")
+    public GraceJSONResult bindingHRToCompany(@RequestParam("hrUserId") String hrUserId,
+                                              @RequestParam("realname") String realname,
+                                              @RequestParam("companyId") String companyId);
+
+    }

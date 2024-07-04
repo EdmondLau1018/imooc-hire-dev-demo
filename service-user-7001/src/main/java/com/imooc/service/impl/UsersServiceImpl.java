@@ -14,6 +14,7 @@ import com.imooc.utils.JWTUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -76,5 +77,31 @@ public class UsersServiceImpl extends BaseInfoProperties implements UsersService
                 .eq("hr_in_which_company_id", companyId));
 
         return counts;
+    }
+
+    /**
+     * 根据 hr 用户 id 更新对应企业的 id 实现方法
+     * 业务上：关联 hr 用户和企业关系
+     * @param hrUserId
+     * @param realname
+     * @param companyId
+     */
+    @Transactional
+    @Override
+    public void updateUserCompanyId(String hrUserId, String realname, String companyId) {
+
+        Users hrUser = new Users();
+        hrUser.setId(hrUserId);
+        hrUser.setRealName(realname);
+        hrUser.setHrInWhichCompanyId(companyId);
+
+        hrUser.setUpdatedTime(LocalDateTime.now());
+
+        usersMapper.updateById(hrUser);
+    }
+
+    @Override
+    public Users getById(String userId) {
+        return usersMapper.selectById(userId);
     }
 }

@@ -6,6 +6,7 @@ import com.imooc.base.BaseInfoProperties;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.pojo.Company;
 import com.imooc.pojo.bo.CreateCompanyBO;
+import com.imooc.pojo.bo.ReviewCompanyBO;
 import com.imooc.pojo.vo.CompanySimpleVO;
 import com.imooc.service.CompanyService;
 import com.imooc.utils.GsonUtils;
@@ -134,5 +135,25 @@ public class CompanyController extends BaseInfoProperties {
             // 缓存中的 企业信息不为空，解析企业信息 返回
             return new Gson().fromJson(companyJson, CompanySimpleVO.class);
         }
+    }
+
+    /**
+     * 绑定 hr 用户和企业关系的接口
+     *
+     * @param reviewCompanyBO
+     * @return
+     */
+    @PostMapping("/goReviewCompany")
+    public GraceJSONResult goReviewCompany(@RequestBody @Valid ReviewCompanyBO reviewCompanyBO) {
+
+        GraceJSONResult graceJSONResult = userMicroServiceFeign.bindingHRToCompany(
+                reviewCompanyBO.getHrUserId(),
+                reviewCompanyBO.getRealname(),
+                reviewCompanyBO.getCompanyId()
+        );
+
+        String mobile = graceJSONResult.getData().toString();
+
+        return GraceJSONResult.ok();
     }
 }
