@@ -54,7 +54,10 @@ public class DataDictController extends BaseInfoProperties {
         }
 
         //  调用 service 查询对应的结果
-//        List<DataDictionary> dictionaryList = dataDictionaryService.getDataBydCode(typeCode);
+        redisDataDictionaryList = dataDictionaryService.getDataBydCode(typeCode);
+
+        // 将 redis 查询的数据字典项结果设置到缓存中
+        redis.set(ddKey,GsonUtils.object2String(redisDataDictionaryList));
 
         return GraceJSONResult.ok(redisDataDictionaryList);
     }
