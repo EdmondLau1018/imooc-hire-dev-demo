@@ -1,27 +1,31 @@
 package com.imooc.controller;
 
+import com.google.gson.Gson;
+import com.imooc.api.feign.UserMicroServiceFeign;
+import com.imooc.base.BaseInfoProperties;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.pojo.Company;
 import com.imooc.pojo.bo.CreateCompanyBO;
 import com.imooc.pojo.vo.CompanySimpleVO;
 import com.imooc.service.CompanyService;
+import com.imooc.utils.GsonUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/company")
-public class CompanyController {
+public class CompanyController extends BaseInfoProperties {
 
     private final CompanyService companyService;
 
-    public CompanyController(CompanyService companyService) {
+    private final UserMicroServiceFeign userMicroServiceFeign;
+
+    public CompanyController(CompanyService companyService, UserMicroServiceFeign userMicroServiceFeign) {
         this.companyService = companyService;
+        this.userMicroServiceFeign = userMicroServiceFeign;
     }
 
     /**
@@ -48,8 +52,10 @@ public class CompanyController {
         return GraceJSONResult.ok(companySimpleVO);
     }
 
-    /**\
+    /**
+     * \
      * app 端 创建公司和审核失败后重置公司信息接口
+     *
      * @param createCompanyBO
      * @return
      */
@@ -69,5 +75,64 @@ public class CompanyController {
         }
 
         return GraceJSONResult.ok(dbCompanyId);
+    }
+
+    /**
+     * 查询企业基本信息
+     *
+     * @param companyId
+     * @param withHRCounts 是否需要查询 绑定的 HR 数量
+     * @return
+     */
+    @PostMapping("/getInfo")
+    public GraceJSONResult getInfo(String companyId, boolean withHRCounts) {
+
+        CompanySimpleVO company = getCompany(companyId);
+
+        //  如果需要查询 HR 绑定的数量 通过 feign 远程调用进行查询
+        if (withHRCounts) {
+
+            GraceJSONResult graceJSONResult = userMicroServiceFeign.getCountsByCompanyId(companyId);
+
+            Object data = graceJSONResult.getData();
+            Long hrCounts = Long.valueOf(data.toString());
+            company.setHrCounts(hrCounts);
+        }
+
+        return GraceJSONResult.ok(company);
+    }
+
+    /**
+     * 根据 companyId 获得企业的公用（基本信息）
+     *
+     * @param companyId
+     * @return
+     */
+    private CompanySimpleVO getCompany(String companyId) {
+
+        if (StringUtils.isBlank(companyId))
+            return null;
+
+        //  查询 redis 缓存 查询对应公司的基本信息
+        String companyJson = redis.get(REDIS_COMPANY_BASE_INFO + ":" + companyId);
+        if (StringUtils.isBlank(companyJson)) {
+            //  当前企业信息在缓存中为空 查询数据库
+            Company company = companyService.getById(companyId);
+            //  如果发现请求携带的 company id 不存在 返回空对象
+            if (company == null) return null;
+
+            //  将查询出的 company 基本信息设置到缓存中
+            CompanySimpleVO companySimpleVO = new CompanySimpleVO();
+            BeanUtils.copyProperties(company, companySimpleVO);
+
+            redis.set(REDIS_COMPANY_BASE_INFO + ":" + companyId,
+                    GsonUtils.object2String(companySimpleVO),
+                    5 * 60 * 60);
+
+            return companySimpleVO;
+        } else {
+            // 缓存中的 企业信息不为空，解析企业信息 返回
+            return new Gson().fromJson(companyJson, CompanySimpleVO.class);
+        }
     }
 }

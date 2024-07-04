@@ -6,6 +6,11 @@ spring:
   cloud:
     nacos:
       server-addr: 192.168.32.100:8848
+  redis:
+    host: 192.168.32.100
+    port: 6370
+    database: 0
+    password: 1018
   #  数据源配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver

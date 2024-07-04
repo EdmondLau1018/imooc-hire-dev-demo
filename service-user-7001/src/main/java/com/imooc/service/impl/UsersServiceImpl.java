@@ -1,5 +1,6 @@
 package com.imooc.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.Gson;
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.exceptions.GraceException;
@@ -60,5 +61,20 @@ public class UsersServiceImpl extends BaseInfoProperties implements UsersService
         BeanUtils.copyProperties(users, usersVO);
         usersVO.setUserToken(uToken);
         return usersVO;
+    }
+
+    /**
+     * 根据公司  id 获取当前公司 HR 绑定的数量
+     *
+     * @param companyId
+     * @return
+     */
+    @Override
+    public Long getCountsByCompanyId(String companyId) {
+
+        Long counts = usersMapper.selectCount(new QueryWrapper<Users>()
+                .eq("hr_in_which_company_id", companyId));
+
+        return counts;
     }
 }

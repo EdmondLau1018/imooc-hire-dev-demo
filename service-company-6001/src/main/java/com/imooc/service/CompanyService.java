@@ -34,4 +34,11 @@ public interface CompanyService{
      * @return
      */
     public String resetCompanyReview(CreateCompanyBO createCompanyBO);
+
+    /**
+     * 根据公司 id 查询企业信息
+     * @param companyId
+     * @return
+     */
+    public Company getById(String companyId);
 }

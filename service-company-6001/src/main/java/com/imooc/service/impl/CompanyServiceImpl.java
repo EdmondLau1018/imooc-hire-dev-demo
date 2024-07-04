@@ -86,4 +86,14 @@ public class CompanyServiceImpl implements CompanyService {
 
         return createCompanyBO.getCompanyId();
     }
+
+    /**
+     * 根据企业 id 查询 企业信息 实现方法
+     * @param companyId
+     * @return
+     */
+    @Override
+    public Company getById(String companyId) {
+        return companyMapper.selectById(companyId);
+    }
 }
