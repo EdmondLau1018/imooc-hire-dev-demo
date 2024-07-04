@@ -2,6 +2,7 @@ package com.imooc.service;
 
 import com.imooc.pojo.Company;
 import com.imooc.pojo.bo.CreateCompanyBO;
+import com.imooc.pojo.bo.ReviewCompanyBO;
 
 /**
  * <p>
@@ -41,4 +42,10 @@ public interface CompanyService{
      * @return
      */
     public Company getById(String companyId);
+
+    /**
+     * 更新待审核的公司信息
+     * @param reviewCompanyBO
+     */
+    public void commitReviewCompanyInfo(ReviewCompanyBO reviewCompanyBO);
 }

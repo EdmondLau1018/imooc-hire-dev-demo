@@ -22,6 +22,13 @@
             <artifactId>hire-api</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+
+        <!-- 剔除 Seata 整合过程中的 bug 重新在对应的服务中引入 1.5.2 版本的依赖 -->
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-spring-boot-starter</artifactId>
+            <version>1.5.2</version>
+        </dependency>
     </dependencies>
 
 </project>

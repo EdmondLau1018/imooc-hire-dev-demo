@@ -6,11 +6,13 @@ import com.imooc.enums.YesOrNo;
 import com.imooc.mapper.CompanyMapper;
 import com.imooc.pojo.Company;
 import com.imooc.pojo.bo.CreateCompanyBO;
+import com.imooc.pojo.bo.ReviewCompanyBO;
 import com.imooc.service.CompanyService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -95,5 +97,29 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     public Company getById(String companyId) {
         return companyMapper.selectById(companyId);
+    }
+
+    /**
+     * 更新待审核的公司信息实现方法
+     * @param reviewCompanyBO
+     */
+    @Transactional
+    @Override
+    public void commitReviewCompanyInfo(ReviewCompanyBO reviewCompanyBO) {
+
+        Company pendingCompany = new Company();
+        pendingCompany.setId(reviewCompanyBO.getCompanyId());
+        pendingCompany.setReviewStatus(reviewCompanyBO.getReviewStatus());
+        //  如果上次的审核信息未通过 （重置审核信息）
+        pendingCompany.setReviewReplay("");
+        pendingCompany.setAuthLetter(reviewCompanyBO.getAuthLetter());
+
+        pendingCompany.setCommitUserId(reviewCompanyBO.getHrUserId());
+        pendingCompany.setCommitUserMobile(reviewCompanyBO.getHrMobile());
+        pendingCompany.setCommitDate(LocalDate.now());
+
+        pendingCompany.setUpdatedTime(LocalDateTime.now());
+
+        companyMapper.updateById(pendingCompany);
     }
 }

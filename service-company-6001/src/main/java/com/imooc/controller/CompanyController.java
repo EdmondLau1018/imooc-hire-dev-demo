@@ -154,6 +154,10 @@ public class CompanyController extends BaseInfoProperties {
 
         String mobile = graceJSONResult.getData().toString();
 
+        //  保存审核信息 更改公司信息的审核状态
+        reviewCompanyBO.setHrMobile(mobile);
+        companyService.commitReviewCompanyInfo(reviewCompanyBO);
+
         return GraceJSONResult.ok();
     }
 }

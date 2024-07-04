@@ -47,3 +47,24 @@ mybatis-plus:
       id-type: assign_id
       # 修改更新策略，解决的问题是前端传递的信息为空字符串时 不更新数据库中原有的数据
       update-strategy: not_empty
+
+seata:
+  enabled: true
+  # 事务组的名称 这个是可以自定义的
+  tx-service-group: imooc_tx_group
+  service:
+    vgroup-mapping:
+      imooc_tx_group: SEATA_GROUP
+    grouplist:
+      # 配置 seata 所在事务组服务端 ip 地址
+      SEATA_GROUP: 192.168.32.100:8091
+  config:
+    nacos:
+      server-addr: 192.168.32.100:8848
+      username: nacos
+      password: nacos
+  registry:
+    nacos:
+      server-addr: 192.168.32.100:8848
+      username: nacos
+      password: nacos
