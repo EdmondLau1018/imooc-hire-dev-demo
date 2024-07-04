@@ -157,7 +157,7 @@ public class FileController {
         }
 
         //  拼接 向 minio 中上传的文件路径
-        filename = "company/logo/" + filename;
+        filename = "company/logo/" + dealFilename("", filename);
 
         //   向 minio 服务器中 上传文件返回对应的 url
         String imageUrl = MinIOUtils.uploadFile(minIOConfig.getBucketName(),
@@ -183,7 +183,7 @@ public class FileController {
             return GraceJSONResult.errorCustom(ResponseStatusEnum.FILE_UPLOAD_FAILD);
 
         //  拼接上传文件的路径
-        filename = "company/bizLicense/" + filename;
+        filename = "company/bizLicense/" + dealFilename("", filename);
 
         String imageUrl = MinIOUtils.uploadFile(minIOConfig.getBucketName(),
                 filename,
