@@ -1,6 +1,7 @@
 package com.imooc.service;
 
 import com.imooc.pojo.Company;
+import com.imooc.pojo.bo.CreateCompanyBO;
 
 /**
  * <p>
@@ -20,4 +21,17 @@ public interface CompanyService{
      */
     public Company getByFullName(String fullName);
 
+    /**
+     * 新建公司（公司未创建） 返回创建后的公司 id
+     * @param createCompanyBO
+     * @return
+     */
+    public String createNewCompany(CreateCompanyBO createCompanyBO);
+
+    /**
+     * 更新公司信息
+     * @param createCompanyBO
+     * @return
+     */
+    public String resetCompanyReview(CreateCompanyBO createCompanyBO);
 }
