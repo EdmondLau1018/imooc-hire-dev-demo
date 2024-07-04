@@ -35,7 +35,7 @@ public class UserInfoController extends BaseInfoProperties {
     public GraceJSONResult modify(@RequestBody ModifyUserBO modifyUserBO) {
         usersService.modifyUserInfo(modifyUserBO);
 
-        UsersVO userInfo = getUserInfo(modifyUserBO.getUserId());
+        UsersVO userInfo = getUserInfo(modifyUserBO.getUserId(), true);
         return GraceJSONResult.ok(userInfo);
     }
 
@@ -45,7 +45,7 @@ public class UserInfoController extends BaseInfoProperties {
      * @param userId
      * @return
      */
-    public UsersVO getUserInfo(String userId) {
+    public UsersVO getUserInfo(String userId, boolean needJWT) {
         return usersService.getUserinfo(userId);
     }
 
@@ -102,5 +102,30 @@ public class UserInfoController extends BaseInfoProperties {
 
         // 将获取用户的 手机号返回给 调用方
         return GraceJSONResult.ok(hrUser.getMobile());
+    }
+
+    /**
+     * app 端刷新用户信息
+     *
+     * @param userId
+     * @return
+     */
+    @PostMapping("/freshUserInfo")
+    public GraceJSONResult freshUserInfo(String userId) {
+
+        UsersVO usersVO = getUserInfo(userId, true);
+        return GraceJSONResult.ok(usersVO);
+    }
+
+    /**
+     * 服务远程调用接口，根据用户id 获取单个用户的信息
+     * @param userId
+     * @return
+     */
+    @PostMapping("/get")
+    public GraceJSONResult get(@RequestParam("userId") String userId) {
+
+        UsersVO usersVO = getUserInfo(userId, false);
+        return GraceJSONResult.ok(usersVO);
     }
 }

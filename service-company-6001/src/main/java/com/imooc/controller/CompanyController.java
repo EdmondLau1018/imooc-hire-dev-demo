@@ -8,8 +8,10 @@ import com.imooc.pojo.Company;
 import com.imooc.pojo.bo.CreateCompanyBO;
 import com.imooc.pojo.bo.ReviewCompanyBO;
 import com.imooc.pojo.vo.CompanySimpleVO;
+import com.imooc.pojo.vo.UsersVO;
 import com.imooc.service.CompanyService;
 import com.imooc.utils.GsonUtils;
+import com.imooc.utils.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
@@ -159,5 +161,39 @@ public class CompanyController extends BaseInfoProperties {
         companyService.commitReviewCompanyInfo(reviewCompanyBO);
 
         return GraceJSONResult.ok();
+    }
+
+    /**
+     * 重新获取 hr 用户信息
+     * 查询当前重新获取的用户对应的企业信息
+     * @param hrUserId
+     * @return
+     */
+    @PostMapping("/information")
+    public GraceJSONResult information(String hrUserId) {
+
+        UsersVO hrUserInfoVO = getHRUserInfoVO(hrUserId);
+
+        CompanySimpleVO company = getCompany(hrUserInfoVO.getHrInWhichCompanyId());
+
+        return GraceJSONResult.ok(company);
+    }
+
+    /**
+     * 获取 hr 用户信息（远程接口调用）
+     *
+     * @param hrUserId
+     * @return
+     */
+    public UsersVO getHRUserInfoVO(String hrUserId) {
+
+        GraceJSONResult graceJSONResult = userMicroServiceFeign.get(hrUserId);
+
+        //  微服务远程调用结果格式类型转换
+        Object data = graceJSONResult.getData();
+        String jsonString = JsonUtils.objectToJson(data);
+        UsersVO hrUser = JsonUtils.jsonToPojo(jsonString, UsersVO.class);
+
+        return hrUser;
     }
 }

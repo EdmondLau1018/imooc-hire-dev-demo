@@ -10,6 +10,7 @@ public interface UserMicroServiceFeign {
 
     /**
      * 远程调用接口：根据 企业id获取 企业绑定的 HR 数量
+     *
      * @param companyId
      * @return
      */
@@ -18,6 +19,7 @@ public interface UserMicroServiceFeign {
 
     /**
      * 远程调用接口：绑定 HR 和 企业关系 （更新用户表的 in_which_company_id 字段）
+     *
      * @param hrUserId
      * @param realname
      * @param companyId
@@ -28,4 +30,13 @@ public interface UserMicroServiceFeign {
                                               @RequestParam("realname") String realname,
                                               @RequestParam("companyId") String companyId);
 
-    }
+    /**
+     * 远程调用接口 根据 userId 查询当前用户信息
+     *
+     * @param userId
+     * @return
+     */
+    @PostMapping("/userinfo/get")
+    public GraceJSONResult get(@RequestParam("userId") String userId);
+
+}
