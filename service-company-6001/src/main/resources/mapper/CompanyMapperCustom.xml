@@ -42,7 +42,6 @@
         <if test="paramMap.commitDateEnd != null">
             and c.commit_date &lt;= #{paramMap.commitDateEnd}
         </if>
-        order by commit_date desc;
     </select>
 
     <!-- 根据 companyId 查单个公司的详细信息 -->
