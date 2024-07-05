@@ -5,10 +5,13 @@ import com.imooc.api.feign.UserMicroServiceFeign;
 import com.imooc.api.interceptor.JWTCurrentUserInterceptor;
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.enums.CompanyReviewStatus;
+import com.imooc.exceptions.GraceException;
 import com.imooc.grace.result.GraceJSONResult;
+import com.imooc.grace.result.ResponseStatusEnum;
 import com.imooc.pojo.Company;
 import com.imooc.pojo.Users;
 import com.imooc.pojo.bo.CreateCompanyBO;
+import com.imooc.pojo.bo.ModifyCompanyInfoBO;
 import com.imooc.pojo.bo.QueryCompanyBO;
 import com.imooc.pojo.bo.ReviewCompanyBO;
 import com.imooc.pojo.vo.CompanyInfoVO;
@@ -204,6 +207,58 @@ public class CompanyController extends BaseInfoProperties {
 
         return hrUser;
     }
+
+    /**
+     * app 端根据 企业 id 获取企业详情信息
+     * 企业详细信息修改前置
+     *
+     * @return
+     */
+    @PostMapping("/moreInfo")
+    public GraceJSONResult moreInfo() {
+
+        //  获取当前用户
+        Users currentUser = JWTCurrentUserInterceptor.currentUser.get();
+        CompanyInfoVO companyMoreInfo = getCompanyMoreInfo(currentUser.getHrInWhichCompanyId());
+
+        return GraceJSONResult.ok(companyMoreInfo);
+    }
+
+    /**
+     * app 端修改企业详细信息 接口
+     * @param modifyCompanyInfoBO
+     * @return
+     */
+    @PostMapping("/modify")
+    public GraceJSONResult modify(@RequestBody ModifyCompanyInfoBO modifyCompanyInfoBO) {
+
+        checkUser(modifyCompanyInfoBO.getCurrentUserId(), modifyCompanyInfoBO.getCompanyId());
+
+        //  修改权限校验无误 执行修改流程
+        companyService.modifyCompanyInfo(modifyCompanyInfoBO);
+
+        return GraceJSONResult.ok();
+    }
+
+    /**
+     * app 端修改企业信息校验，
+     * 判断当前发送请求的用户是否有权限 修改 企业信息
+     *
+     * @param currentUserId
+     * @param companyId
+     */
+    public void checkUser(String currentUserId, String companyId) {
+
+        if (StringUtils.isBlank(currentUserId))
+            GraceException.displayException(ResponseStatusEnum.COMPANY_INFO_UPDATED_ERROR);
+
+        // 根据当前登录的用户id 获得 hr 用户详细信息
+        UsersVO hrUserInfo = getHRUserInfoVO(currentUserId);
+        //  判断当前 hr 用户是否 绑定修改信息的企业
+        if (hrUserInfo == null || !hrUserInfo.getHrInWhichCompanyId().equalsIgnoreCase(companyId))
+            GraceException.displayException(ResponseStatusEnum.COMPANY_INFO_UPDATED_NO_AUTH_ERROR);
+    }
+
     /**************************************************业务分割：SAAS端*************************************************/
 
     /**
@@ -224,6 +279,7 @@ public class CompanyController extends BaseInfoProperties {
 
     /**
      * 根据当前用户 所在 公司  id 查询公司详细信息
+     *
      * @return
      */
     @PostMapping("/saas/moreInfo")

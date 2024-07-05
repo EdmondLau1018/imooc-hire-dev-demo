@@ -2,6 +2,7 @@ package com.imooc.service;
 
 import com.imooc.pojo.Company;
 import com.imooc.pojo.bo.CreateCompanyBO;
+import com.imooc.pojo.bo.ModifyCompanyInfoBO;
 import com.imooc.pojo.bo.QueryCompanyBO;
 import com.imooc.pojo.bo.ReviewCompanyBO;
 import com.imooc.pojo.vo.CompanyInfoVO;
@@ -79,4 +80,10 @@ public interface CompanyService {
      * @param reviewCompanyBO
      */
     public void updateReviewInfo(ReviewCompanyBO reviewCompanyBO);
+
+    /**
+     * app 端修改 企业信息接口
+     * @param modifyCompanyInfoBO
+     */
+    public void modifyCompanyInfo(ModifyCompanyInfoBO modifyCompanyInfoBO);
 }

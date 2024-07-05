@@ -5,15 +5,19 @@ import com.github.pagehelper.PageHelper;
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.enums.CompanyReviewStatus;
 import com.imooc.enums.YesOrNo;
+import com.imooc.exceptions.GraceException;
+import com.imooc.grace.result.ResponseStatusEnum;
 import com.imooc.mapper.CompanyMapper;
 import com.imooc.mapper.CompanyMapperCustom;
 import com.imooc.pojo.Company;
 import com.imooc.pojo.bo.CreateCompanyBO;
+import com.imooc.pojo.bo.ModifyCompanyInfoBO;
 import com.imooc.pojo.bo.QueryCompanyBO;
 import com.imooc.pojo.bo.ReviewCompanyBO;
 import com.imooc.pojo.vo.CompanyInfoVO;
 import com.imooc.service.CompanyService;
 import com.imooc.utils.PagedGridResult;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -174,6 +178,7 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
     /**
      * 更新审核后的企业信息
      * 更新的字段是审核的状态和审核信息
+     *
      * @param reviewCompanyBO
      */
     @Transactional
@@ -187,5 +192,33 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
         pendingCompany.setUpdatedTime(LocalDateTime.now());
 
         companyMapper.updateById(pendingCompany);
+    }
+
+    /**
+     * app 端修改企业信息接口实现
+     *
+     * @param modifyCompanyInfoBO
+     */
+    @Override
+    public void modifyCompanyInfo(ModifyCompanyInfoBO modifyCompanyInfoBO) {
+
+        //  校验 企业 id (主键是否为空 )
+        String companyId = modifyCompanyInfoBO.getCompanyId();
+        if (StringUtils.isBlank(companyId))
+            GraceException.displayException(ResponseStatusEnum.COMPANY_INFO_UPDATED_ERROR);
+
+        //  对象信息拷贝
+        Company pendingCompany = new Company();
+        pendingCompany.setId(modifyCompanyInfoBO.getCompanyId());
+        pendingCompany.setUpdatedTime(LocalDateTime.now());
+
+        BeanUtils.copyProperties(modifyCompanyInfoBO, pendingCompany);
+
+        //  持久层更新对象信息
+        companyMapper.updateById(pendingCompany);
+
+        //  修改企业信息之后删除缓存
+        redis.del(REDIS_COMPANY_BASE_INFO + ":" + companyId);
+        redis.del(REDIS_COMPANY_MORE_INFO + ":" + companyId);
     }
 }
