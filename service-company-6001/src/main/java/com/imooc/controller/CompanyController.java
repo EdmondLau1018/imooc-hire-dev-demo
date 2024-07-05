@@ -208,10 +208,11 @@ public class CompanyController extends BaseInfoProperties {
 
     /**
      * saas 管理端 主页获取企业信息
+     *
      * @return
      */
     @PostMapping("/info")
-    public GraceJSONResult info(){
+    public GraceJSONResult info() {
 
         //  获取当前登录的普通用户
         Users currentUser = JWTCurrentUserInterceptor.currentUser.get();
@@ -221,6 +222,50 @@ public class CompanyController extends BaseInfoProperties {
         return GraceJSONResult.ok(company);
     }
 
+    /**
+     * 根据当前用户 所在 公司  id 查询公司详细信息
+     * @return
+     */
+    @PostMapping("/saas/moreInfo")
+    public GraceJSONResult moreInfoSaas() {
+
+        //  获取当前用户
+        Users currentUser = JWTCurrentUserInterceptor.currentUser.get();
+        CompanyInfoVO companyMoreInfo = getCompanyMoreInfo(currentUser.getHrInWhichCompanyId());
+
+        return GraceJSONResult.ok(companyMoreInfo);
+    }
+
+    /**
+     * saas 管理端 根据企业 id 从缓存和 DB 中查询对应的企业信息（单个）
+     *
+     * @param companyId
+     * @return
+     */
+    public CompanyInfoVO getCompanyMoreInfo(String companyId) {
+
+        if (StringUtils.isBlank(companyId))
+            return null;
+
+        //  从 redis 缓存中查询 公司的详细信息
+        String companyJson = redis.get(REDIS_COMPANY_MORE_INFO + ":" + companyId);
+        //  如果结果为空 查询数据库
+        if (StringUtils.isBlank(companyJson)) {
+
+            Company company = companyService.getById(companyId);
+            CompanyInfoVO companyInfoVO = new CompanyInfoVO();
+            BeanUtils.copyProperties(company, companyInfoVO);
+            companyInfoVO.setCompanyId(companyId);
+
+            //  将查询的结果设置到 缓存中
+            redis.set(REDIS_COMPANY_MORE_INFO + ":" + companyId, new Gson().toJson(companyInfoVO), 3 * 60);
+
+            return companyInfoVO;
+        } else {
+            //  缓存中存在当前企业的缓存  直接转换成对象并返回
+            return new Gson().fromJson(companyJson, CompanyInfoVO.class);
+        }
+    }
 
     /**************************************************业务分割：运营管理端*************************************************/
 
