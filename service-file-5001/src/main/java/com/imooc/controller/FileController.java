@@ -14,6 +14,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @RequestMapping("/file")
@@ -216,6 +218,41 @@ public class FileController {
                 true);
 
         return GraceJSONResult.ok(imageUrl);
+    }
+
+
+    /**
+     * 上传公司相册 ，向 minio 中存储 文件数组
+     *
+     * @param files
+     * @param companyId
+     * @return
+     */
+    @PostMapping("/uploadPhoto")
+    public GraceJSONResult uploadPhoto(@RequestParam("files") MultipartFile[] files,
+                                       String companyId) throws Exception {
+
+        //  用于保存 文件上传到 minio 之后返回的资源访问 url
+        List<String> fileList = new ArrayList<>();
+
+        //  遍历文件数组，进行文件上传
+        for (MultipartFile file : files) {
+            //  文件名校验
+            String filename = file.getOriginalFilename();
+            if (StringUtils.isBlank(filename))
+                return GraceJSONResult.errorCustom(ResponseStatusEnum.FILE_UPLOAD_NULL_ERROR);
+
+            //  拼接文件上传路径
+            filename = "/company/" + companyId + "/photo/" + dealFilename(companyId, filename);
+            //  执行文件上传流程
+            String imageurl = MinIOUtils.uploadFile(minIOConfig.getBucketName(),
+                    filename,
+                    file.getInputStream(),
+                    true);
+            fileList.add(imageurl);
+        }
+        return GraceJSONResult.ok(fileList);
+
     }
 
     /**

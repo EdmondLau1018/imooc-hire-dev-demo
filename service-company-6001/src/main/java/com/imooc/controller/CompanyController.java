@@ -237,6 +237,12 @@ public class CompanyController extends BaseInfoProperties {
         //  修改权限校验无误 执行修改流程
         companyService.modifyCompanyInfo(modifyCompanyInfoBO);
 
+        //  新增 修改企业 相册的功能
+        //  如果前端传递的参数 相册属性非空 那么调用 service 完成相册更新
+        if (StringUtils.isNotBlank(modifyCompanyInfoBO.getPhotos())) {
+            companyService.savePhotos(modifyCompanyInfoBO);
+        }
+
         return GraceJSONResult.ok();
     }
 

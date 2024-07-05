@@ -1,6 +1,7 @@
 package com.imooc.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.github.pagehelper.PageHelper;
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.enums.CompanyReviewStatus;
@@ -9,7 +10,9 @@ import com.imooc.exceptions.GraceException;
 import com.imooc.grace.result.ResponseStatusEnum;
 import com.imooc.mapper.CompanyMapper;
 import com.imooc.mapper.CompanyMapperCustom;
+import com.imooc.mapper.CompanyPhotoMapper;
 import com.imooc.pojo.Company;
+import com.imooc.pojo.CompanyPhoto;
 import com.imooc.pojo.bo.CreateCompanyBO;
 import com.imooc.pojo.bo.ModifyCompanyInfoBO;
 import com.imooc.pojo.bo.QueryCompanyBO;
@@ -42,9 +45,12 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
 
     private final CompanyMapperCustom companyMapperCustom;
 
-    public CompanyServiceImpl(CompanyMapper companyMapper, CompanyMapperCustom companyMapperCustom) {
+    private final CompanyPhotoMapper companyPhotoMapper;
+
+    public CompanyServiceImpl(CompanyMapper companyMapper, CompanyMapperCustom companyMapperCustom, CompanyPhotoMapper companyPhotoMapper) {
         this.companyMapper = companyMapper;
         this.companyMapperCustom = companyMapperCustom;
+        this.companyPhotoMapper = companyPhotoMapper;
     }
 
     @Override
@@ -220,5 +226,48 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
         //  修改企业信息之后删除缓存
         redis.del(REDIS_COMPANY_BASE_INFO + ":" + companyId);
         redis.del(REDIS_COMPANY_MORE_INFO + ":" + companyId);
+    }
+
+    /**
+     * 保存 企业相册实现方法
+     *
+     * @param companyInfoBO
+     */
+    @Transactional
+    @Override
+    public void savePhotos(ModifyCompanyInfoBO companyInfoBO) {
+
+        CompanyPhoto companyPhoto = new CompanyPhoto();
+        companyPhoto.setCompanyId(companyInfoBO.getCompanyId());
+        companyPhoto.setPhotos(companyInfoBO.getPhotos());
+
+        //  获取当前企业是否存在相册记录，如果存在就修改 ，不存在则新增
+        CompanyPhoto photos = getPhotos(companyInfoBO.getCompanyId());
+        if (photos == null) {
+            //  在 企业相册表中不存在相关记录 ，新增流程
+            companyPhotoMapper.insert(companyPhoto);
+        } else {
+            //  存在当前企业的 相册记录 执行修改流程
+            companyPhotoMapper.update(companyPhoto,
+                    new UpdateWrapper<CompanyPhoto>()
+                            .eq("company_id", companyInfoBO.getCompanyId())
+            );
+        }
+    }
+
+    /**
+     * 根据 企业 id 查询 企业相册表
+     * 当前企业是否存在 相册记录
+     *
+     * @param companyId
+     * @return
+     */
+    public CompanyPhoto getPhotos(String companyId) {
+
+        //  根据 企业id 查询企业相册是否存在记录
+        CompanyPhoto companyPhoto = companyPhotoMapper.selectOne(new QueryWrapper<CompanyPhoto>()
+                .eq("company_id", companyId));
+
+        return companyPhoto;
     }
 }

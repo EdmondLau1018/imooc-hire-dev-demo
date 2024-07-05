@@ -86,4 +86,11 @@ public interface CompanyService {
      * @param modifyCompanyInfoBO
      */
     public void modifyCompanyInfo(ModifyCompanyInfoBO modifyCompanyInfoBO);
+
+    /**
+     * 修改 企业的相册信息
+     * 操作的是企业相册关联表
+     * @param companyInfoBO
+     */
+    public void savePhotos(ModifyCompanyInfoBO companyInfoBO);
 }
