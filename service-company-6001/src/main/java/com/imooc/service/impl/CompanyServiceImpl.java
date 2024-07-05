@@ -1,19 +1,27 @@
 package com.imooc.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.github.pagehelper.PageHelper;
+import com.imooc.base.BaseInfoProperties;
 import com.imooc.enums.CompanyReviewStatus;
 import com.imooc.enums.YesOrNo;
 import com.imooc.mapper.CompanyMapper;
+import com.imooc.mapper.CompanyMapperCustom;
 import com.imooc.pojo.Company;
 import com.imooc.pojo.bo.CreateCompanyBO;
+import com.imooc.pojo.bo.QueryCompanyBO;
 import com.imooc.pojo.bo.ReviewCompanyBO;
+import com.imooc.pojo.vo.CompanyInfoVO;
 import com.imooc.service.CompanyService;
+import com.imooc.utils.PagedGridResult;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * <p>
@@ -24,12 +32,15 @@ import java.time.LocalDateTime;
  * @since 2024-07-01
  */
 @Service
-public class CompanyServiceImpl implements CompanyService {
+public class CompanyServiceImpl extends BaseInfoProperties implements CompanyService {
 
     private final CompanyMapper companyMapper;
 
-    public CompanyServiceImpl(CompanyMapper companyMapper) {
+    private final CompanyMapperCustom companyMapperCustom;
+
+    public CompanyServiceImpl(CompanyMapper companyMapper, CompanyMapperCustom companyMapperCustom) {
         this.companyMapper = companyMapper;
+        this.companyMapperCustom = companyMapperCustom;
     }
 
     @Override
@@ -91,6 +102,7 @@ public class CompanyServiceImpl implements CompanyService {
 
     /**
      * 根据企业 id 查询 企业信息 实现方法
+     *
      * @param companyId
      * @return
      */
@@ -101,6 +113,7 @@ public class CompanyServiceImpl implements CompanyService {
 
     /**
      * 更新待审核的公司信息实现方法
+     *
      * @param reviewCompanyBO
      */
     @Transactional
@@ -121,5 +134,23 @@ public class CompanyServiceImpl implements CompanyService {
         pendingCompany.setUpdatedTime(LocalDateTime.now());
 
         companyMapper.updateById(pendingCompany);
+    }
+
+    @Override
+    public PagedGridResult queryCompanyListPaged(QueryCompanyBO queryCompanyBO, Integer page, Integer pageSize) {
+
+        PageHelper.startPage(page, pageSize);
+
+        //  构建查询参数
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("companyName", queryCompanyBO.getCompanyName());
+        map.put("commitUser", queryCompanyBO.getCommitUser());
+        map.put("reviewStatus", queryCompanyBO.getReviewStatus());
+        map.put("commitDateStart", queryCompanyBO.getCommitDateStart());
+        map.put("commitDateEnd", queryCompanyBO.getCommitDateEnd());
+
+        List<CompanyInfoVO> companyList = companyMapperCustom.queryCompanyList(map);
+
+        return setterPagedGrid(companyList, page);
     }
 }

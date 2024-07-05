@@ -2,7 +2,9 @@ package com.imooc.service;
 
 import com.imooc.pojo.Company;
 import com.imooc.pojo.bo.CreateCompanyBO;
+import com.imooc.pojo.bo.QueryCompanyBO;
 import com.imooc.pojo.bo.ReviewCompanyBO;
+import com.imooc.utils.PagedGridResult;
 
 /**
  * <p>
@@ -12,11 +14,12 @@ import com.imooc.pojo.bo.ReviewCompanyBO;
  * @author Sharn
  * @since 2024-07-01
  */
-public interface CompanyService{
+public interface CompanyService {
 
     /**
      * 根据公司全名获取公司的具体数据
      * 条件查询 eq
+     *
      * @param fullName
      * @return
      */
@@ -24,6 +27,7 @@ public interface CompanyService{
 
     /**
      * 新建公司（公司未创建） 返回创建后的公司 id
+     *
      * @param createCompanyBO
      * @return
      */
@@ -31,6 +35,7 @@ public interface CompanyService{
 
     /**
      * 更新公司信息
+     *
      * @param createCompanyBO
      * @return
      */
@@ -38,6 +43,7 @@ public interface CompanyService{
 
     /**
      * 根据公司 id 查询企业信息
+     *
      * @param companyId
      * @return
      */
@@ -45,7 +51,18 @@ public interface CompanyService{
 
     /**
      * 更新待审核的公司信息
+     *
      * @param reviewCompanyBO
      */
     public void commitReviewCompanyInfo(ReviewCompanyBO reviewCompanyBO);
+
+    /**
+     * 运营平台 查询企业提交审核列表
+     * 分页查询
+     * @param queryCompanyBO
+     * @param page
+     * @param pageSize
+     * @return
+     */
+    public PagedGridResult queryCompanyListPaged(QueryCompanyBO queryCompanyBO, Integer page, Integer pageSize);
 }

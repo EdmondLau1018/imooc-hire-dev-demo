@@ -6,12 +6,14 @@ import com.imooc.base.BaseInfoProperties;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.pojo.Company;
 import com.imooc.pojo.bo.CreateCompanyBO;
+import com.imooc.pojo.bo.QueryCompanyBO;
 import com.imooc.pojo.bo.ReviewCompanyBO;
 import com.imooc.pojo.vo.CompanySimpleVO;
 import com.imooc.pojo.vo.UsersVO;
 import com.imooc.service.CompanyService;
 import com.imooc.utils.GsonUtils;
 import com.imooc.utils.JsonUtils;
+import com.imooc.utils.PagedGridResult;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
@@ -166,6 +168,7 @@ public class CompanyController extends BaseInfoProperties {
     /**
      * 重新获取 hr 用户信息
      * 查询当前重新获取的用户对应的企业信息
+     *
      * @param hrUserId
      * @return
      */
@@ -195,5 +198,30 @@ public class CompanyController extends BaseInfoProperties {
         UsersVO hrUser = JsonUtils.jsonToPojo(jsonString, UsersVO.class);
 
         return hrUser;
+    }
+
+    /**************************************************业务分割：运营管理端*************************************************/
+
+    /**
+     * 运营管理端公司列表分页查询
+     * @param queryCompanyBO
+     * @param page
+     * @param limit
+     * @return
+     */
+    @PostMapping("/admin/getCompanyList")
+    public GraceJSONResult getCompanyList(@RequestBody @Valid QueryCompanyBO queryCompanyBO,
+                                          Integer page,
+                                          Integer limit) {
+
+        if (page == null) page = 1;
+        if (limit == null) limit = 10;
+
+        //  获得运营端公司列表的分类查询结果
+        PagedGridResult gridResult = companyService.queryCompanyListPaged(queryCompanyBO,
+                page,
+                limit);
+
+        return GraceJSONResult.ok(gridResult);
     }
 }

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.imooc.mapper.CompanyMapperCustom">
+
+
+    <select id="queryCompanyList" parameterType="map" resultType="com.imooc.pojo.vo.CompanyInfoVO">
+        select c.id             companyid,
+        c.company_name          companyName,
+        c.short_name            shortName,
+        c.logo                  logo,
+        c.address               address,
+        c.people_size           peopleSize,
+        c.nature                nature,
+        c.industry              industry,
+        c.financ_stage          financStage,
+        c.work_time             workTime,
+        c.introduction          introduction,
+        c.review_status         reviewStatus,
+        c.review_replay         reviewReplay,
+        c.commit_date           commitDate,
+        c.commit_user_id        commitUserId,
+        u.real_name             commitUser
+        from company c
+        left join users u on c.commit_user_id = u.id
+        where 1 = 1
+        <if test="paramMap.companyName != null and paramMap.companyName != ''">
+            and c.company_name like '%${paramMap.companyName}%'
+        </if>
+        <if test="paramMap.commitUser != null and paramMap.commitUser != ''">
+            and u.real_name like '%${paramMap.commitUser}%'
+        </if>
+        <if test="paramMap.reviewStatus != null and paramMap.reviewStatus >= 0">
+            and c.review_status = #{paramMap.reviewStatus}
+        </if>
+        <if test="paramMap.reviewStatus != null and paramMap.reviewStatus >= 0">
+            and c.review_status = #{paramMap.reviewStatus}
+        </if>
+        <if test="paramMap.commitDateStart != null">
+            and c.commit_date &gt;= #{paramMap.commitDateStart}
+        </if>
+        <if test="paramMap.commitDateEnd != null">
+            and c.commit_date &lt;= #{paramMap.commitDateEnd}
+        </if>
+        order by commit_date desc;
+    </select>
+
+</mapper>
