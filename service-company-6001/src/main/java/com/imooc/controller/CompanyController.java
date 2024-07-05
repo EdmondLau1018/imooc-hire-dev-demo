@@ -2,10 +2,12 @@ package com.imooc.controller;
 
 import com.google.gson.Gson;
 import com.imooc.api.feign.UserMicroServiceFeign;
+import com.imooc.api.interceptor.JWTCurrentUserInterceptor;
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.enums.CompanyReviewStatus;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.pojo.Company;
+import com.imooc.pojo.Users;
 import com.imooc.pojo.bo.CreateCompanyBO;
 import com.imooc.pojo.bo.QueryCompanyBO;
 import com.imooc.pojo.bo.ReviewCompanyBO;
@@ -202,6 +204,23 @@ public class CompanyController extends BaseInfoProperties {
 
         return hrUser;
     }
+    /**************************************************业务分割：SAAS端*************************************************/
+
+    /**
+     * saas 管理端 主页获取企业信息
+     * @return
+     */
+    @PostMapping("/info")
+    public GraceJSONResult info(){
+
+        //  获取当前登录的普通用户
+        Users currentUser = JWTCurrentUserInterceptor.currentUser.get();
+        //  根据当前登录的 HR 关联的公司 id 获取企业信息
+        CompanySimpleVO company = getCompany(currentUser.getHrInWhichCompanyId());
+
+        return GraceJSONResult.ok(company);
+    }
+
 
     /**************************************************业务分割：运营管理端*************************************************/
 
