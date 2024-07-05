@@ -24,4 +24,10 @@ public interface CompanyMapperCustom {
      */
     public List<CompanyInfoVO> queryCompanyList(@Param("paramMap")Map<String,Object> paramMap);
 
+    /**
+     * 根据公司 id 查询公司具体信息
+     * @param paramMap
+     * @return
+     */
+    public CompanyInfoVO queryCompanyInfo(@Param("paramMap")Map<String,Object> paramMap);
 }

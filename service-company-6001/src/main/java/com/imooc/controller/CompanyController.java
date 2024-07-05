@@ -8,12 +8,14 @@ import com.imooc.pojo.Company;
 import com.imooc.pojo.bo.CreateCompanyBO;
 import com.imooc.pojo.bo.QueryCompanyBO;
 import com.imooc.pojo.bo.ReviewCompanyBO;
+import com.imooc.pojo.vo.CompanyInfoVO;
 import com.imooc.pojo.vo.CompanySimpleVO;
 import com.imooc.pojo.vo.UsersVO;
 import com.imooc.service.CompanyService;
 import com.imooc.utils.GsonUtils;
 import com.imooc.utils.JsonUtils;
 import com.imooc.utils.PagedGridResult;
+import jdk.nashorn.internal.runtime.regexp.joni.constants.OPSize;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
@@ -223,5 +225,18 @@ public class CompanyController extends BaseInfoProperties {
                 limit);
 
         return GraceJSONResult.ok(gridResult);
+    }
+
+    /**
+     * 根据公司  id 获取具体的 公司信息
+     * @param companyId
+     * @return
+     */
+    @PostMapping("/admin/getCompanyInfo")
+    public GraceJSONResult getCompanyInfo(String companyId){
+
+        CompanyInfoVO companyInfo = companyService.queryCompanyInfo(companyId);
+
+        return GraceJSONResult.ok(companyInfo);
     }
 }

@@ -4,6 +4,7 @@ import com.imooc.pojo.Company;
 import com.imooc.pojo.bo.CreateCompanyBO;
 import com.imooc.pojo.bo.QueryCompanyBO;
 import com.imooc.pojo.bo.ReviewCompanyBO;
+import com.imooc.pojo.vo.CompanyInfoVO;
 import com.imooc.utils.PagedGridResult;
 
 /**
@@ -65,4 +66,11 @@ public interface CompanyService {
      * @return
      */
     public PagedGridResult queryCompanyListPaged(QueryCompanyBO queryCompanyBO, Integer page, Integer pageSize);
+
+    /**
+     * 根据公司 id 查询企业具体信息
+     * @param companyId
+     * @return
+     */
+    public CompanyInfoVO queryCompanyInfo(String companyId);
 }

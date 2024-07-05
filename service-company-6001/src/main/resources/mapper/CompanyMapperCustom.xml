@@ -3,7 +3,8 @@
 <mapper namespace="com.imooc.mapper.CompanyMapperCustom">
 
 
-    <select id="queryCompanyList" parameterType="map" resultType="com.imooc.pojo.vo.CompanyInfoVO">
+    <!-- 运营管理端查询 公司列表信息 -->
+    <select id="queryCompanyList" parameterType="Map" resultType="com.imooc.pojo.vo.CompanyInfoVO">
         select c.id             companyid,
         c.company_name          companyName,
         c.short_name            shortName,
@@ -42,6 +43,32 @@
             and c.commit_date &lt;= #{paramMap.commitDateEnd}
         </if>
         order by commit_date desc;
+    </select>
+
+    <!-- 根据 companyId 查单个公司的详细信息 -->
+    <select id="queryCompanyInfo" parameterType="Map" resultType="com.imooc.pojo.vo.CompanyInfoVO">
+        select c.id             companyid,
+        c.company_name          companyName,
+        c.short_name            shortName,
+        c.logo                  logo,
+        c.address               address,
+        c.people_size           peopleSize,
+        c.nature                nature,
+        c.industry              industry,
+        c.financ_stage          financStage,
+        c.work_time             workTime,
+        c.introduction          introduction,
+        c.review_status         reviewStatus,
+        c.review_replay         reviewReplay,
+        c.commit_date           commitDate,
+        c.commit_user_id        commitUserId,
+        u.real_name             commitUser
+        from company c
+        left join users u on c.commit_user_id = u.id
+        where 1 = 1
+        <if test="paramMap.companyId != null and paramMap.companyId != ''">
+            and c.id = #{paramMap.companyId}
+        </if>
     </select>
 
 </mapper>

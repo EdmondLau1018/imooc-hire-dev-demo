@@ -153,4 +153,21 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
 
         return setterPagedGrid(companyList, page);
     }
+
+    /**
+     * 根据公司 id 查询企业基本信息
+     *
+     * @param companyId
+     * @return
+     */
+    @Override
+    public CompanyInfoVO queryCompanyInfo(String companyId) {
+
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("companyId", companyId);
+
+        //  持久层查询公司信息
+        CompanyInfoVO companyInfo = companyMapperCustom.queryCompanyInfo(map);
+        return companyInfo;
+    }
 }
