@@ -2,6 +2,7 @@ package com.imooc.controller;
 
 
 import com.imooc.base.BaseInfoProperties;
+import com.imooc.enums.UserRole;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.pojo.Users;
 import com.imooc.pojo.bo.ModifyUserBO;
@@ -10,6 +11,8 @@ import com.imooc.service.UsersService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 /**
  * 用户信息接口
@@ -127,5 +130,17 @@ public class UserInfoController extends BaseInfoProperties {
 
         UsersVO usersVO = getUserInfo(userId, false);
         return GraceJSONResult.ok(usersVO);
+    }
+
+    /**
+     * 将 提交企业审核的用户 修改为 HR
+     * @param hrUserId
+     * @return
+     */
+    @PostMapping("/changeUserToHR")
+    public GraceJSONResult changeUserToHR(String hrUserId){
+
+        usersService.updateUserToHR(hrUserId);
+        return GraceJSONResult.ok();
     }
 }

@@ -21,4 +21,10 @@ public interface UsersService {
     public void updateUserCompanyId(String hrUserId, String realname, String companyId);
 
     public Users getById(String userId);
+
+    /**
+     * 将提交企业的用户身份修改为 HR
+     * @param hrUserId
+     */
+    public void updateUserToHR(String hrUserId);
 }

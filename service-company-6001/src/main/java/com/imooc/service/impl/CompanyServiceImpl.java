@@ -170,4 +170,22 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
         CompanyInfoVO companyInfo = companyMapperCustom.queryCompanyInfo(map);
         return companyInfo;
     }
+
+    /**
+     * 更新审核后的企业信息
+     * 更新的字段是审核的状态和审核信息
+     * @param reviewCompanyBO
+     */
+    @Transactional
+    @Override
+    public void updateReviewInfo(ReviewCompanyBO reviewCompanyBO) {
+
+        Company pendingCompany = new Company();
+        pendingCompany.setId(reviewCompanyBO.getCompanyId());
+        pendingCompany.setReviewStatus(reviewCompanyBO.getReviewStatus());
+        pendingCompany.setReviewReplay(reviewCompanyBO.getReviewReplay());
+        pendingCompany.setUpdatedTime(LocalDateTime.now());
+
+        companyMapper.updateById(pendingCompany);
+    }
 }

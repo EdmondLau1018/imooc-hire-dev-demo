@@ -73,4 +73,10 @@ public interface CompanyService {
      * @return
      */
     public CompanyInfoVO queryCompanyInfo(String companyId);
+
+    /**
+     * 更新审核后的企业信息
+     * @param reviewCompanyBO
+     */
+    public void updateReviewInfo(ReviewCompanyBO reviewCompanyBO);
 }

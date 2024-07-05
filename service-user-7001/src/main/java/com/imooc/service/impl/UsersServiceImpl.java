@@ -3,6 +3,7 @@ package com.imooc.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.Gson;
 import com.imooc.base.BaseInfoProperties;
+import com.imooc.enums.UserRole;
 import com.imooc.exceptions.GraceException;
 import com.imooc.grace.result.ResponseStatusEnum;
 import com.imooc.mapper.UsersMapper;
@@ -82,6 +83,7 @@ public class UsersServiceImpl extends BaseInfoProperties implements UsersService
     /**
      * 根据 hr 用户 id 更新对应企业的 id 实现方法
      * 业务上：关联 hr 用户和企业关系
+     *
      * @param hrUserId
      * @param realname
      * @param companyId
@@ -103,5 +105,24 @@ public class UsersServiceImpl extends BaseInfoProperties implements UsersService
     @Override
     public Users getById(String userId) {
         return usersMapper.selectById(userId);
+    }
+
+    /**
+     * 将提交企业的用户身份修改为 HR
+     *
+     * @param hrUserId
+     */
+    @Transactional
+    @Override
+    public void updateUserToHR(String hrUserId) {
+
+        //    * 结合 MP 的更新策略为 not_empty 新建对象的其他空属性不会更新到数据库中
+        Users hrUser = new Users();
+        hrUser.setId(hrUserId);
+        //  将用户的角色设置成 招聘者
+        hrUser.setRole(UserRole.RECRUITER.type);
+        hrUser.setUpdatedTime(LocalDateTime.now());
+
+        usersMapper.updateById(hrUser);
     }
 }

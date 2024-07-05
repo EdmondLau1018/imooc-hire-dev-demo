@@ -39,4 +39,12 @@ public interface UserMicroServiceFeign {
     @PostMapping("/userinfo/get")
     public GraceJSONResult get(@RequestParam("userId") String userId);
 
+    /**
+     * 将当前企业提交审核的用户信息修改为 hr
+     * @param hrUserId
+     * @return
+     */
+    @PostMapping("/userinfo/changeUserToHR")
+    public GraceJSONResult changeUserToHR(@RequestParam("hrUserId") String hrUserId);
+
 }

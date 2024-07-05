@@ -3,6 +3,7 @@ package com.imooc.controller;
 import com.google.gson.Gson;
 import com.imooc.api.feign.UserMicroServiceFeign;
 import com.imooc.base.BaseInfoProperties;
+import com.imooc.enums.CompanyReviewStatus;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.pojo.Company;
 import com.imooc.pojo.bo.CreateCompanyBO;
@@ -206,6 +207,7 @@ public class CompanyController extends BaseInfoProperties {
 
     /**
      * 运营管理端公司列表分页查询
+     *
      * @param queryCompanyBO
      * @param page
      * @param limit
@@ -229,14 +231,47 @@ public class CompanyController extends BaseInfoProperties {
 
     /**
      * 根据公司  id 获取具体的 公司信息
+     *
      * @param companyId
      * @return
      */
     @PostMapping("/admin/getCompanyInfo")
-    public GraceJSONResult getCompanyInfo(String companyId){
+    public GraceJSONResult getCompanyInfo(String companyId) {
 
         CompanyInfoVO companyInfo = companyService.queryCompanyInfo(companyId);
 
         return GraceJSONResult.ok(companyInfo);
+    }
+
+    /**
+     * 更新企业审核信息
+     * 远程调用用户服务 修改用户身份为招聘者
+     *
+     * @param reviewCompanyBO
+     * @return
+     */
+    @PostMapping("/admin/doReview")
+    public GraceJSONResult doReview(@RequestBody ReviewCompanyBO reviewCompanyBO) {
+
+        //  参数校验 企业 id 和用户 id 都不能为空
+        String companyId = reviewCompanyBO.getCompanyId();
+        String hrUserId = reviewCompanyBO.getHrUserId();
+        if (StringUtils.isBlank(companyId) || StringUtils.isBlank(hrUserId))
+            return GraceJSONResult.error();
+
+        //  审核企业信息
+        companyService.updateReviewInfo(reviewCompanyBO);
+
+        //  审核企业成功 （审核状态为 成功 ）审核企业信息未发生异常 修改用户的身份信息 为 HR
+        if (reviewCompanyBO.getReviewStatus() == CompanyReviewStatus.SUCCESSFUL.type) {
+            //  将当前 提交企业审核的用户 身份设置为 HR
+            userMicroServiceFeign.changeUserToHR(hrUserId);
+        }
+
+        //  （企业信息发生变更） 清除 企业缓存
+        redis.del(REDIS_COMPANY_BASE_INFO + ":" + companyId);
+
+        return GraceJSONResult.ok();
+
     }
 }
