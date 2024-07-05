@@ -53,4 +53,11 @@ public interface DataDictionaryService {
      * @return
      */
     public List<DataDictionary> getDataBydCode(String typeCode);
+
+    /**
+     *
+     * @param keys
+     * @return
+     */
+    public List<DataDictionary> getItemsByKeys(String... keys);
 }

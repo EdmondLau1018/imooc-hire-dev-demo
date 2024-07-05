@@ -124,6 +124,7 @@ public class DataDictionaryServiceImpl extends BaseInfoProperties implements Dat
 
     /**
      * 根据字典编码查询字典项
+     *
      * @param typeCode
      * @return
      */
@@ -137,5 +138,21 @@ public class DataDictionaryServiceImpl extends BaseInfoProperties implements Dat
                 );
 
         return dataDictionaryList;
+    }
+
+    /**
+     * 根据 传入的 key 数组查询对应的数据字典项
+     *
+     * @param keys
+     * @return
+     */
+    @Override
+    public List<DataDictionary> getItemsByKeys(String... keys) {
+
+        List<DataDictionary> list = dataDictionaryMapper.selectList(new QueryWrapper<DataDictionary>()
+                .eq("enable", 1)
+                .in("item_key", keys));
+
+        return list;
     }
 }

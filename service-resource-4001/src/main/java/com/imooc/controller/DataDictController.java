@@ -6,6 +6,8 @@ import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.grace.result.ResponseStatusEnum;
 import com.imooc.pojo.DataDictionary;
 import com.imooc.pojo.bo.DataDictionaryBO;
+import com.imooc.pojo.bo.QueryDictItemsBO;
+import com.imooc.pojo.vo.CompanyPointsVO;
 import com.imooc.service.DataDictionaryService;
 import com.imooc.utils.GsonUtils;
 import com.imooc.utils.PagedGridResult;
@@ -60,6 +62,33 @@ public class DataDictController extends BaseInfoProperties {
         redis.set(ddKey,GsonUtils.object2String(redisDataDictionaryList));
 
         return GraceJSONResult.ok(redisDataDictionaryList);
+    }
+
+    /**
+     * app 端 查询企业优势对应的数据字典 单线程查询四个列表
+     * @param itemsBO
+     * @return
+     */
+    @PostMapping("/app/getItemByKeys")
+    public GraceJSONResult getItemByKeys(@RequestBody QueryDictItemsBO itemsBO){
+
+        String[] advantage = itemsBO.getAdvantage();
+        String[] benefits = itemsBO.getBenefits();
+        String[] bonus = itemsBO.getBonus();
+        String[] subsidy = itemsBO.getSubsidy();
+
+        List<DataDictionary> advantageList = dataDictionaryService.getItemsByKeys(advantage);
+        List<DataDictionary> benefitsList = dataDictionaryService.getItemsByKeys(benefits);
+        List<DataDictionary> bonusList = dataDictionaryService.getItemsByKeys(bonus);
+        List<DataDictionary> subsidyList = dataDictionaryService.getItemsByKeys(subsidy);
+
+        CompanyPointsVO companyPointsVO = new CompanyPointsVO();
+        companyPointsVO.setAdvantageList(advantageList);
+        companyPointsVO.setBenefitsList(benefitsList);
+        companyPointsVO.setBonusList(bonusList);
+        companyPointsVO.setSubsidyList(subsidyList);
+
+        return GraceJSONResult.ok(companyPointsVO);
     }
 
 
