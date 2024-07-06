@@ -2,6 +2,8 @@ package com.imooc.test.threads;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
@@ -58,5 +60,38 @@ public class MyThreadsTest {
 
         //  获取线程执行完毕后的结果
         System.out.println("线程池任务执行结果： " + futureTask.get());
+    }
+
+    @Test
+    public void CompletableFutureTest() {
+
+        System.out.println("开始运行 test ...");
+
+        CompletableFuture<Void> completableFuture = CompletableFuture.runAsync(() -> {
+            System.out.println("第一个参数是编排线程的任务内容，第二个参数是使用的线程池~~~");
+        }, MyFixedThreadPool.executorService);
+
+        System.out.println("结束运行 test ...");
+    }
+
+    /**
+     * 测试有返回的 编排任务
+     */
+    @Test
+    public void testCompletableFuture() throws Exception {
+
+        System.out.println("开始运行 test ...");
+
+        CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
+
+            String uuid = UUID.randomUUID().toString();
+            System.out.println("带返回的编排任务 uuid 内部打印： " + uuid);
+            return uuid;
+        }, MyThreadPoolExecutor.threadPool);
+
+        //  这里使用 get 会导致主线程阻塞
+        System.out.println("线程外部获取的结果为： " + future.get());
+
+        System.out.println("结束运行 test ...");
     }
 }
