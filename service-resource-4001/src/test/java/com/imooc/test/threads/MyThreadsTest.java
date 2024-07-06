@@ -114,8 +114,99 @@ public class MyThreadsTest {
             return UUID.randomUUID().toString();
         });
 
-        System.out.println("线程任务执行完毕，获得的 uuid 外部打印 ："  + completableFuture.get());
+        System.out.println("线程任务执行完毕，获得的 uuid 外部打印 ：" + completableFuture.get());
 
         System.out.println("结束运行 test ...");
+    }
+
+    /************************************ 异步任务 顺序执行  ****************************************/
+    @Test
+    public void testCompletableFutureThen() throws Exception {
+
+        CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> {
+            String uuid = UUID.randomUUID().toString();
+            System.out.println("当前线程编号为：" + Thread.currentThread().getId() + "   内部打印 uuid :" + uuid);
+            return uuid;
+        }).thenRun(() -> {
+            String uuid = UUID.randomUUID().toString();
+            System.out.println("在这里生成新的 uuid 不接收参数 ..." + uuid);
+        });
+
+        System.out.println(future.get());
+
+    }
+
+
+    /************************************ 双重任务 组合  ****************************************/
+    @Test
+    public void testCompletableRunAfterBoth() throws Exception {
+
+        //  定义一个新的无返回值的任务
+        CompletableFuture<Void> completableFuture1 = CompletableFuture
+                .runAsync(new RunnableClass_01(),
+                        MyThreadPoolExecutor.threadPool);
+
+        CompletableFuture<Void> completableFutur2 = CompletableFuture.supplyAsync(() -> {
+            String uuid = UUID.randomUUID().toString();
+            System.out.println("多线程异步任务生成随机 uuid： " + uuid);
+            return uuid;
+        }, MyThreadPoolExecutor.threadPool).runAfterBoth(completableFuture1, () -> {
+            //runAfterBoth 第一个参数是 无返回值的任务对象
+            System.out.println("两个任务都执行完了，但是当前任务不接收参数");
+        });
+
+        //  应该什么都获取不到
+        System.out.println(completableFutur2.get());
+    }
+
+    /**
+     * runAfterEither 其中一个任务优先完成
+     * 无返回值
+     */
+    @Test
+    public void testCompletableFutureRunAfterEither() throws Exception {
+
+        //  定义一个新的无返回值的任务
+        CompletableFuture<Void> completableFuture1 = CompletableFuture
+                .runAsync(new RunnableClass_01(),
+                        MyThreadPoolExecutor.threadPool);
+
+        CompletableFuture<Void> completableFuture2 = CompletableFuture.supplyAsync(() -> {
+            String uuid = UUID.randomUUID().toString();
+            System.out.println("多线程异步任务生成随机 uuid： " + uuid);
+            return uuid;
+        }, MyThreadPoolExecutor.threadPool).runAfterEither(completableFuture1, () -> {
+            System.out.println("其中有一个任务优先执行完了.....");
+        });
+
+        completableFuture2.get();
+    }
+
+
+    @Test
+    public void testCompletableFutureThenCombine() throws Exception {
+
+        //  定义一个新的无返回值的任务
+        CompletableFuture<String> completableFuture1 = CompletableFuture
+                .supplyAsync(() -> {
+                    String uuid = UUID.randomUUID().toString();
+                    System.out.println("多线程异步任务生成随机 uuid： " + uuid);
+                    return uuid;
+                }, MyThreadPoolExecutor.threadPool);
+
+        CompletableFuture<String> completableFuture2 = CompletableFuture.supplyAsync(() -> {
+            String uuid = UUID.randomUUID().toString();
+            System.out.println("多线程异步任务生成随机 uuid： " + uuid);
+            return uuid;
+        }, MyThreadPoolExecutor.threadPool).thenCombine(completableFuture1, (s1, s2) -> {
+
+            System.out.println("两个异步任务都执行完了，他们的结果分别为：");
+            System.out.println(s1);
+            System.out.println(s2);
+
+            return s1 + s2;
+        });
+
+        System.out.println("组合之后的结果：" + completableFuture2.get());
     }
 }
