@@ -3,6 +3,7 @@ package com.imooc.test.threads;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
 public class MyThreadsTest {
@@ -45,5 +46,17 @@ public class MyThreadsTest {
         System.out.println("主线程获取 futureTask 02 结果：" + futureTask02.get());
 
         System.out.println("测试结束...");
+    }
+
+    @Test
+    public void ThreadPoolTest() throws Exception {
+
+        // 在线程池中创建线程执行的任务
+        Future<Object> futureTask = MyFixedThreadPool
+                .executorService
+                .submit(new CallableClass_01());
+
+        //  获取线程执行完毕后的结果
+        System.out.println("线程池任务执行结果： " + futureTask.get());
     }
 }
