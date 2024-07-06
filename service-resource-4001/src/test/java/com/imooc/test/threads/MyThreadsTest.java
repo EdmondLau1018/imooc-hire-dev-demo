@@ -209,4 +209,21 @@ public class MyThreadsTest {
 
         System.out.println("组合之后的结果：" + completableFuture2.get());
     }
+
+
+    /************************************ 多重任务 组合  ****************************************/
+    @Test
+    public void testCompletableAllOf() throws Exception {
+
+        CompletableFuture<Void> completableFuture1 = CompletableFuture.runAsync(new RunnableClass_01(), MyThreadPoolExecutor.threadPool);
+        CompletableFuture<Void> completableFuture2 = CompletableFuture.runAsync(new RunnableClass_02(), MyThreadPoolExecutor.threadPool);
+
+        CompletableFuture<String> completableFuture3 = CompletableFuture.supplyAsync(() -> {
+            String res = "这是第三个定义的任务，执行这个的结果。。。";
+            System.out.println(res);
+            return res;
+        }, MyThreadPoolExecutor.threadPool);
+
+        CompletableFuture.allOf(completableFuture1,completableFuture2,completableFuture3);
+    }
 }
