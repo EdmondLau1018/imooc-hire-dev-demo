@@ -94,4 +94,28 @@ public class MyThreadsTest {
 
         System.out.println("结束运行 test ...");
     }
+
+    @Test
+    public void testComplete() throws Exception {
+        System.out.println("开始运行 test ...");
+
+        CompletableFuture<String> completableFuture = CompletableFuture.supplyAsync(() -> {
+
+            String uuid = UUID.randomUUID().toString();
+            System.out.println("当前线程编号为：" + Thread.currentThread().getId() + "   内部打印 uuid :" + uuid);
+            return uuid;
+        }).whenComplete((s, throwable) -> {
+
+            System.out.println("线程任务执行完毕后获取的结果为 :" + s);
+        }).exceptionally((throwable) -> {
+
+            System.out.println("进入异常兜底方法 ，异常的信息为：" + throwable.getMessage());
+            //   返回一个新的 uuid
+            return UUID.randomUUID().toString();
+        });
+
+        System.out.println("线程任务执行完毕，获得的 uuid 外部打印 ："  + completableFuture.get());
+
+        System.out.println("结束运行 test ...");
+    }
 }
