@@ -1,9 +1,7 @@
 package com.imooc.controller;
 
 import com.imooc.base.BaseInfoProperties;
-import com.imooc.exceptions.GraceException;
 import com.imooc.grace.result.GraceJSONResult;
-import com.imooc.grace.result.ResponseStatusEnum;
 import com.imooc.pojo.DataDictionary;
 import com.imooc.pojo.bo.DataDictionaryBO;
 import com.imooc.pojo.bo.QueryDictItemsBO;
@@ -11,13 +9,13 @@ import com.imooc.pojo.vo.CompanyPointsVO;
 import com.imooc.service.DataDictionaryService;
 import com.imooc.utils.GsonUtils;
 import com.imooc.utils.PagedGridResult;
-import com.sun.org.apache.regexp.internal.RE;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @RestController
 @RequestMapping("/dataDict")
@@ -25,10 +23,13 @@ public class DataDictController extends BaseInfoProperties {
 
     private final DataDictionaryService dataDictionaryService;
 
+    private final ThreadPoolExecutor threadPoolExecutor;
+
     private static final String DDKEY_PREFIX = DATA_DICTIONARY_LIST_TYPECODE + ":";
 
-    public DataDictController(DataDictionaryService dataDictionaryService) {
+    public DataDictController(DataDictionaryService dataDictionaryService, ThreadPoolExecutor threadPoolExecutor) {
         this.dataDictionaryService = dataDictionaryService;
+        this.threadPoolExecutor = threadPoolExecutor;
     }
 
     /******************************************业务分割：app 端接口 **********************************************************/
@@ -52,25 +53,70 @@ public class DataDictController extends BaseInfoProperties {
         List<DataDictionary> redisDataDictionaryList = null;
         if (StringUtils.isNotBlank(redisDDStr)) {
             //  进行格式转换
-            redisDataDictionaryList = GsonUtils.stringToListAnother(redisDDStr,DataDictionary.class);
+            redisDataDictionaryList = GsonUtils.stringToListAnother(redisDDStr, DataDictionary.class);
         }
 
         //  调用 service 查询对应的结果
         redisDataDictionaryList = dataDictionaryService.getDataBydCode(typeCode);
 
         // 将 redis 查询的数据字典项结果设置到缓存中
-        redis.set(ddKey,GsonUtils.object2String(redisDataDictionaryList));
+        redis.set(ddKey, GsonUtils.object2String(redisDataDictionaryList));
 
         return GraceJSONResult.ok(redisDataDictionaryList);
     }
 
     /**
-     * app 端 查询企业优势对应的数据字典 单线程查询四个列表
+     * 查询企业优势对应的数据字典 ，该接口 引入 多线程进行的优化
+     *
      * @param itemsBO
      * @return
      */
-    @PostMapping("/app/getItemByKeys")
-    public GraceJSONResult getItemByKeys(@RequestBody QueryDictItemsBO itemsBO){
+    @PostMapping("/app/getitemByKeys")
+    public GraceJSONResult getItemByKeys(@RequestBody QueryDictItemsBO itemsBO) {
+
+        CompanyPointsVO companyPointsVO = new CompanyPointsVO();
+
+        CompletableFuture<Void> advantageFuture = CompletableFuture.runAsync(() -> {
+            String[] advantage = itemsBO.getAdvantage();
+            List<DataDictionary> advantageList = dataDictionaryService.getItemsByKeys(advantage);
+            companyPointsVO.setAdvantageList(advantageList);
+        }, threadPoolExecutor);
+
+        CompletableFuture<Void> benefitsFuture = CompletableFuture.runAsync(() -> {
+            String[] benefits = itemsBO.getBenefits();
+            List<DataDictionary> benefitsList = dataDictionaryService.getItemsByKeys(benefits);
+            companyPointsVO.setBenefitsList(benefitsList);
+        }, threadPoolExecutor);
+
+        CompletableFuture<Void> bonusFuture = CompletableFuture.runAsync(() -> {
+            String[] bonus = itemsBO.getBonus();
+            List<DataDictionary> bonusList = dataDictionaryService.getItemsByKeys(bonus);
+            companyPointsVO.setBonusList(bonusList);
+        }, threadPoolExecutor);
+
+        CompletableFuture<Void> subsidyFutureFuture = CompletableFuture.runAsync(() -> {
+            String[] subsidy = itemsBO.getSubsidy();
+            List<DataDictionary> subsidyList = dataDictionaryService.getItemsByKeys(subsidy);
+            companyPointsVO.setSubsidyList(subsidyList);
+        }, threadPoolExecutor);
+
+        CompletableFuture.allOf(advantageFuture,
+                benefitsFuture,
+                bonusFuture,
+                subsidyFutureFuture);
+
+        return GraceJSONResult.ok(companyPointsVO);
+
+    }
+
+    /**
+     * app 端 查询企业优势对应的数据字典 单线程查询四个列表
+     *
+     * @param itemsBO
+     * @return
+     */
+    @PostMapping("/app/getItemByKeys2")
+    public GraceJSONResult getItemByKeys2(@RequestBody QueryDictItemsBO itemsBO) {
 
         String[] advantage = itemsBO.getAdvantage();
         String[] benefits = itemsBO.getBenefits();
