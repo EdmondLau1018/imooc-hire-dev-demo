@@ -1,6 +1,7 @@
 package com.imooc.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.github.pagehelper.PageHelper;
 import com.google.gson.Gson;
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.enums.UserRole;
@@ -12,12 +13,14 @@ import com.imooc.pojo.bo.ModifyUserBO;
 import com.imooc.pojo.vo.UsersVO;
 import com.imooc.service.UsersService;
 import com.imooc.utils.JWTUtils;
+import com.imooc.utils.PagedGridResult;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class UsersServiceImpl extends BaseInfoProperties implements UsersService {
@@ -124,5 +127,25 @@ public class UsersServiceImpl extends BaseInfoProperties implements UsersService
         hrUser.setUpdatedTime(LocalDateTime.now());
 
         usersMapper.updateById(hrUser);
+    }
+
+    /**
+     * 分页查询当前当前企业对应的 hr 列表
+     *
+     * @param companyId
+     * @param page
+     * @param limit
+     * @return
+     */
+    @Override
+    public PagedGridResult getHrList(String companyId, Integer page, Integer limit) {
+
+        PageHelper.startPage(page, limit);
+
+        //  分页查询 当前企业下 绑定的 hr 用户信息
+        List<Users> hrUsersList = usersMapper.selectList(new QueryWrapper<Users>()
+                .eq("hr_in_which_company_id", companyId));
+
+        return setterPagedGrid(hrUsersList, page);
     }
 }

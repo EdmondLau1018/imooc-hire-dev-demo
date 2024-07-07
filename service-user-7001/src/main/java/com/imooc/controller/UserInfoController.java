@@ -1,6 +1,7 @@
 package com.imooc.controller;
 
 
+import com.imooc.api.interceptor.JWTCurrentUserInterceptor;
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.enums.UserRole;
 import com.imooc.grace.result.GraceJSONResult;
@@ -8,6 +9,7 @@ import com.imooc.pojo.Users;
 import com.imooc.pojo.bo.ModifyUserBO;
 import com.imooc.pojo.vo.UsersVO;
 import com.imooc.service.UsersService;
+import com.imooc.utils.PagedGridResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -122,6 +124,7 @@ public class UserInfoController extends BaseInfoProperties {
 
     /**
      * 服务远程调用接口，根据用户id 获取单个用户的信息
+     *
      * @param userId
      * @return
      */
@@ -134,13 +137,33 @@ public class UserInfoController extends BaseInfoProperties {
 
     /**
      * 将 提交企业审核的用户 修改为 HR
+     *
      * @param hrUserId
      * @return
      */
     @PostMapping("/changeUserToHR")
-    public GraceJSONResult changeUserToHR(String hrUserId){
+    public GraceJSONResult changeUserToHR(String hrUserId) {
 
         usersService.updateUserToHR(hrUserId);
         return GraceJSONResult.ok();
+    }
+
+    /**
+     * 查询当前企业 对应的 hr 列表
+     *
+     * @param page
+     * @param limit
+     * @return
+     */
+    @PostMapping("/saas/hrList")
+    public GraceJSONResult getHrList(Integer page, Integer limit) {
+
+        //  获取当前登录 saas 系统的 hr 用户信息
+        Users hrUser = JWTCurrentUserInterceptor.currentUser.get();
+        String companyId = hrUser.getHrInWhichCompanyId();
+
+        PagedGridResult pagedGridResult = usersService.getHrList(companyId, page, limit);
+
+        return GraceJSONResult.ok(pagedGridResult);
     }
 }

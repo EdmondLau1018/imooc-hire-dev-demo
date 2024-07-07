@@ -3,6 +3,7 @@ package com.imooc.service;
 import com.imooc.pojo.Users;
 import com.imooc.pojo.bo.ModifyUserBO;
 import com.imooc.pojo.vo.UsersVO;
+import com.imooc.utils.PagedGridResult;
 
 public interface UsersService {
 
@@ -24,7 +25,17 @@ public interface UsersService {
 
     /**
      * 将提交企业的用户身份修改为 HR
+     *
      * @param hrUserId
      */
     public void updateUserToHR(String hrUserId);
+
+    /**
+     * 分页查询当前企业对应的用户信息
+     * @param companyId
+     * @param page
+     * @param limit
+     * @return
+     */
+    public PagedGridResult getHrList(String companyId, Integer page, Integer limit);
 }
