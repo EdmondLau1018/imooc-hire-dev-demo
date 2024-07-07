@@ -14,6 +14,7 @@ import com.imooc.pojo.vo.UsersVO;
 import com.imooc.service.UsersService;
 import com.imooc.utils.JWTUtils;
 import com.imooc.utils.PagedGridResult;
+import org.apache.catalina.User;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -147,5 +148,24 @@ public class UsersServiceImpl extends BaseInfoProperties implements UsersService
                 .eq("hr_in_which_company_id", companyId));
 
         return setterPagedGrid(hrUsersList, page);
+    }
+
+    /**
+     * 更新当前 hr 用户 角色变成普通用户
+     *
+     * @param hrUserId
+     */
+    @Override
+    public void updateUsersToCand(String hrUserId) {
+
+        Users hrUser = new Users();
+        hrUser.setId(hrUserId);
+        hrUser.setRole(UserRole.CANDIDATE.type);
+
+        hrUser.setHrInWhichCompanyId("0");
+
+        hrUser.setUpdatedTime(LocalDateTime.now());
+
+        usersMapper.updateById(hrUser);
     }
 }

@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.processing.SupportedOptions;
 import java.time.LocalDateTime;
 
 /**
@@ -165,5 +166,17 @@ public class UserInfoController extends BaseInfoProperties {
         PagedGridResult pagedGridResult = usersService.getHrList(companyId, page, limit);
 
         return GraceJSONResult.ok(pagedGridResult);
+    }
+
+    /**
+     *
+     * @param hrUserId
+     * @return
+     */
+    @PostMapping("/changeUserToCand")
+    public GraceJSONResult changeUserToCand(@RequestParam("hrUserId") String hrUserId) {
+
+        usersService.updateUsersToCand(hrUserId);
+        return GraceJSONResult.ok();
     }
 }

@@ -38,4 +38,10 @@ public interface UsersService {
      * @return
      */
     public PagedGridResult getHrList(String companyId, Integer page, Integer limit);
+
+    /**
+     * hr 用户离职公司  修改为普通用户
+     * @param hrUserId
+     */
+    public void updateUsersToCand(String hrUserId);
 }
