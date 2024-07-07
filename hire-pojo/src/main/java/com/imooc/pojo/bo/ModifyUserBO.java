@@ -21,6 +21,8 @@ public class ModifyUserBO {
     private Integer sex;
     private String nickName;
 
+    private Integer showWhichName;
+
     @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd")
     private LocalDate birthDay;
     @Email
