@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 
 @RestController
@@ -72,7 +73,7 @@ public class DataDictController extends BaseInfoProperties {
      * @return
      */
     @PostMapping("/app/getitemByKeys")
-    public GraceJSONResult getItemByKeys(@RequestBody QueryDictItemsBO itemsBO) {
+    public GraceJSONResult getItemByKeys(@RequestBody QueryDictItemsBO itemsBO) throws Exception {
 
         CompanyPointsVO companyPointsVO = new CompanyPointsVO();
 
@@ -100,10 +101,13 @@ public class DataDictController extends BaseInfoProperties {
             companyPointsVO.setSubsidyList(subsidyList);
         }, threadPoolExecutor);
 
-        CompletableFuture.allOf(advantageFuture,
+        CompletableFuture<Void> allOf = CompletableFuture.allOf(advantageFuture,
                 benefitsFuture,
                 bonusFuture,
                 subsidyFutureFuture);
+
+        // 编排任务 后添加这行代码 执行任务之后 让主线程阻塞 ，等待所有任务执行完毕后继续执行
+        allOf.get();
 
         return GraceJSONResult.ok(companyPointsVO);
 
