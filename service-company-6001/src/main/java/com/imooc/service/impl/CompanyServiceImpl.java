@@ -25,11 +25,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * <p>
@@ -218,6 +217,9 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
         while (redis.setnx(distLockName, selfLockId, 30)) {
             Thread.sleep(2000);
         }
+        //  当前线程获得 redis 分布式锁 后开启自动检查是否过期机制
+        autoRefreshLockTimes(distLockName, selfLockId, 30l, 30l);
+
         try {
             //  当前线程加锁成功，执行业务
             doModify(modifyCompanyInfoBO);
@@ -237,6 +239,31 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
                             + " end ";
             redis.execLuaScript(lockScript, selfLockId, distLockName);
         }
+    }
+
+    /**
+     * 使用 定时器  +  LUA 脚本的方式 实现分布式锁 超期自动续期
+     * 在线程获得分布式锁的时候调用
+     * 过期时间小号三分之一 开始触发自动检查
+     */
+    private Timer lockTimer = new Timer();
+
+    private void autoRefreshLockTimes(String distLockName, String lockId, Long expireTimes, Long delayTimes) {
+
+        String refreshScript =
+                " if redis.call('get',KEYS[1]) == ARGV[1] "
+                        + " then "
+                        + " return redis.call('expire',KEYS[1],30) "
+                        + " else "
+                        + " return 0 "
+                        + " end ";
+
+        lockTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                redis.execLuaScript(refreshScript, distLockName, lockId);
+            }
+        }, expireTimes / (3 * 1000), delayTimes / (3 * 1000));
     }
 
     /**
