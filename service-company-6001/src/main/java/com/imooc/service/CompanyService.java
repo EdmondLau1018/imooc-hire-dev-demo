@@ -100,4 +100,12 @@ public interface CompanyService {
     public void testReadLock();
 
     public void testWriteLock();
+
+    /**
+     * 信号量的获取和释放
+     * @param num
+     */
+    public void getSemaphore(Integer num);
+
+    public void releaseSemaphore(Integer num);
 }

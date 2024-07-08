@@ -404,4 +404,25 @@ public class CompanyController extends BaseInfoProperties {
         return GraceJSONResult.ok();
 
     }
+
+    /**************************************************业务分割：分布式锁测试*************************************************/
+
+    /**
+     * 测试获取 redisson 信号量的方法
+     * @param num
+     * @return
+     */
+    @GetMapping("/getSemaphore")
+    public GraceJSONResult getSemaphore(Integer num) {
+
+        companyService.getSemaphore(num);
+        return GraceJSONResult.ok();
+    }
+
+    @GetMapping("/releaseSemaphore")
+    public GraceJSONResult releaseSemaphore(Integer num){
+
+        companyService.releaseSemaphore(num);
+        return GraceJSONResult.ok();
+    }
 }

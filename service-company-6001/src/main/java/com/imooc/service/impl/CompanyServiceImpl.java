@@ -23,6 +23,7 @@ import com.imooc.utils.PagedGridResult;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RReadWriteLock;
+import org.redisson.api.RSemaphore;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -385,6 +386,9 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
 
     /**
      * 高并发请求测试读锁和写锁
+     * 读锁和写锁 在编码的时候名称参数是同一个，代表获取的是同一个读写锁
+     * 在代码不同的地方请求这个 锁 会得到同一个读写锁 为了确保这些业务代码使用的是同一个锁
+     * 从而保证业务正确的同步
      */
     @Override
     public void testReadLock() {
@@ -411,6 +415,47 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
         } finally {
             lock.writeLock().unlock();
         }
+    }
+
+    /**
+     * 信号量测试 获取信号量
+     * @param num
+     */
+    @Override
+    public void getSemaphore(Integer num) {
+
+        // 在 redis 中 声明信号量
+        RSemaphore semaphore = redissonClient.getSemaphore("test-semaphore");
+        //  声明信号量的公共资源数
+        semaphore.trySetPermits(4);
+
+        try {
+            //  获取信号量
+            semaphore.acquire();
+            System.out.println("当前 编号为 " + num + "的业务获取信号量...");
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 释放信号量
+     * @param num
+     */
+    @Override
+    public void releaseSemaphore(Integer num) {
+
+        RSemaphore semaphore = redissonClient.getSemaphore("test-semaphore");
+
+        try {
+            semaphore.release();
+            System.out.println("当前 编号为 " + num + "的业务释放信号量...");
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 
     /**
