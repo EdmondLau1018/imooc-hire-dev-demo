@@ -213,15 +213,19 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
 
         //  1. 获得锁，值随意只要不为空即可
         String distLockName = "redis_lock";
+        //  给对应的 设置锁的线程 设置 唯一 id 确保只有设置锁的线程才可以释放锁
+        String selfLockId = UUID.randomUUID().toString();
         //  在设置 redis 分布式锁的时候新增 过期时间
-        Boolean isLockOK = redis.setnx(distLockName, UUID.randomUUID().toString(),30);
-
+        Boolean isLockOK = redis.setnx(distLockName, selfLockId,30);
         //  2. 判断是否加锁成功（当前线程是否获得锁）
         if (isLockOK) {
             //  3. 执行更新业务流程
             doModify(modifyCompanyInfoBO);
             //  4. 执行业务结束，释放锁
-            redis.del(distLockName);
+            //  4-1. 判断这个锁是不是当前线程设置的如果是 才删除锁
+            if (redis.get(distLockName).equalsIgnoreCase(selfLockId) && redis.get(distLockName) != null) {
+                redis.del(distLockName);
+            }
         } else {
             //  3-1.    加锁失败 ，重试当前方法
             //      不要立即重试 ，需要等待一段时间重试
