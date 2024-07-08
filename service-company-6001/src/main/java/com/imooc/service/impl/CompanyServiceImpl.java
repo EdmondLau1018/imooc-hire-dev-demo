@@ -21,11 +21,12 @@ import com.imooc.pojo.vo.CompanyInfoVO;
 import com.imooc.service.CompanyService;
 import com.imooc.utils.PagedGridResult;
 import org.apache.commons.lang3.StringUtils;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -47,10 +48,13 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
 
     private final CompanyPhotoMapper companyPhotoMapper;
 
-    public CompanyServiceImpl(CompanyMapper companyMapper, CompanyMapperCustom companyMapperCustom, CompanyPhotoMapper companyPhotoMapper) {
+    private final RedissonClient redissonClient;
+
+    public CompanyServiceImpl(CompanyMapper companyMapper, CompanyMapperCustom companyMapperCustom, CompanyPhotoMapper companyPhotoMapper, RedissonClient redissonClient) {
         this.companyMapper = companyMapper;
         this.companyMapperCustom = companyMapperCustom;
         this.companyPhotoMapper = companyPhotoMapper;
+        this.redissonClient = redissonClient;
     }
 
     @Override
@@ -201,14 +205,38 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
     }
 
     /**
+     * 引入 redisson 处理 分布式锁的 问题
+     * @param modifyCompanyInfoBO
+     * @throws InterruptedException
+     */
+    @Transactional
+    @Override
+    public void modifyCompanyInfo(ModifyCompanyInfoBO modifyCompanyInfoBO) throws InterruptedException {
+
+        String distLockName = "redis_lock";
+        //  使用 redisson 对象获取 锁
+        RLock rLock = redissonClient.getLock(distLockName);
+        //  加锁 （redisson 有自动的 到期续期机制）
+        rLock.lock();
+
+        try {
+            //  当前线程加锁成功，执行业务
+            doModify(modifyCompanyInfoBO);
+        } finally {
+            //  释放锁
+            rLock.unlock();
+        }
+    }
+
+
+    /**
      * app 端修改企业信息接口实现
      * 新增技术点：redis 分布式锁
      *
      * @param modifyCompanyInfoBO
      */
     @Transactional
-    @Override
-    public void modifyCompanyInfo(ModifyCompanyInfoBO modifyCompanyInfoBO) throws InterruptedException {
+    public void modifyCompanyInfo3(ModifyCompanyInfoBO modifyCompanyInfoBO) throws InterruptedException {
 
         String distLockName = "redis_lock";
         String selfLockId = UUID.randomUUID().toString();
