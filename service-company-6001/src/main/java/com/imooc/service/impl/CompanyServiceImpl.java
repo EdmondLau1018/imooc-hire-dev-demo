@@ -215,7 +215,7 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
         String selfLockId = UUID.randomUUID().toString();
 
         //  循环设置 redis 分布式锁
-        while (redis.setnx(distLockName, selfLockId,30)) {
+        while (redis.setnx(distLockName, selfLockId, 30)) {
             Thread.sleep(2000);
         }
         try {
@@ -223,14 +223,25 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
             doModify(modifyCompanyInfoBO);
         } finally {
             //  判断是不是加了锁的线程 如果是 那就释放锁
-            if (redis.get(selfLockId).equalsIgnoreCase(selfLockId)) {
-                redis.del(distLockName);
-            }
+//            if (redis.get(selfLockId).equalsIgnoreCase(selfLockId)) {
+//                redis.del(distLockName);
+//            }
+            //  用 LUA 脚本 删除分布式锁，先获取redis 中对应的key
+            //  判断与 方法传递的 key 是否一致 ，如果一致那就删除这个分布式锁
+            String lockScript =
+                    " if redis.call('get',KEYS[1]) == ARGV[1] "
+                            + " then "
+                            + " return redis.call('del',KEYS[1]) "
+                            + " else "
+                            + " return 0 "
+                            + " end ";
+            redis.execLuaScript(lockScript, selfLockId, distLockName);
         }
     }
 
     /**
      * redis 分布式锁 优化前的代码
+     *
      * @param modifyCompanyInfoBO
      * @throws InterruptedException
      */
@@ -242,7 +253,7 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
         //  给对应的 设置锁的线程 设置 唯一 id 确保只有设置锁的线程才可以释放锁
         String selfLockId = UUID.randomUUID().toString();
         //  在设置 redis 分布式锁的时候新增 过期时间
-        Boolean isLockOK = redis.setnx(distLockName, selfLockId,30);
+        Boolean isLockOK = redis.setnx(distLockName, selfLockId, 30);
         //  2. 判断是否加锁成功（当前线程是否获得锁）
         if (isLockOK) {
             //  3. 执行更新业务流程
