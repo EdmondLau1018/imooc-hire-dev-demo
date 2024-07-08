@@ -213,7 +213,8 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
 
         //  1. 获得锁，值随意只要不为空即可
         String distLockName = "redis_lock";
-        Boolean isLockOK = redis.setnx(distLockName, UUID.randomUUID().toString());
+        //  在设置 redis 分布式锁的时候新增 过期时间
+        Boolean isLockOK = redis.setnx(distLockName, UUID.randomUUID().toString(),30);
 
         //  2. 判断是否加锁成功（当前线程是否获得锁）
         if (isLockOK) {
