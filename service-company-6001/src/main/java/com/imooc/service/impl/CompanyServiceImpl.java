@@ -22,6 +22,7 @@ import com.imooc.service.CompanyService;
 import com.imooc.utils.PagedGridResult;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
+import org.redisson.api.RReadWriteLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -379,6 +380,36 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
                     new UpdateWrapper<CompanyPhoto>()
                             .eq("company_id", companyInfoBO.getCompanyId())
             );
+        }
+    }
+
+    /**
+     * 高并发请求测试读锁和写锁
+     */
+    @Override
+    public void testReadLock() {
+
+        RReadWriteLock lock = redissonClient.getReadWriteLock("redisson-rw-lock");
+        try {
+            lock.readLock().lock();
+            System.out.println("执行读锁的对应流程...");
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void testWriteLock() {
+
+        RReadWriteLock lock = redissonClient.getReadWriteLock("redisson-rw-lock");
+        try {
+            lock.writeLock().lock();
+            System.out.println("执行写锁的对应业务逻辑...");
+        } finally {
+            lock.writeLock().unlock();
         }
     }
 

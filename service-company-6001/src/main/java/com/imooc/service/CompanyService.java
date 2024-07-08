@@ -93,4 +93,11 @@ public interface CompanyService {
      * @param companyInfoBO
      */
     public void savePhotos(ModifyCompanyInfoBO companyInfoBO);
+
+    /**
+     * 高并发请求测试读写锁
+     */
+    public void testReadLock();
+
+    public void testWriteLock();
 }
