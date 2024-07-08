@@ -29,6 +29,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * <p>
@@ -202,11 +203,40 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
 
     /**
      * app 端修改企业信息接口实现
+     * 新增技术点：redis 分布式锁
      *
      * @param modifyCompanyInfoBO
      */
+    @Transactional
     @Override
-    public void modifyCompanyInfo(ModifyCompanyInfoBO modifyCompanyInfoBO) {
+    public void modifyCompanyInfo(ModifyCompanyInfoBO modifyCompanyInfoBO) throws InterruptedException {
+
+        //  1. 获得锁，值随意只要不为空即可
+        String distLockName = "redis_lock";
+        Boolean isLockOK = redis.setnx(distLockName, UUID.randomUUID().toString());
+
+        //  2. 判断是否加锁成功（当前线程是否获得锁）
+        if (isLockOK) {
+            //  3. 执行更新业务流程
+            doModify(modifyCompanyInfoBO);
+            //  4. 执行业务结束，释放锁
+            redis.del(distLockName);
+        } else {
+            //  3-1.    加锁失败 ，重试当前方法
+            //      不要立即重试 ，需要等待一段时间重试
+            Thread.sleep(100);
+            modifyCompanyInfo(modifyCompanyInfoBO);
+        }
+
+        doModify(modifyCompanyInfoBO);
+    }
+
+    /**
+     * 更新 企业信息 业务实现
+     *
+     * @param modifyCompanyInfoBO
+     */
+    public void doModify(ModifyCompanyInfoBO modifyCompanyInfoBO) {
 
         //  校验 企业 id (主键是否为空 )
         String companyId = modifyCompanyInfoBO.getCompanyId();

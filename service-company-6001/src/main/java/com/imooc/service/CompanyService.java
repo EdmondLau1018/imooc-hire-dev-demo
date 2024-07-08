@@ -85,7 +85,7 @@ public interface CompanyService {
      * app 端修改 企业信息接口
      * @param modifyCompanyInfoBO
      */
-    public void modifyCompanyInfo(ModifyCompanyInfoBO modifyCompanyInfoBO);
+    public void modifyCompanyInfo(ModifyCompanyInfoBO modifyCompanyInfoBO) throws InterruptedException;
 
     /**
      * 修改 企业的相册信息
