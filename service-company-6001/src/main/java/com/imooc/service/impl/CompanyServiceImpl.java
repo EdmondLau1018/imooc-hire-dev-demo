@@ -211,6 +211,32 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
     @Override
     public void modifyCompanyInfo(ModifyCompanyInfoBO modifyCompanyInfoBO) throws InterruptedException {
 
+        String distLockName = "redis_lock";
+        String selfLockId = UUID.randomUUID().toString();
+
+        //  循环设置 redis 分布式锁
+        while (redis.setnx(distLockName, selfLockId,30)) {
+            Thread.sleep(2000);
+        }
+        try {
+            //  当前线程加锁成功，执行业务
+            doModify(modifyCompanyInfoBO);
+        } finally {
+            //  判断是不是加了锁的线程 如果是 那就释放锁
+            if (redis.get(selfLockId).equalsIgnoreCase(selfLockId)) {
+                redis.del(distLockName);
+            }
+        }
+    }
+
+    /**
+     * redis 分布式锁 优化前的代码
+     * @param modifyCompanyInfoBO
+     * @throws InterruptedException
+     */
+    @Transactional
+    public void modifyCompanyInfo2(ModifyCompanyInfoBO modifyCompanyInfoBO) throws InterruptedException {
+
         //  1. 获得锁，值随意只要不为空即可
         String distLockName = "redis_lock";
         //  给对应的 设置锁的线程 设置 唯一 id 确保只有设置锁的线程才可以释放锁
