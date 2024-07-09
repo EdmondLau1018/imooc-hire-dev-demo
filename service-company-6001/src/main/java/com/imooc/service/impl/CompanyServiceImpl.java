@@ -21,10 +21,7 @@ import com.imooc.pojo.vo.CompanyInfoVO;
 import com.imooc.service.CompanyService;
 import com.imooc.utils.PagedGridResult;
 import org.apache.commons.lang3.StringUtils;
-import org.redisson.api.RLock;
-import org.redisson.api.RReadWriteLock;
-import org.redisson.api.RSemaphore;
-import org.redisson.api.RedissonClient;
+import org.redisson.api.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -456,6 +453,32 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
             e.printStackTrace();
         }
 
+    }
+
+    /**
+     * 闭锁业务测试
+     */
+    @Override
+    public void releaseCar() {
+
+        RCountDownLatch lock = redissonClient.getCountDownLatch("H2SO4_LOCK");
+        //  设置流程继续需要消耗的资源数
+        lock.trySetCount(4);
+        //  等待全部资源数完成 继续执行 或者会进入阻塞状态
+        try {
+            lock.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void doneStepCar(String name) {
+
+        //  获得 之前声明的 闭锁 countDownLatch
+        RCountDownLatch lock = redissonClient.getCountDownLatch("H2SO4-LOCK");
+        // 消耗闭锁中的资源 （待处理的资源数量 -1）
+        lock.countDown();
     }
 
     /**

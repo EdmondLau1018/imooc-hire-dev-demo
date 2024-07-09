@@ -425,4 +425,27 @@ public class CompanyController extends BaseInfoProperties {
         companyService.releaseSemaphore(num);
         return GraceJSONResult.ok();
     }
+
+    /**
+     * CountDownLatch 测试
+     * 声明 redisson 闭锁资源
+     * @return
+     */
+    @GetMapping("/release/car")
+    public GraceJSONResult releaseCar (){
+
+        companyService.releaseCar();
+        return GraceJSONResult.ok();
+    }
+
+    /**
+     * 消费 redisson 闭锁资源
+     * @return
+     */
+    @GetMapping("/doneStep/car")
+    public GraceJSONResult doneStepCar(String name) {
+
+        companyService.doneStepCar("硫酸");
+        return GraceJSONResult.ok();
+    }
 }

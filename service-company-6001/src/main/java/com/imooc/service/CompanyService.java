@@ -108,4 +108,12 @@ public interface CompanyService {
     public void getSemaphore(Integer num);
 
     public void releaseSemaphore(Integer num);
+
+    /**
+     * 闭锁资源声明与消耗测试
+     * 通常用于某些具体流程中
+     */
+    public void releaseCar();
+
+    public void doneStepCar(String name);
 }
