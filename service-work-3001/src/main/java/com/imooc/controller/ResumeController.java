@@ -104,4 +104,17 @@ public class ResumeController extends BaseInfoProperties {
         ResumeWorkExp workExp = resumeService.getWorkExp(workExpId, userId);
         return GraceJSONResult.ok(workExp);
     }
+
+    /**
+     * 删除工作经验详情内容
+     * @param workWxpId
+     * @param userId
+     * @return
+     */
+    @PostMapping("deleteWorkExp")
+    public GraceJSONResult deleteWorkExp(String workWxpId, String userId) {
+
+        resumeService.deleteWorkExp(workWxpId, userId);
+        return GraceJSONResult.ok();
+    }
 }

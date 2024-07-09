@@ -46,9 +46,18 @@ public interface ResumeService {
 
     /**
      * 根据工作经验 id 和用户 id 查询单个用户的工作经验列表
+     *
      * @param workExpId
      * @param userId
      * @return
      */
     public ResumeWorkExp getWorkExp(String workExpId, String userId);
+
+    /**
+     * 删除工作经验详情内容
+     *
+     * @param workExpId
+     * @param userId
+     */
+    public void deleteWorkExp(String workExpId, String userId);
 }

@@ -167,4 +167,22 @@ public class ResumeServiceImpl extends BaseInfoProperties implements ResumeServi
                 .eq("user_id", userId));
         return exp;
     }
+
+    /**
+     * 删除工作经验详情
+     *
+     * @param workExpId
+     * @param userId
+     */
+    @Override
+    public void deleteWorkExp(String workExpId, String userId) {
+
+        //  从数据库中删除工作经验详情
+        resumeWorkExpMapper.delete(new QueryWrapper<ResumeWorkExp>()
+                .eq("id", workExpId)
+                .eq("user_id", userId));
+
+        //  从 redis 中删除 简历信息的缓存
+        redis.del(REDIS_RESUME_INFO + ":" + userId);
+    }
 }
