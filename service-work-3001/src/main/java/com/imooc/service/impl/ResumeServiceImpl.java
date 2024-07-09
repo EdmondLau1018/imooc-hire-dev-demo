@@ -133,10 +133,16 @@ public class ResumeServiceImpl extends BaseInfoProperties implements ResumeServi
                 .eq("resume_id", resume.getId())
                 .orderByDesc("begin_date"));
 
+        //  查询教育经历
+        List<ResumeEducation> resumeEducationList = resumeEducationMapper.selectList(new QueryWrapper<ResumeEducation>()
+                .eq("user_id", userId)
+                .eq("resume_id", resume.getId())
+                .orderByDesc("begin_date"));
+
         //  将工作经验列表信息封装到 对应的 VO 中
         resumeVO.setWorkExpList(resumeWorkExpList);
         resumeVO.setProjectExpList(resumeProjectExpList);
-
+        resumeVO.setEducationList(resumeEducationList);
         return resumeVO;
     }
 
@@ -296,5 +302,22 @@ public class ResumeServiceImpl extends BaseInfoProperties implements ResumeServi
         }
 
         redis.del(REDIS_RESUME_INFO + ":" + editEducationBO.getUserId());
+    }
+
+    /**
+     * 查询用户 教育经历实现方法
+     *
+     * @param eduId
+     * @param userId
+     * @return
+     */
+    @Override
+    public ResumeEducation getEducation(String eduId, String userId) {
+
+        ResumeEducation resumeEducation = resumeEducationMapper.selectOne(new QueryWrapper<ResumeEducation>()
+                .eq("id", eduId)
+                .eq("user_id", userId));
+
+        return resumeEducation;
     }
 }

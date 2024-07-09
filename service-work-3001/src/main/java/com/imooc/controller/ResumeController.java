@@ -168,6 +168,7 @@ public class ResumeController extends BaseInfoProperties {
 
     /**
      * 编辑教育经历
+     *
      * @param editEducationBO
      * @return
      */
@@ -176,5 +177,19 @@ public class ResumeController extends BaseInfoProperties {
 
         resumeService.editEducation(editEducationBO);
         return GraceJSONResult.ok();
+    }
+
+    /**
+     * 查询教育经历详情
+     *
+     * @param eduId
+     * @param userId
+     * @return
+     */
+    @PostMapping("/getEducation")
+    public GraceJSONResult getEducation(String eduId, String userId) {
+
+        ResumeEducation resumeEducation = resumeService.getEducation(eduId, userId);
+        return GraceJSONResult.ok(resumeEducation);
     }
 }

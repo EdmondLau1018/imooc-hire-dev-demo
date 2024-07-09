@@ -1,5 +1,6 @@
 package com.imooc.service;
 
+import com.imooc.pojo.ResumeEducation;
 import com.imooc.pojo.ResumeProjectExp;
 import com.imooc.pojo.ResumeWorkExp;
 import com.imooc.pojo.bo.EditEducationBO;
@@ -82,6 +83,7 @@ public interface ResumeService {
 
     /**
      * 删除项目经验
+     *
      * @param projectExpId
      * @param userId
      */
@@ -89,7 +91,17 @@ public interface ResumeService {
 
     /**
      * 新增或者修改教育经历
+     *
      * @param editEducationBO
      */
     public void editEducation(EditEducationBO editEducationBO);
+
+    /**
+     * 查询用户对应的教育经历
+     *
+     * @param eduId
+     * @param userId
+     * @return
+     */
+    public ResumeEducation getEducation(String eduId, String userId);
 }
