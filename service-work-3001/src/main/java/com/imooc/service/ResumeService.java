@@ -1,6 +1,7 @@
 package com.imooc.service;
 
 import com.imooc.pojo.bo.EditResumeBO;
+import com.imooc.pojo.vo.ResumeVO;
 
 /**
  * <p>
@@ -23,5 +24,12 @@ public interface ResumeService  {
      * @param editResumeBO
      */
     public void modifyResume(EditResumeBO editResumeBO);
+
+    /**
+     * 查询当前用户的 简历信息
+     * @param userId
+     * @return
+     */
+    public ResumeVO getResumeInfo(String userId);
 
 }

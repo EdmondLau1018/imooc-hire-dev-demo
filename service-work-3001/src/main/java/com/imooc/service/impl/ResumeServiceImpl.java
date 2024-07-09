@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.imooc.mapper.ResumeMapper;
 import com.imooc.pojo.Resume;
 import com.imooc.pojo.bo.EditResumeBO;
+import com.imooc.pojo.vo.ResumeVO;
 import com.imooc.service.MqLocalMsgRecordService;
 import com.imooc.service.ResumeService;
 import org.springframework.beans.BeanUtils;
@@ -77,9 +78,25 @@ public class ResumeServiceImpl implements ResumeService {
         resume.setUpdatedTime(LocalDateTime.now());
 
         //  根据 主键 和关联的用户 id 进行更新
-        resumeMapper.update(resume,new QueryWrapper<Resume>()
-                .eq("id",resume.getId())
-                .eq("user_id",resume.getUserId()));
+        resumeMapper.update(resume, new QueryWrapper<Resume>()
+                .eq("id", resume.getId())
+                .eq("user_id", resume.getUserId()));
 
+    }
+
+    /**
+     * 查询当前用户简历信息的实现方法
+     *
+     * @param userId
+     * @return
+     */
+    @Override
+    public ResumeVO getResumeInfo(String userId) {
+
+        ResumeVO resumeVO = new ResumeVO();
+        Resume resume = resumeMapper.selectOne(new QueryWrapper<Resume>()
+                .eq("user_id", userId));
+        BeanUtils.copyProperties(resume, resumeVO);
+        return resumeVO;
     }
 }
