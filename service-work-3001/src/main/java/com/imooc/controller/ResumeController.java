@@ -3,6 +3,7 @@ package com.imooc.controller;
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.pojo.bo.EditResumeBO;
+import com.imooc.pojo.bo.EditWorkExpBO;
 import com.imooc.pojo.vo.ResumeVO;
 import com.imooc.service.ResumeService;
 import com.imooc.utils.GsonUtils;
@@ -73,5 +74,12 @@ public class ResumeController extends BaseInfoProperties {
             redis.set(REDIS_RESUME_INFO + ":" + userId, GsonUtils.object2String(resumeVO));
         }
         return GraceJSONResult.ok(resumeVO);
+    }
+
+    @PostMapping("/editWorkExp")
+    public GraceJSONResult editWorkExp(@RequestBody @Valid EditWorkExpBO editWorkExpBO) {
+
+        resumeService.editWorkExp(editWorkExpBO);
+        return GraceJSONResult.ok();
     }
 }

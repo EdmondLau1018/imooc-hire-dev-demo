@@ -1,6 +1,7 @@
 package com.imooc.service;
 
 import com.imooc.pojo.bo.EditResumeBO;
+import com.imooc.pojo.bo.EditWorkExpBO;
 import com.imooc.pojo.vo.ResumeVO;
 
 /**
@@ -11,25 +12,33 @@ import com.imooc.pojo.vo.ResumeVO;
  * @author Sharn
  * @since 2024-06-20
  */
-public interface ResumeService  {
+public interface ResumeService {
 
     /**
      * 根据 userid 初始化用户简历
+     *
      * @param userId
      */
-    public void initResume(String userId,String msgId);
+    public void initResume(String userId, String msgId);
 
     /**
      * 修改用户简历服务接口
+     *
      * @param editResumeBO
      */
     public void modifyResume(EditResumeBO editResumeBO);
 
     /**
      * 查询当前用户的 简历信息
+     *
      * @param userId
      * @return
      */
     public ResumeVO getResumeInfo(String userId);
 
+    /**
+     * 修改工作经验  业务接口
+     * @param editWorkExpBO
+     */
+    public void editWorkExp(EditWorkExpBO editWorkExpBO);
 }

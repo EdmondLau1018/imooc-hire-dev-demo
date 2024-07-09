@@ -2,6 +2,7 @@ package com.imooc.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.imooc.pojo.ResumeWorkExp;
+import org.springframework.stereotype.Repository;
 
 /**
  * <p>
@@ -11,6 +12,7 @@ import com.imooc.pojo.ResumeWorkExp;
  * @author Sharn
  * @since 2024-07-01
  */
+@Repository
 public interface ResumeWorkExpMapper extends BaseMapper<ResumeWorkExp> {
 
 }
