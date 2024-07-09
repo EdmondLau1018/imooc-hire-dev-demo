@@ -233,6 +233,7 @@ public class ResumeServiceImpl extends BaseInfoProperties implements ResumeServi
 
     /**
      * 查询项目经验详情 业务实现
+     *
      * @param projectExpId
      * @param userId
      * @return
@@ -244,5 +245,21 @@ public class ResumeServiceImpl extends BaseInfoProperties implements ResumeServi
                 eq("id", projectExpId)
                 .eq("user_id", userId));
         return exp;
+    }
+
+    /**
+     * 删除项目经验
+     *
+     * @param projectExpId
+     * @param userId
+     */
+    @Override
+    public void deleteProjectExp(String projectExpId, String userId) {
+
+        resumeProjectExpMapper.delete(new QueryWrapper<ResumeProjectExp>()
+                .eq("id", projectExpId)
+                .eq("user_id", userId));
+
+        redis.del(REDIS_RESUME_INFO + ":" + userId);
     }
 }

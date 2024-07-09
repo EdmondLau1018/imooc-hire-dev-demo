@@ -65,15 +65,24 @@ public interface ResumeService {
 
     /**
      * 新增 编辑 项目经验业务接口
+     *
      * @param editProjectExpBO
      */
     public void editProjectExp(EditProjectExpBO editProjectExpBO);
 
     /**
      * 查询项目经验 详情业务接口
+     *
      * @param projectExpId
      * @param userId
      * @return
      */
-    public ResumeProjectExp getProjectExp(String projectExpId,String userId);
+    public ResumeProjectExp getProjectExp(String projectExpId, String userId);
+
+    /**
+     * 删除项目经验
+     * @param projectExpId
+     * @param userId
+     */
+    public void deleteProjectExp(String projectExpId, String userId);
 }

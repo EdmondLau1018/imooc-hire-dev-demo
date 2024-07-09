@@ -149,4 +149,18 @@ public class ResumeController extends BaseInfoProperties {
 
         return GraceJSONResult.ok(exp);
     }
+
+    /**
+     * 删除用户项目经验信息接口
+     *
+     * @param projectId
+     * @param userId
+     * @return
+     */
+    @PostMapping("/deleteProjectExp")
+    public GraceJSONResult deleteProjectExp(String projectId, String userId) {
+
+        resumeService.deleteProjectExp(projectId, userId);
+        return GraceJSONResult.ok();
+    }
 }
