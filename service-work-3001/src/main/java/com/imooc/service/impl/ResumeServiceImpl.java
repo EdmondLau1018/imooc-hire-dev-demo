@@ -2,12 +2,15 @@ package com.imooc.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.imooc.base.BaseInfoProperties;
+import com.imooc.mapper.ResumeEducationMapper;
 import com.imooc.mapper.ResumeMapper;
 import com.imooc.mapper.ResumeProjectExpMapper;
 import com.imooc.mapper.ResumeWorkExpMapper;
 import com.imooc.pojo.Resume;
+import com.imooc.pojo.ResumeEducation;
 import com.imooc.pojo.ResumeProjectExp;
 import com.imooc.pojo.ResumeWorkExp;
+import com.imooc.pojo.bo.EditEducationBO;
 import com.imooc.pojo.bo.EditProjectExpBO;
 import com.imooc.pojo.bo.EditResumeBO;
 import com.imooc.pojo.bo.EditWorkExpBO;
@@ -33,11 +36,14 @@ public class ResumeServiceImpl extends BaseInfoProperties implements ResumeServi
 
     private final ResumeProjectExpMapper resumeProjectExpMapper;
 
-    public ResumeServiceImpl(ResumeMapper resumeMapper, MqLocalMsgRecordService recordService, ResumeWorkExpMapper resumeWorkExpMapper, ResumeProjectExpMapper resumeProjectExpMapper) {
+    private final ResumeEducationMapper resumeEducationMapper;
+
+    public ResumeServiceImpl(ResumeMapper resumeMapper, MqLocalMsgRecordService recordService, ResumeWorkExpMapper resumeWorkExpMapper, ResumeProjectExpMapper resumeProjectExpMapper, ResumeEducationMapper resumeEducationMapper) {
         this.resumeMapper = resumeMapper;
         this.recordService = recordService;
         this.resumeWorkExpMapper = resumeWorkExpMapper;
         this.resumeProjectExpMapper = resumeProjectExpMapper;
+        this.resumeEducationMapper = resumeEducationMapper;
     }
 
 //    /**
@@ -261,5 +267,34 @@ public class ResumeServiceImpl extends BaseInfoProperties implements ResumeServi
                 .eq("user_id", userId));
 
         redis.del(REDIS_RESUME_INFO + ":" + userId);
+    }
+
+    /**
+     * 新增 或者 修改实现方法
+     *
+     * @param editEducationBO
+     */
+    @Transactional
+    @Override
+    public void editEducation(EditEducationBO editEducationBO) {
+
+        ResumeEducation resumeEducation = new ResumeEducation();
+        BeanUtils.copyProperties(editEducationBO, resumeEducation);
+
+        resumeEducation.setUpdatedTime(LocalDateTime.now());
+
+        if (StringUtils.isBlank(resumeEducation.getId())) {
+            //  执行新增流程
+            resumeEducation.setCreateTime(LocalDateTime.now());
+            resumeEducationMapper.insert(resumeEducation);
+        } else {
+            //  执行更新流程
+            resumeEducationMapper.update(resumeEducation, new QueryWrapper<ResumeEducation>()
+                    .eq("id", editEducationBO.getId())
+                    .eq("user_id", editEducationBO.getUserId())
+                    .eq("resume_id", editEducationBO.getResumeId()));
+        }
+
+        redis.del(REDIS_RESUME_INFO + ":" + editEducationBO.getUserId());
     }
 }

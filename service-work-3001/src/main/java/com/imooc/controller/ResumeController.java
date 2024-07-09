@@ -2,8 +2,10 @@ package com.imooc.controller;
 
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.grace.result.GraceJSONResult;
+import com.imooc.pojo.ResumeEducation;
 import com.imooc.pojo.ResumeProjectExp;
 import com.imooc.pojo.ResumeWorkExp;
+import com.imooc.pojo.bo.EditEducationBO;
 import com.imooc.pojo.bo.EditProjectExpBO;
 import com.imooc.pojo.bo.EditResumeBO;
 import com.imooc.pojo.bo.EditWorkExpBO;
@@ -161,6 +163,18 @@ public class ResumeController extends BaseInfoProperties {
     public GraceJSONResult deleteProjectExp(String projectId, String userId) {
 
         resumeService.deleteProjectExp(projectId, userId);
+        return GraceJSONResult.ok();
+    }
+
+    /**
+     * 编辑教育经历
+     * @param editEducationBO
+     * @return
+     */
+    @PostMapping("/editEducation")
+    public GraceJSONResult editEducation(@RequestBody @Valid EditEducationBO editEducationBO) {
+
+        resumeService.editEducation(editEducationBO);
         return GraceJSONResult.ok();
     }
 }
