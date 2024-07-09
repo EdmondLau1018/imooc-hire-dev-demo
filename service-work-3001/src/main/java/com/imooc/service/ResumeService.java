@@ -1,6 +1,7 @@
 package com.imooc.service;
 
 import com.imooc.pojo.ResumeWorkExp;
+import com.imooc.pojo.bo.EditProjectExpBO;
 import com.imooc.pojo.bo.EditResumeBO;
 import com.imooc.pojo.bo.EditWorkExpBO;
 import com.imooc.pojo.vo.ResumeVO;
@@ -60,4 +61,10 @@ public interface ResumeService {
      * @param userId
      */
     public void deleteWorkExp(String workExpId, String userId);
+
+    /**
+     * 新增 编辑 项目经验业务接口
+     * @param editProjectExpBO
+     */
+    public void editProjectExp(EditProjectExpBO editProjectExpBO);
 }

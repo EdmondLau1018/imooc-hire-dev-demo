@@ -3,9 +3,12 @@ package com.imooc.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.mapper.ResumeMapper;
+import com.imooc.mapper.ResumeProjectExpMapper;
 import com.imooc.mapper.ResumeWorkExpMapper;
 import com.imooc.pojo.Resume;
+import com.imooc.pojo.ResumeProjectExp;
 import com.imooc.pojo.ResumeWorkExp;
+import com.imooc.pojo.bo.EditProjectExpBO;
 import com.imooc.pojo.bo.EditResumeBO;
 import com.imooc.pojo.bo.EditWorkExpBO;
 import com.imooc.pojo.vo.ResumeVO;
@@ -28,10 +31,13 @@ public class ResumeServiceImpl extends BaseInfoProperties implements ResumeServi
 
     private final ResumeWorkExpMapper resumeWorkExpMapper;
 
-    public ResumeServiceImpl(ResumeMapper resumeMapper, MqLocalMsgRecordService recordService, ResumeWorkExpMapper resumeWorkExpMapper) {
+    private final ResumeProjectExpMapper resumeProjectExpMapper;
+
+    public ResumeServiceImpl(ResumeMapper resumeMapper, MqLocalMsgRecordService recordService, ResumeWorkExpMapper resumeWorkExpMapper, ResumeProjectExpMapper resumeProjectExpMapper) {
         this.resumeMapper = resumeMapper;
         this.recordService = recordService;
         this.resumeWorkExpMapper = resumeWorkExpMapper;
+        this.resumeProjectExpMapper = resumeProjectExpMapper;
     }
 
 //    /**
@@ -184,5 +190,36 @@ public class ResumeServiceImpl extends BaseInfoProperties implements ResumeServi
 
         //  从 redis 中删除 简历信息的缓存
         redis.del(REDIS_RESUME_INFO + ":" + userId);
+    }
+
+    /**
+     * 新增 编辑项目经验业务实现
+     *
+     * @param editProjectExpBO
+     */
+    @Transactional
+    @Override
+    public void editProjectExp(EditProjectExpBO editProjectExpBO) {
+
+        ResumeProjectExp resumeProjectExp = new ResumeProjectExp();
+        BeanUtils.copyProperties(editProjectExpBO, resumeProjectExp);
+
+        resumeProjectExp.setUpdatedTime(LocalDateTime.now());
+
+        //  判断当前的 项目经验 对象是否存在 id 如果存在则 更新 不存在则新增
+        if (StringUtils.isBlank(resumeProjectExp.getId())) {
+            //  执行新增流程
+            resumeProjectExp.setCreateTime(LocalDateTime.now());
+            resumeProjectExpMapper.insert(resumeProjectExp);
+        } else {
+            //  执行更新流程
+            resumeProjectExpMapper.update(resumeProjectExp, new QueryWrapper<ResumeProjectExp>()
+                    .eq("id", editProjectExpBO.getId())
+                    .eq("user_id", editProjectExpBO.getUserId())
+                    .eq("resume_id", editProjectExpBO.getResumeId()));
+        }
+
+        //  删除 redis 中存储的简历信息缓存
+        redis.del(REDIS_RESUME_INFO + ":" + editProjectExpBO.getUserId());
     }
 }
