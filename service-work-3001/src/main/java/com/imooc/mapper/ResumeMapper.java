@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
  * </p>
  *
  * @author Sharn
- * @since 2024-06-20
+ * @since 2024-07-01
  */
 @Repository
 public interface ResumeMapper extends BaseMapper<Resume> {
