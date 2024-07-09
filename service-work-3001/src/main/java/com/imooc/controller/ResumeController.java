@@ -2,6 +2,7 @@ package com.imooc.controller;
 
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.grace.result.GraceJSONResult;
+import com.imooc.pojo.ResumeWorkExp;
 import com.imooc.pojo.bo.EditResumeBO;
 import com.imooc.pojo.bo.EditWorkExpBO;
 import com.imooc.pojo.vo.ResumeVO;
@@ -53,6 +54,7 @@ public class ResumeController extends BaseInfoProperties {
 
     /**
      * 根据当前  userId 获取用户简历信息
+     *
      * @param userId
      * @return
      */
@@ -76,10 +78,30 @@ public class ResumeController extends BaseInfoProperties {
         return GraceJSONResult.ok(resumeVO);
     }
 
+    /**
+     * 修改 用户工作经验接口
+     *
+     * @param editWorkExpBO
+     * @return
+     */
     @PostMapping("/editWorkExp")
     public GraceJSONResult editWorkExp(@RequestBody @Valid EditWorkExpBO editWorkExpBO) {
 
         resumeService.editWorkExp(editWorkExpBO);
         return GraceJSONResult.ok();
+    }
+
+    /**
+     * 获取单个用户工作经验详情接口
+     *
+     * @param workExpId
+     * @param userId
+     * @return
+     */
+    @PostMapping("/getWorkExp")
+    public GraceJSONResult getWorkExp(String workExpId, String userId) {
+
+        ResumeWorkExp workExp = resumeService.getWorkExp(workExpId, userId);
+        return GraceJSONResult.ok(workExp);
     }
 }

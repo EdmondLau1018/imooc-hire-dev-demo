@@ -1,5 +1,6 @@
 package com.imooc.service;
 
+import com.imooc.pojo.ResumeWorkExp;
 import com.imooc.pojo.bo.EditResumeBO;
 import com.imooc.pojo.bo.EditWorkExpBO;
 import com.imooc.pojo.vo.ResumeVO;
@@ -38,7 +39,16 @@ public interface ResumeService {
 
     /**
      * 修改工作经验  业务接口
+     *
      * @param editWorkExpBO
      */
     public void editWorkExp(EditWorkExpBO editWorkExpBO);
+
+    /**
+     * 根据工作经验 id 和用户 id 查询单个用户的工作经验列表
+     * @param workExpId
+     * @param userId
+     * @return
+     */
+    public ResumeWorkExp getWorkExp(String workExpId, String userId);
 }

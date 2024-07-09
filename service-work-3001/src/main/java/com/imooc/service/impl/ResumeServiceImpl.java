@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class ResumeServiceImpl extends BaseInfoProperties implements ResumeService {
@@ -102,9 +103,20 @@ public class ResumeServiceImpl extends BaseInfoProperties implements ResumeServi
     public ResumeVO getResumeInfo(String userId) {
 
         ResumeVO resumeVO = new ResumeVO();
+
+        //  查询简历信息
         Resume resume = resumeMapper.selectOne(new QueryWrapper<Resume>()
                 .eq("user_id", userId));
         BeanUtils.copyProperties(resume, resumeVO);
+
+        //  查询工作经验信息
+        List<ResumeWorkExp> resumeWorkExpList = resumeWorkExpMapper.selectList(new QueryWrapper<ResumeWorkExp>()
+                .eq("user_id", userId)
+                .eq("resume_id", resume.getId())
+                .orderByDesc("begin_date"));
+
+        //  将工作经验列表信息封装到 对应的 VO 中
+        resumeVO.setWorkExpList(resumeWorkExpList);
         return resumeVO;
     }
 
@@ -138,5 +150,21 @@ public class ResumeServiceImpl extends BaseInfoProperties implements ResumeServi
 
         //  删除redis 中的简历信息 等待查询的时候会自动填充
         redis.del(REDIS_RESUME_INFO + ":" + editWorkExpBO.getUserId());
+    }
+
+    /**
+     * 查询单个用户的工作经验列表
+     *
+     * @param workExpId
+     * @param userId
+     * @return
+     */
+    @Override
+    public ResumeWorkExp getWorkExp(String workExpId, String userId) {
+
+        ResumeWorkExp exp = resumeWorkExpMapper.selectOne(new QueryWrapper<ResumeWorkExp>()
+                .eq("id", workExpId)
+                .eq("user_id", userId));
+        return exp;
     }
 }
