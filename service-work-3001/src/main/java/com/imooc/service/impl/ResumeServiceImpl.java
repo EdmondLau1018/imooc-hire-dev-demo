@@ -121,8 +121,16 @@ public class ResumeServiceImpl extends BaseInfoProperties implements ResumeServi
                 .eq("resume_id", resume.getId())
                 .orderByDesc("begin_date"));
 
+        //  查询项目经验信息
+        List<ResumeProjectExp> resumeProjectExpList = resumeProjectExpMapper.selectList(new QueryWrapper<ResumeProjectExp>()
+                .eq("user_id", userId)
+                .eq("resume_id", resume.getId())
+                .orderByDesc("begin_date"));
+
         //  将工作经验列表信息封装到 对应的 VO 中
         resumeVO.setWorkExpList(resumeWorkExpList);
+        resumeVO.setProjectExpList(resumeProjectExpList);
+
         return resumeVO;
     }
 
@@ -221,5 +229,20 @@ public class ResumeServiceImpl extends BaseInfoProperties implements ResumeServi
 
         //  删除 redis 中存储的简历信息缓存
         redis.del(REDIS_RESUME_INFO + ":" + editProjectExpBO.getUserId());
+    }
+
+    /**
+     * 查询项目经验详情 业务实现
+     * @param projectExpId
+     * @param userId
+     * @return
+     */
+    @Override
+    public ResumeProjectExp getProjectExp(String projectExpId, String userId) {
+
+        ResumeProjectExp exp = resumeProjectExpMapper.selectOne(new QueryWrapper<ResumeProjectExp>().
+                eq("id", projectExpId)
+                .eq("user_id", userId));
+        return exp;
     }
 }

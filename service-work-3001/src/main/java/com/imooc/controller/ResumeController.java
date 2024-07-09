@@ -2,6 +2,7 @@ package com.imooc.controller;
 
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.grace.result.GraceJSONResult;
+import com.imooc.pojo.ResumeProjectExp;
 import com.imooc.pojo.ResumeWorkExp;
 import com.imooc.pojo.bo.EditProjectExpBO;
 import com.imooc.pojo.bo.EditResumeBO;
@@ -108,6 +109,7 @@ public class ResumeController extends BaseInfoProperties {
 
     /**
      * 删除工作经验详情内容
+     *
      * @param workWxpId
      * @param userId
      * @return
@@ -121,6 +123,7 @@ public class ResumeController extends BaseInfoProperties {
 
     /**
      * 新增或者 更新项目经验 接口
+     *
      * @param editProjectExpBO
      * @return
      */
@@ -129,5 +132,21 @@ public class ResumeController extends BaseInfoProperties {
 
         resumeService.editProjectExp(editProjectExpBO);
         return GraceJSONResult.ok();
+    }
+
+
+    /**
+     * 查询 工作项目经验 列表
+     *
+     * @param projectExpId
+     * @param userId
+     * @return
+     */
+    @PostMapping("/getProjectExp")
+    public GraceJSONResult getProjectExp(String projectExpId, String userId) {
+
+        ResumeProjectExp exp = resumeService.getProjectExp(projectExpId, userId);
+
+        return GraceJSONResult.ok(exp);
     }
 }
