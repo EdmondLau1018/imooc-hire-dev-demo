@@ -2,18 +2,9 @@ package com.imooc.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.imooc.base.BaseInfoProperties;
-import com.imooc.mapper.ResumeEducationMapper;
-import com.imooc.mapper.ResumeMapper;
-import com.imooc.mapper.ResumeProjectExpMapper;
-import com.imooc.mapper.ResumeWorkExpMapper;
-import com.imooc.pojo.Resume;
-import com.imooc.pojo.ResumeEducation;
-import com.imooc.pojo.ResumeProjectExp;
-import com.imooc.pojo.ResumeWorkExp;
-import com.imooc.pojo.bo.EditEducationBO;
-import com.imooc.pojo.bo.EditProjectExpBO;
-import com.imooc.pojo.bo.EditResumeBO;
-import com.imooc.pojo.bo.EditWorkExpBO;
+import com.imooc.mapper.*;
+import com.imooc.pojo.*;
+import com.imooc.pojo.bo.*;
 import com.imooc.pojo.vo.ResumeVO;
 import com.imooc.service.MqLocalMsgRecordService;
 import com.imooc.service.ResumeService;
@@ -38,12 +29,15 @@ public class ResumeServiceImpl extends BaseInfoProperties implements ResumeServi
 
     private final ResumeEducationMapper resumeEducationMapper;
 
-    public ResumeServiceImpl(ResumeMapper resumeMapper, MqLocalMsgRecordService recordService, ResumeWorkExpMapper resumeWorkExpMapper, ResumeProjectExpMapper resumeProjectExpMapper, ResumeEducationMapper resumeEducationMapper) {
+    private final ResumeExpectMapper resumeExpectMapper;
+
+    public ResumeServiceImpl(ResumeMapper resumeMapper, MqLocalMsgRecordService recordService, ResumeWorkExpMapper resumeWorkExpMapper, ResumeProjectExpMapper resumeProjectExpMapper, ResumeEducationMapper resumeEducationMapper, ResumeExpectMapper resumeExpectMapper) {
         this.resumeMapper = resumeMapper;
         this.recordService = recordService;
         this.resumeWorkExpMapper = resumeWorkExpMapper;
         this.resumeProjectExpMapper = resumeProjectExpMapper;
         this.resumeEducationMapper = resumeEducationMapper;
+        this.resumeExpectMapper = resumeExpectMapper;
     }
 
 //    /**
@@ -336,5 +330,33 @@ public class ResumeServiceImpl extends BaseInfoProperties implements ResumeServi
 
         //  删除缓存中存储的内容
         redis.del(REDIS_RESUME_INFO + ":" + userId);
+    }
+
+    /**
+     * 编辑求职期望实现方法
+     *
+     * @param editResumeExpectBO
+     */
+    @Transactional
+    @Override
+    public void editResumeExpect(EditResumeExpectBO editResumeExpectBO) {
+
+        ResumeExpect resumeExpect = new ResumeExpect();
+        BeanUtils.copyProperties(editResumeExpectBO, resumeExpect);
+
+        resumeExpect.setUpdatedTime(LocalDateTime.now());
+
+        if (StringUtils.isBlank(resumeExpect.getId())) {
+            //  执行新增流程
+            resumeExpectMapper.insert(resumeExpect);
+        } else {
+            //  执行更新流程
+            resumeExpectMapper.update(resumeExpect, new QueryWrapper<ResumeExpect>()
+                    .eq("id", editResumeExpectBO.getId())
+                    .eq("user_id", editResumeExpectBO.getUserId())
+                    .eq("resume_id", editResumeExpectBO.getResumeId()));
+
+            redis.del(REDIS_RESUME_INFO + ":" + editResumeExpectBO.getUserId());
+        }
     }
 }
