@@ -8,6 +8,7 @@ import com.imooc.pojo.bo.*;
 import com.imooc.pojo.vo.ResumeVO;
 import com.imooc.service.MqLocalMsgRecordService;
 import com.imooc.service.ResumeService;
+import com.imooc.utils.GsonUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -358,5 +359,32 @@ public class ResumeServiceImpl extends BaseInfoProperties implements ResumeServi
 
             redis.del(REDIS_RESUME_INFO + ":" + editResumeExpectBO.getUserId());
         }
+    }
+
+    /**
+     * 查询我的期望列表
+     *
+     * @param resumeId
+     * @param userId
+     * @return
+     */
+    @Override
+    public List<ResumeExpect> getMyResumeExpect(String resumeId, String userId) {
+
+        //  查询 redis 如果查询到了 就类型转换 如果 redis 中没有相关记录 就从 DB 中查询
+        String myResumeExpectListJson = redis.get(REDIS_RESUME_EXPECT + ":" + userId);
+        List<ResumeExpect> resumeExpectList = null;
+
+        //  判断当前从 缓存中读取的内容是否从存在
+        if (StringUtils.isNotBlank(myResumeExpectListJson)) {
+            //   对象类型转换
+            resumeExpectList = GsonUtils.stringToListAnother(myResumeExpectListJson, ResumeExpect.class);
+        } else {
+            //  从 DB 中查询相关信息
+            resumeExpectList = resumeExpectMapper.selectList(new QueryWrapper<ResumeExpect>()
+                    .eq("id", resumeId)
+                    .eq("user_id", userId));
+        }
+        return resumeExpectList;
     }
 }

@@ -192,6 +192,7 @@ public class ResumeController extends BaseInfoProperties {
 
     /**
      * 删除教育经历详情
+     *
      * @param eduId
      * @param userId
      * @return
@@ -205,6 +206,7 @@ public class ResumeController extends BaseInfoProperties {
 
     /**
      * 编辑求职期望
+     *
      * @param resumeExpectBO
      * @return
      */
@@ -212,6 +214,19 @@ public class ResumeController extends BaseInfoProperties {
     public GraceJSONResult editJobExpect(@RequestBody @Valid EditResumeExpectBO resumeExpectBO) {
 
         resumeService.editResumeExpect(resumeExpectBO);
+
+        return GraceJSONResult.ok();
+    }
+
+    /**
+     * @param resumeId
+     * @param userId
+     * @return
+     */
+    @PostMapping("/getMyResumeExpectList")
+    public GraceJSONResult getMyResumeExpectList(String resumeId, String userId) {
+
+        resumeService.getMyResumeExpect(resumeId, userId);
 
         return GraceJSONResult.ok();
     }

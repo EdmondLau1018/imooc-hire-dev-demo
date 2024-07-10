@@ -1,10 +1,13 @@
 package com.imooc.service;
 
 import com.imooc.pojo.ResumeEducation;
+import com.imooc.pojo.ResumeExpect;
 import com.imooc.pojo.ResumeProjectExp;
 import com.imooc.pojo.ResumeWorkExp;
 import com.imooc.pojo.bo.*;
 import com.imooc.pojo.vo.ResumeVO;
+
+import java.util.List;
 
 /**
  * <p>
@@ -104,6 +107,7 @@ public interface ResumeService {
 
     /**
      * 删除教育经历
+     *
      * @param eduId
      * @param userId
      */
@@ -111,7 +115,16 @@ public interface ResumeService {
 
     /**
      * 编辑求职期望
+     *
      * @param editResumeExpectBO
      */
     public void editResumeExpect(EditResumeExpectBO editResumeExpectBO);
+
+    /**
+     * 查询我的期望列表
+     * @param resumeId
+     * @param userId
+     * @return
+     */
+    public List<ResumeExpect> getMyResumeExpect(String resumeId, String userId);
 }
