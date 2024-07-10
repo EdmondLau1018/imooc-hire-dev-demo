@@ -2,6 +2,7 @@ package com.imooc.controller;
 
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.grace.result.GraceJSONResult;
+import com.imooc.grace.result.ResponseStatusEnum;
 import com.imooc.pojo.ResumeEducation;
 import com.imooc.pojo.ResumeProjectExp;
 import com.imooc.pojo.ResumeWorkExp;
@@ -9,6 +10,7 @@ import com.imooc.pojo.bo.*;
 import com.imooc.pojo.vo.ResumeVO;
 import com.imooc.service.ResumeService;
 import com.imooc.utils.GsonUtils;
+import com.imooc.utils.LocalDateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -233,6 +235,7 @@ public class ResumeController extends BaseInfoProperties {
 
     /**
      * 求职期望删除
+     *
      * @param resumeExpectId
      * @param userId
      * @return
@@ -241,6 +244,49 @@ public class ResumeController extends BaseInfoProperties {
     public GraceJSONResult deleteMyResumeExpect(String resumeExpectId, String userId) {
 
         resumeService.deleteMyResumeExpect(resumeExpectId, userId);
+
+        return GraceJSONResult.ok();
+    }
+
+    /**
+     * 刷新简历接口
+     *
+     * @param userId
+     * @param resumeId
+     * @return
+     */
+    @PostMapping("/refresh")
+    public GraceJSONResult refreshResume(String userId, String resumeId) {
+
+        //  假设从 feign 中获取系统参数中配置的 最大刷新简历次数
+        int maxResumeRefreshCounts = 3;
+
+        //  从 redis 中 获取当天 已刷新的次数 ，如果大于等于该系统参数配置的次数则返回错误 如果小于这个次数则可以刷新
+        String localDateStr = LocalDateUtils.getLocalDateStr();
+        int userAlreadyRefreshedCounts = 0;
+        //  获取当前用户 今日 刷新简历的次数
+        String userAlreadyRefreshedCountsStr = redis.get(USER_ALREADY_REFRESHED_COUNTS + ":" + localDateStr + ":" + userId);
+        //  为空 则表示 当前用户今天没有刷新过简历 设置 0 这个缓存只有在当天才会被查询，设置 24 小时的缓存时间
+        if (StringUtils.isBlank(userAlreadyRefreshedCountsStr)) {
+
+            redis.set(USER_ALREADY_REFRESHED_COUNTS + ":" + localDateStr + ":" + userId,
+                    userAlreadyRefreshedCounts + "",
+                    24 * 60 * 60);
+        } else {
+
+            //  不为空 ，直接将缓存中存储的 数量转换成 int进行判断
+            userAlreadyRefreshedCounts = Integer.valueOf(userAlreadyRefreshedCountsStr);
+        }
+
+        //  如果当前 简历刷新次数小于系统参数 则 将信息保存到数据库中并刷新到 redis 中
+        if (userAlreadyRefreshedCounts <= maxResumeRefreshCounts) {
+            resumeService.refreshResume(userId, resumeId);
+            //  redis 信息同步
+            redis.increment(USER_ALREADY_REFRESHED_COUNTS + ":" + localDateStr + ":" + userId, 1);
+        } else {
+            //  刷新次数超过限制 抛出超限提示 返回错误信息
+            return GraceJSONResult.errorCustom(ResponseStatusEnum.RESUME_MAX_LIMIT_ERROR);
+        }
 
         return GraceJSONResult.ok();
     }

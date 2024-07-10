@@ -404,4 +404,21 @@ public class ResumeServiceImpl extends BaseInfoProperties implements ResumeServi
         //  从 redis 中删除相关内容
         redis.del(REDIS_RESUME_INFO + ":" + userId);
     }
+
+    /**
+     * 刷新简历业务实现函数
+     * @param userId
+     * @param resumeId
+     */
+    @Transactional
+    @Override
+    public void refreshResume(String userId, String resumeId) {
+
+        EditResumeBO editResumeBO = new EditResumeBO();
+        editResumeBO.setId(resumeId);
+        editResumeBO.setUserId(userId);
+
+        editResumeBO.setRefreshTime(LocalDateTime.now());
+        this.modifyResume(editResumeBO);
+    }
 }

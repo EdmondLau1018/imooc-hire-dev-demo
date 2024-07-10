@@ -135,4 +135,11 @@ public interface ResumeService {
      * @param userId
      */
     public void deleteMyResumeExpect(String resumeId, String userId);
+
+    /**
+     *  简历刷新业务接口
+     * @param userId
+     * @param resumeId
+     */
+    public void refreshResume(String userId,String resumeId);
 }
