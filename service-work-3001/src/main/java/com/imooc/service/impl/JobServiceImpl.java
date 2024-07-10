@@ -8,6 +8,7 @@ import com.imooc.mapper.JobMapper;
 import com.imooc.pojo.Job;
 import com.imooc.pojo.bo.EditJobBO;
 import com.imooc.service.JobService;
+import com.imooc.utils.GsonUtils;
 import com.imooc.utils.PagedGridResult;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -99,6 +100,41 @@ public class JobServiceImpl extends BaseInfoProperties implements JobService {
         //  从 DB 查询对应的 岗位列表
         List<Job> jobList = jobMapper.selectList(jobQueryWrapper);
         return setterPagedGrid(jobList, page);
+    }
+
+    /**
+     * 根据 id 查询尊位详情
+     *
+     * @param companyId
+     * @param hrId
+     * @param jobId
+     * @return
+     */
+    @Override
+    public Job queryHrJobDetail(String companyId, String hrId, String jobId) {
+
+        //  定义不同状态 在数据库中存储的值
+        Integer[] status = {1, 2, 3};
+
+        QueryWrapper<Job> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("id", jobId);
+
+        if (StringUtils.isNotBlank(companyId)) {
+            queryWrapper.eq("company_id", companyId);
+        }
+
+        if (StringUtils.isNotBlank(hrId)) {
+            queryWrapper.eq("hr_id", hrId);
+        }
+
+        queryWrapper.in("status", status);
+
+        Job job = jobMapper.selectOne(queryWrapper);
+
+        //  将查询到的结果设置在缓存中
+        redis.set(REDIS_JOB_DETAIL + ":" + companyId + ":" + hrId + ":" + jobId,
+                GsonUtils.object2String(job));
+        return job;
     }
 
 

@@ -2,8 +2,10 @@ package com.imooc.controller;
 
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.grace.result.GraceJSONResult;
+import com.imooc.pojo.Job;
 import com.imooc.pojo.bo.EditJobBO;
 import com.imooc.service.JobService;
+import com.imooc.utils.GsonUtils;
 import com.imooc.utils.PagedGridResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -57,6 +59,35 @@ public class JobController extends BaseInfoProperties {
         PagedGridResult gridResult = jobService.queryHrJobList(hrId, companyId, page, limit, status);
 
         return GraceJSONResult.ok(gridResult);
+    }
+
+    /**
+     * @param jobId
+     * @param hrId
+     * @param companyId
+     * @return
+     */
+    @PostMapping("/hr/jobDetail")
+    public GraceJSONResult hrJobDetail(String jobId, String hrId, String companyId) {
+
+        //  参数校验
+        if (StringUtils.isBlank(jobId) ||
+                StringUtils.isBlank(hrId) ||
+                StringUtils.isBlank(companyId))
+            return GraceJSONResult.error();
+
+        //  从 redis 中查询对应的信息
+        String jobDetailStr = redis.get(REDIS_JOB_DETAIL + ":" + companyId + ":" + hrId + ":" + jobId);
+
+        Job job = null;
+        if (StringUtils.isBlank(jobDetailStr)) {
+            //  从 缓存中未查询出数据 从 DB中进行查询
+            job = jobService.queryHrJobDetail(jobId, hrId, companyId);
+        } else {
+            job = GsonUtils.stringToBean(jobDetailStr, Job.class);
+        }
+
+        return GraceJSONResult.ok(job);
     }
 
 }

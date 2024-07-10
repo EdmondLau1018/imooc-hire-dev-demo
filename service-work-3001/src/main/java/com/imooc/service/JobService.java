@@ -24,6 +24,7 @@ public interface JobService {
 
     /**
      * hr 查询发布的工作机会 列表
+     *
      * @param hrId
      * @param companyId
      * @param page
@@ -32,4 +33,13 @@ public interface JobService {
      * @return
      */
     public PagedGridResult queryHrJobList(String hrId, String companyId, Integer page, Integer pageSize, Integer status);
+
+    /**
+     * 查询工作机会 详情业务接口
+     * @param companyId
+     * @param hrId
+     * @param jobId
+     * @return
+     */
+    public Job queryHrJobDetail(String companyId, String hrId, String jobId);
 }
