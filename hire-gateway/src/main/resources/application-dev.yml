@@ -41,7 +41,7 @@ spring:
         - id: workRoute
           uri: lb://work-service
           predicates:
-            - Path=/resume/**
+            - Path=/resume/**,/job/**
         - id: fileRoute
           uri: lb://file-service
           predicates:
