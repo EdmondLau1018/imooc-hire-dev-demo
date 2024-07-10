@@ -192,4 +192,17 @@ public class ResumeController extends BaseInfoProperties {
         ResumeEducation resumeEducation = resumeService.getEducation(eduId, userId);
         return GraceJSONResult.ok(resumeEducation);
     }
+
+    /**
+     * 删除教育经历详情
+     * @param eduId
+     * @param userId
+     * @return
+     */
+    @PostMapping("/deleteEducation")
+    public GraceJSONResult deleteEducation(String eduId, String userId) {
+
+        resumeService.deleteEducation(eduId, userId);
+        return GraceJSONResult.ok();
+    }
 }

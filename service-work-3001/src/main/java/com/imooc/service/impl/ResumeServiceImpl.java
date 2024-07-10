@@ -320,4 +320,21 @@ public class ResumeServiceImpl extends BaseInfoProperties implements ResumeServi
 
         return resumeEducation;
     }
+
+    /**
+     * 删除教育经历
+     *
+     * @param eduId
+     * @param userId
+     */
+    @Override
+    public void deleteEducation(String eduId, String userId) {
+
+        resumeEducationMapper.delete(new QueryWrapper<ResumeEducation>()
+                .eq("id", eduId)
+                .eq("user_id", userId));
+
+        //  删除缓存中存储的内容
+        redis.del(REDIS_RESUME_INFO + ":" + userId);
+    }
 }

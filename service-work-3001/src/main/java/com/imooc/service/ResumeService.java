@@ -104,4 +104,11 @@ public interface ResumeService {
      * @return
      */
     public ResumeEducation getEducation(String eduId, String userId);
+
+    /**
+     * 删除教育经历
+     * @param eduId
+     * @param userId
+     */
+    public void deleteEducation(String eduId, String userId);
 }
