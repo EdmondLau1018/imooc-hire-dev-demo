@@ -387,4 +387,21 @@ public class ResumeServiceImpl extends BaseInfoProperties implements ResumeServi
         }
         return resumeExpectList;
     }
+
+    /**
+     * 删除求职期望业务实现
+     *
+     * @param resumeId
+     * @param userId
+     */
+    @Override
+    public void deleteMyResumeExpect(String resumeId, String userId) {
+
+        resumeExpectMapper.delete(new QueryWrapper<ResumeExpect>()
+                .eq("id", resumeId)
+                .eq("user_id", userId));
+
+        //  从 redis 中删除相关内容
+        redis.del(REDIS_RESUME_INFO + ":" + userId);
+    }
 }

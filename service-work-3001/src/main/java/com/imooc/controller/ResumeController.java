@@ -230,4 +230,18 @@ public class ResumeController extends BaseInfoProperties {
 
         return GraceJSONResult.ok();
     }
+
+    /**
+     * 求职期望删除
+     * @param resumeExpectId
+     * @param userId
+     * @return
+     */
+    @PostMapping("/deleteMyResumeExpect")
+    public GraceJSONResult deleteMyResumeExpect(String resumeExpectId, String userId) {
+
+        resumeService.deleteMyResumeExpect(resumeExpectId, userId);
+
+        return GraceJSONResult.ok();
+    }
 }

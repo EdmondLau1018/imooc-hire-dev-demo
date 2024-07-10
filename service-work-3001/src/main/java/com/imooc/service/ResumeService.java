@@ -122,9 +122,17 @@ public interface ResumeService {
 
     /**
      * 查询我的期望列表
+     *
      * @param resumeId
      * @param userId
      * @return
      */
     public List<ResumeExpect> getMyResumeExpect(String resumeId, String userId);
+
+    /**
+     * 根据 id 删除求职期望信息
+     * @param resumeId
+     * @param userId
+     */
+    public void deleteMyResumeExpect(String resumeId, String userId);
 }
