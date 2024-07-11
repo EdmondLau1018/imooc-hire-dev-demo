@@ -1,6 +1,7 @@
 package com.imooc.controller;
 
 import com.imooc.base.BaseInfoProperties;
+import com.imooc.enums.JobStatus;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.pojo.Job;
 import com.imooc.pojo.bo.EditJobBO;
@@ -88,6 +89,27 @@ public class JobController extends BaseInfoProperties {
         }
 
         return GraceJSONResult.ok(job);
+    }
+
+    /** 开启和关闭工作 岗位 状态接口
+     *
+     * @param jobId
+     * @param hrId
+     * @param companyId
+     * @return
+     */
+    @PostMapping("/close")
+    public GraceJSONResult closeJob(String jobId, String hrId, String companyId) {
+
+        jobService.modifyJobStatus(jobId, companyId, hrId, JobStatus.CLOSE);
+        return GraceJSONResult.ok();
+    }
+
+    @PostMapping("/open")
+    public GraceJSONResult openJob(String jobId, String hrId, String companyId) {
+
+        jobService.modifyJobStatus(jobId, companyId, hrId, JobStatus.OPEN);
+        return GraceJSONResult.ok();
     }
 
 }

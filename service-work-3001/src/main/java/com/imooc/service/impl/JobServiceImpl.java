@@ -137,5 +137,29 @@ public class JobServiceImpl extends BaseInfoProperties implements JobService {
         return job;
     }
 
+    /**
+     * 修改工作岗位状态接口
+     *
+     * @param companyId
+     * @param hrId
+     * @param jobStatus
+     */
+    @Override
+    public void modifyJobStatus(String jobId, String companyId, String hrId, JobStatus jobStatus) {
+
+        Job job = new Job();
+
+        job.setStatus(jobStatus.type);
+        job.setUpdatedTime(LocalDateTime.now());
+
+        jobMapper.update(job, new QueryWrapper<Job>()
+                .eq("job_id", jobId)
+                .eq("company_id", companyId)
+                .eq("hr_id", hrId));
+
+        //  删除缓存中的内容
+        redis.del(REDIS_JOB_DETAIL + ":" + companyId + ":" + hrId + ":" + jobId);
+    }
+
 
 }

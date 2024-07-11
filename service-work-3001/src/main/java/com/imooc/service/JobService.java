@@ -1,6 +1,7 @@
 package com.imooc.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.imooc.enums.JobStatus;
 import com.imooc.pojo.Job;
 import com.imooc.pojo.bo.EditJobBO;
 import com.imooc.utils.PagedGridResult;
@@ -36,10 +37,20 @@ public interface JobService {
 
     /**
      * 查询工作机会 详情业务接口
+     *
      * @param companyId
      * @param hrId
      * @param jobId
      * @return
      */
     public Job queryHrJobDetail(String companyId, String hrId, String jobId);
+
+    /**
+     * 修改工作岗位状态的业务接口，开启和关闭并工作岗位用的都是这个
+     *
+     * @param companyId
+     * @param hrId
+     * @param jobStatus
+     */
+    public void modifyJobStatus(String jobId, String companyId, String hrId, JobStatus jobStatus);
 }
