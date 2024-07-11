@@ -84,7 +84,10 @@ public class JobServiceImpl extends BaseInfoProperties implements JobService {
         if (StringUtils.isNotBlank(hrId)) {
             jobQueryWrapper.eq("hr_id", hrId);
         }
-        jobQueryWrapper.eq("company_id", companyId);
+
+        if (StringUtils.isNotBlank(companyId)) {
+            jobQueryWrapper.eq("company_id", companyId);
+        }
 
         //  判断当前的岗位 是否为 null
         if (status != null) {

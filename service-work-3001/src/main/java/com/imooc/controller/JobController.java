@@ -53,6 +53,9 @@ public class JobController extends BaseInfoProperties {
     @PostMapping("/hr/jobList")
     public GraceJSONResult hrJobList(String hrId, String companyId, Integer page, Integer limit, Integer status) {
 
+        if (page == null) page = 1;
+        if (limit == null) limit = 10;
+
         if (StringUtils.isBlank(companyId)) {
             return GraceJSONResult.error();
         }
@@ -60,6 +63,41 @@ public class JobController extends BaseInfoProperties {
         PagedGridResult gridResult = jobService.queryHrJobList(hrId, companyId, page, limit, status);
 
         return GraceJSONResult.ok(gridResult);
+    }
+
+    /**
+     * 查询工作历史记录
+     *
+     * @param page
+     * @param limit
+     * @return
+     */
+    @PostMapping("/jobList")
+    public GraceJSONResult getJobList(Integer page, Integer limit) {
+
+        if (page == null) page = 1;
+        if (limit == null) limit = 1;
+
+        PagedGridResult gridResult = jobService.queryHrJobList(null, null, page, limit, null);
+
+        return GraceJSONResult.ok(gridResult);
+    }
+
+    /**
+     * 查询职位详情（历史信息 - - 职位详情）
+     *
+     * @param jobId
+     * @return
+     */
+    @PostMapping("/admin/jobDetail")
+    public GraceJSONResult adminJobDetail(String jobId) {
+
+        if (StringUtils.isBlank(jobId)) {
+            return GraceJSONResult.error();
+        }
+
+        Job job = jobService.queryHrJobDetail(null, null, jobId);
+        return GraceJSONResult.ok(job);
     }
 
     /**
@@ -91,7 +129,8 @@ public class JobController extends BaseInfoProperties {
         return GraceJSONResult.ok(job);
     }
 
-    /** 开启和关闭工作 岗位 状态接口
+    /**
+     * 开启和关闭工作 岗位 状态接口
      *
      * @param jobId
      * @param hrId
