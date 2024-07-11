@@ -4,7 +4,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.imooc.enums.JobStatus;
 import com.imooc.pojo.Job;
 import com.imooc.pojo.bo.EditJobBO;
+import com.imooc.pojo.bo.SearchJobsBO;
 import com.imooc.utils.PagedGridResult;
+
+import java.util.List;
 
 /**
  * <p>
@@ -53,4 +56,13 @@ public interface JobService {
      * @param jobStatus
      */
     public void modifyJobStatus(String jobId, String companyId, String hrId, JobStatus jobStatus);
+
+    /**
+     *
+     * @param searchJobsBO
+     * @param page
+     * @param limit
+     * @return
+     */
+    public PagedGridResult searchJobs(SearchJobsBO searchJobsBO, Integer page, Integer limit);
 }

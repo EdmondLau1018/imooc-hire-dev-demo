@@ -5,6 +5,7 @@ import com.imooc.enums.JobStatus;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.pojo.Job;
 import com.imooc.pojo.bo.EditJobBO;
+import com.imooc.pojo.bo.SearchJobsBO;
 import com.imooc.service.JobService;
 import com.imooc.utils.GsonUtils;
 import com.imooc.utils.PagedGridResult;
@@ -151,4 +152,22 @@ public class JobController extends BaseInfoProperties {
         return GraceJSONResult.ok();
     }
 
+    /**
+     * 岗位搜索 接口
+     *
+     * @param searchJobsBO
+     * @param page
+     * @param limit
+     * @return
+     */
+    @PostMapping("/searchJobs")
+    public GraceJSONResult searchJobs(@RequestBody @Valid SearchJobsBO searchJobsBO,
+                                      Integer page, Integer limit) {
+
+        if (page == null) page = 1;
+        if (limit == null) limit = 10;
+
+        PagedGridResult gridResult = jobService.searchJobs(searchJobsBO, page, limit);
+        return GraceJSONResult.ok(gridResult);
+    }
 }

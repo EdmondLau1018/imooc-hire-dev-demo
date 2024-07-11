@@ -7,6 +7,7 @@ import com.imooc.enums.JobStatus;
 import com.imooc.mapper.JobMapper;
 import com.imooc.pojo.Job;
 import com.imooc.pojo.bo.EditJobBO;
+import com.imooc.pojo.bo.SearchJobsBO;
 import com.imooc.service.JobService;
 import com.imooc.utils.GsonUtils;
 import com.imooc.utils.PagedGridResult;
@@ -162,6 +163,39 @@ public class JobServiceImpl extends BaseInfoProperties implements JobService {
 
         //  删除缓存中的内容
         redis.del(REDIS_JOB_DETAIL + ":" + companyId + ":" + hrId + ":" + jobId);
+    }
+
+    @Override
+    public PagedGridResult searchJobs(SearchJobsBO searchJobsBO, Integer page, Integer limit) {
+
+        String jobName = searchJobsBO.getJobName();
+        String jobType = searchJobsBO.getJobType();
+        String city = searchJobsBO.getCity();
+        Integer beginSalary = searchJobsBO.getBeginSalary();
+        Integer endSalary = searchJobsBO.getEndSalary();
+
+        PageHelper.startPage(page, limit);
+
+        QueryWrapper<Job> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("status", JobStatus.OPEN.type);
+
+        if (StringUtils.isNotBlank(jobName)) {
+            queryWrapper.like("job_name", jobName);
+        }
+        if (StringUtils.isNotBlank(jobType)) {
+            queryWrapper.like("job_type", jobType);
+        }
+        if (StringUtils.isNotBlank(city)) {
+            queryWrapper.like("city", city);
+        }
+        if (beginSalary > 0 && endSalary > 0) {
+            queryWrapper.ge("end_salary", beginSalary);
+        }
+
+        List<Job> jobList = jobMapper.selectList(queryWrapper);
+
+        PagedGridResult gridResult = setterPagedGrid(jobList, page);
+        return gridResult;
     }
 
 

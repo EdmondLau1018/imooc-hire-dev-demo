@@ -49,6 +49,9 @@ server:
 
 # 配置mybatis-plus 信息
 mybatis-plus:
+  configuration:
+    # mybatis plus 日志打印配置信息
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   mapper-locations: classpath*:/mapper/*.xml
   global-config:
     # 取消项目启动加载 banner
@@ -56,6 +59,10 @@ mybatis-plus:
     db-config:
       # 项目生成的主键策略 （雪花算法）
       id-type: assign_id
+      update-strategy: not_empty
+
+pagehelper:
+  support-methods-arguments: true
 
 # 配置 seata 分布式事务相关信息
 seata:
