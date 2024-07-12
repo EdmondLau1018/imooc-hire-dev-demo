@@ -38,7 +38,11 @@ spring:
     listener:
       simple:
         acknowledge-mode: manual
-
+# mongodb 相关配置信息
+  data:
+    mongodb:
+      uri: mongodb://admin:imooc@192.168.32.100:27017
+      database: imooc_hire_dev
 # 服务器应用配置
 server:
   port: 3001
