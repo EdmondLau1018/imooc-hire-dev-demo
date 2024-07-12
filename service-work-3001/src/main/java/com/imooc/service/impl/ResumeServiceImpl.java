@@ -1,20 +1,24 @@
 package com.imooc.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.github.pagehelper.PageHelper;
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.mapper.*;
 import com.imooc.pojo.*;
 import com.imooc.pojo.bo.*;
 import com.imooc.pojo.vo.ResumeVO;
+import com.imooc.pojo.vo.SearchResumesVO;
 import com.imooc.service.MqLocalMsgRecordService;
 import com.imooc.service.ResumeService;
 import com.imooc.utils.GsonUtils;
+import com.imooc.utils.PagedGridResult;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -32,13 +36,16 @@ public class ResumeServiceImpl extends BaseInfoProperties implements ResumeServi
 
     private final ResumeExpectMapper resumeExpectMapper;
 
-    public ResumeServiceImpl(ResumeMapper resumeMapper, MqLocalMsgRecordService recordService, ResumeWorkExpMapper resumeWorkExpMapper, ResumeProjectExpMapper resumeProjectExpMapper, ResumeEducationMapper resumeEducationMapper, ResumeExpectMapper resumeExpectMapper) {
+    private final ResumeMapperCustom resumeMapperCustom;
+
+    public ResumeServiceImpl(ResumeMapper resumeMapper, MqLocalMsgRecordService recordService, ResumeWorkExpMapper resumeWorkExpMapper, ResumeProjectExpMapper resumeProjectExpMapper, ResumeEducationMapper resumeEducationMapper, ResumeExpectMapper resumeExpectMapper, ResumeMapperCustom resumeMapperCustom) {
         this.resumeMapper = resumeMapper;
         this.recordService = recordService;
         this.resumeWorkExpMapper = resumeWorkExpMapper;
         this.resumeProjectExpMapper = resumeProjectExpMapper;
         this.resumeEducationMapper = resumeEducationMapper;
         this.resumeExpectMapper = resumeExpectMapper;
+        this.resumeMapperCustom = resumeMapperCustom;
     }
 
 //    /**
@@ -407,6 +414,7 @@ public class ResumeServiceImpl extends BaseInfoProperties implements ResumeServi
 
     /**
      * 刷新简历业务实现函数
+     *
      * @param userId
      * @param resumeId
      */
@@ -420,5 +428,52 @@ public class ResumeServiceImpl extends BaseInfoProperties implements ResumeServi
 
         editResumeBO.setRefreshTime(LocalDateTime.now());
         this.modifyResume(editResumeBO);
+    }
+
+    /**
+     * 简历搜索
+     *
+     * @param searchResumesBO
+     * @param page
+     * @param limit
+     * @return
+     */
+    @Override
+    public PagedGridResult searchResumes(SearchResumesBO searchResumesBO, Integer page, Integer limit) {
+
+        String basicTitle = searchResumesBO.getBasicTitle();
+        String jobType = searchResumesBO.getJobType();
+        Integer beginAge = searchResumesBO.getBeginAge();
+        Integer endAge = searchResumesBO.getEndAge();
+        Integer sex = searchResumesBO.getSex();
+        Integer activeTimes = searchResumesBO.getActiveTimes();
+        Integer beginWorkExpYears = searchResumesBO.getBeginWorkExpYears();
+        Integer endWorkExpYears = searchResumesBO.getEndWorkExpYears();
+        String edu = searchResumesBO.getEdu();
+        List<String> eduList = searchResumesBO.getEduList();
+        Integer beginSalary = searchResumesBO.getBeginSalary();
+        Integer endSalary = searchResumesBO.getEndSalary();
+        String jobStatus = searchResumesBO.getJobStatus();
+
+        PageHelper.startPage(page, limit);
+
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("basicTitle", basicTitle);
+        map.put("jobType", jobType);
+        map.put("beginAge", beginAge);
+        map.put("endAge", endAge);
+        map.put("sex", sex);
+        map.put("activeTimes", activeTimes);
+        map.put("beginWorkExpYears", beginWorkExpYears);
+        map.put("endWorkExpYears", endWorkExpYears);
+        map.put("edu", edu);
+        map.put("eduList", eduList);
+        map.put("beginSalary", beginSalary);
+        map.put("endSalary", endSalary);
+        map.put("jobStatus", jobStatus);
+
+        List<SearchResumesVO> searchResumesVOS = resumeMapperCustom.searchResumesList(map);
+
+        return setterPagedGrid(searchResumesVOS, page);
     }
 }

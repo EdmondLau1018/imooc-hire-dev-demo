@@ -6,6 +6,7 @@ import com.imooc.pojo.ResumeProjectExp;
 import com.imooc.pojo.ResumeWorkExp;
 import com.imooc.pojo.bo.*;
 import com.imooc.pojo.vo.ResumeVO;
+import com.imooc.utils.PagedGridResult;
 
 import java.util.List;
 
@@ -131,15 +132,26 @@ public interface ResumeService {
 
     /**
      * 根据 id 删除求职期望信息
+     *
      * @param resumeId
      * @param userId
      */
     public void deleteMyResumeExpect(String resumeId, String userId);
 
     /**
-     *  简历刷新业务接口
+     * 简历刷新业务接口
+     *
      * @param userId
      * @param resumeId
      */
-    public void refreshResume(String userId,String resumeId);
+    public void refreshResume(String userId, String resumeId);
+
+    /**
+     *
+     * @param searchResumesBO
+     * @param page
+     * @param limit
+     * @return
+     */
+    public PagedGridResult searchResumes(SearchResumesBO searchResumesBO, Integer page, Integer limit);
 }

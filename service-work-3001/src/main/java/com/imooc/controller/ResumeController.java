@@ -1,6 +1,8 @@
 package com.imooc.controller;
 
 import com.imooc.base.BaseInfoProperties;
+import com.imooc.enums.ActiveTime;
+import com.imooc.enums.EduEnum;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.grace.result.ResponseStatusEnum;
 import com.imooc.pojo.ResumeEducation;
@@ -11,11 +13,13 @@ import com.imooc.pojo.vo.ResumeVO;
 import com.imooc.service.ResumeService;
 import com.imooc.utils.GsonUtils;
 import com.imooc.utils.LocalDateUtils;
+import com.imooc.utils.PagedGridResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -289,5 +293,33 @@ public class ResumeController extends BaseInfoProperties {
         }
 
         return GraceJSONResult.ok();
+    }
+
+    /**
+     * 分页查询简历信息
+     *
+     * @param searchResumesBO
+     * @param page
+     * @param limit
+     * @return
+     */
+    @PostMapping("/searchResumes")
+    public GraceJSONResult searchResumes(@RequestBody SearchResumesBO searchResumesBO,
+                                         Integer page, Integer limit) {
+
+        //  使用枚举索引 查询 活跃时间 对应的 索引值
+        String activeTime = searchResumesBO.getActiveTime();
+        Integer activeTimes = ActiveTime.getActiveTimes(activeTime);
+        searchResumesBO.setActiveTimes(activeTimes);
+
+        //  使用枚举索引 查询对应的 教育经历索引值
+        String edu = searchResumesBO.getEdu();
+        Integer eduIndex = EduEnum.getEduIndex(edu);
+        List eduList = EduEnum.getEduList(eduIndex);
+        searchResumesBO.setEduList(eduList);
+
+        PagedGridResult gridResult = resumeService.searchResumes(searchResumesBO, page, limit);
+
+        return GraceJSONResult.ok(gridResult);
     }
 }
