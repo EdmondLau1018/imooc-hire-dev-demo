@@ -168,4 +168,18 @@ public class UsersServiceImpl extends BaseInfoProperties implements UsersService
 
         usersMapper.updateById(hrUser);
     }
+
+    /**
+     * 根据 id 列表查询用户信息
+     *
+     * @param userIds
+     * @return
+     */
+    @Override
+    public List<Users> getByIds(List<String> userIds) {
+
+        List<Users> usersList = usersMapper.selectList(new QueryWrapper<Users>()
+                .in("id", userIds));
+        return usersList;
+    }
 }

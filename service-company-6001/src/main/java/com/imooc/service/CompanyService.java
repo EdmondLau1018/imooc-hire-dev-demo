@@ -1,12 +1,11 @@
 package com.imooc.service;
 
 import com.imooc.pojo.Company;
-import com.imooc.pojo.bo.CreateCompanyBO;
-import com.imooc.pojo.bo.ModifyCompanyInfoBO;
-import com.imooc.pojo.bo.QueryCompanyBO;
-import com.imooc.pojo.bo.ReviewCompanyBO;
+import com.imooc.pojo.bo.*;
 import com.imooc.pojo.vo.CompanyInfoVO;
 import com.imooc.utils.PagedGridResult;
+
+import java.util.List;
 
 /**
  * <p>
@@ -116,4 +115,11 @@ public interface CompanyService {
     public void releaseCar();
 
     public void doneStepCar(String name);
+
+    /**
+     * 根据公司 id 列表查询公司信息
+     * @param searchBO
+     * @return
+     */
+    public List<Company> getList(SearchBO searchBO);
 }

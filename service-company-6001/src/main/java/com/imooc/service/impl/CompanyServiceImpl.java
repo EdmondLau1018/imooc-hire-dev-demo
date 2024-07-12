@@ -13,10 +13,7 @@ import com.imooc.mapper.CompanyMapperCustom;
 import com.imooc.mapper.CompanyPhotoMapper;
 import com.imooc.pojo.Company;
 import com.imooc.pojo.CompanyPhoto;
-import com.imooc.pojo.bo.CreateCompanyBO;
-import com.imooc.pojo.bo.ModifyCompanyInfoBO;
-import com.imooc.pojo.bo.QueryCompanyBO;
-import com.imooc.pojo.bo.ReviewCompanyBO;
+import com.imooc.pojo.bo.*;
 import com.imooc.pojo.vo.CompanyInfoVO;
 import com.imooc.service.CompanyService;
 import com.imooc.utils.PagedGridResult;
@@ -205,6 +202,7 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
 
     /**
      * 引入 redisson 处理 分布式锁的 问题
+     *
      * @param modifyCompanyInfoBO
      * @throws InterruptedException
      */
@@ -416,6 +414,7 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
 
     /**
      * 信号量测试 获取信号量
+     *
      * @param num
      */
     @Override
@@ -438,6 +437,7 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
 
     /**
      * 释放信号量
+     *
      * @param num
      */
     @Override
@@ -479,6 +479,20 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
         RCountDownLatch lock = redissonClient.getCountDownLatch("H2SO4-LOCK");
         // 消耗闭锁中的资源 （待处理的资源数量 -1）
         lock.countDown();
+    }
+
+    /**
+     * 根据 公司 id 列表 查询公司信息
+     *
+     * @param searchBO
+     * @return
+     */
+    @Override
+    public List<Company> getList(SearchBO searchBO) {
+
+        List<Company> companyList = companyMapper.selectList(new QueryWrapper<Company>()
+                .in("id", searchBO.getCompanyIds()));
+        return companyList;
     }
 
     /**

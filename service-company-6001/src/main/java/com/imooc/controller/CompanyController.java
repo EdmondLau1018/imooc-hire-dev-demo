@@ -10,10 +10,7 @@ import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.grace.result.ResponseStatusEnum;
 import com.imooc.pojo.Company;
 import com.imooc.pojo.Users;
-import com.imooc.pojo.bo.CreateCompanyBO;
-import com.imooc.pojo.bo.ModifyCompanyInfoBO;
-import com.imooc.pojo.bo.QueryCompanyBO;
-import com.imooc.pojo.bo.ReviewCompanyBO;
+import com.imooc.pojo.bo.*;
 import com.imooc.pojo.vo.CompanyInfoVO;
 import com.imooc.pojo.vo.CompanySimpleVO;
 import com.imooc.pojo.vo.UsersVO;
@@ -27,6 +24,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/company")
@@ -226,6 +225,7 @@ public class CompanyController extends BaseInfoProperties {
 
     /**
      * app 端修改企业详细信息 接口
+     *
      * @param modifyCompanyInfoBO
      * @return
      */
@@ -409,6 +409,7 @@ public class CompanyController extends BaseInfoProperties {
 
     /**
      * 测试获取 redisson 信号量的方法
+     *
      * @param num
      * @return
      */
@@ -420,7 +421,7 @@ public class CompanyController extends BaseInfoProperties {
     }
 
     @GetMapping("/releaseSemaphore")
-    public GraceJSONResult releaseSemaphore(Integer num){
+    public GraceJSONResult releaseSemaphore(Integer num) {
 
         companyService.releaseSemaphore(num);
         return GraceJSONResult.ok();
@@ -429,10 +430,11 @@ public class CompanyController extends BaseInfoProperties {
     /**
      * CountDownLatch 测试
      * 声明 redisson 闭锁资源
+     *
      * @return
      */
     @GetMapping("/release/car")
-    public GraceJSONResult releaseCar (){
+    public GraceJSONResult releaseCar() {
 
         companyService.releaseCar();
         return GraceJSONResult.ok();
@@ -440,6 +442,7 @@ public class CompanyController extends BaseInfoProperties {
 
     /**
      * 消费 redisson 闭锁资源
+     *
      * @return
      */
     @GetMapping("/doneStep/car")
@@ -447,5 +450,32 @@ public class CompanyController extends BaseInfoProperties {
 
         companyService.doneStepCar("硫酸");
         return GraceJSONResult.ok();
+    }
+
+    /**
+     * 根据 id 列表查询企业 信息列表
+     *
+     * @param searchBO
+     * @return
+     */
+    @PostMapping("/list/get")
+    public GraceJSONResult getList(@RequestBody @Valid SearchBO searchBO) {
+
+        //  获取企业信息列表
+        List<Company> companyList = companyService.getList(searchBO);
+        //  使用 VO 对象返回 只返回需要的数据
+        ArrayList<CompanyInfoVO> companyInfoVOList = new ArrayList<>();
+
+        //  拷贝对象信息
+        for (Company company : companyList) {
+            CompanyInfoVO companyInfoVO = new CompanyInfoVO();
+            BeanUtils.copyProperties(company, companyInfoVO);
+            companyInfoVOList.add(companyInfoVO);
+        }
+
+        //  将 企业信息 VO 列表转换成 jsonString
+        String companyVoListStr = GsonUtils.object2String(companyInfoVOList);
+
+        return GraceJSONResult.ok(companyVoListStr);
     }
 }

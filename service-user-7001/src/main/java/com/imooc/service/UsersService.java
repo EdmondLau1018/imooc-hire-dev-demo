@@ -5,6 +5,8 @@ import com.imooc.pojo.bo.ModifyUserBO;
 import com.imooc.pojo.vo.UsersVO;
 import com.imooc.utils.PagedGridResult;
 
+import java.util.List;
+
 public interface UsersService {
 
     public void modifyUserInfo(ModifyUserBO modifyUserBO);
@@ -44,4 +46,11 @@ public interface UsersService {
      * @param hrUserId
      */
     public void updateUsersToCand(String hrUserId);
+
+    /**
+     * 根据用户 id 获取用户信息
+     * @param userIds
+     * @return
+     */
+    public List<Users> getByIds(List<String> userIds);
 }

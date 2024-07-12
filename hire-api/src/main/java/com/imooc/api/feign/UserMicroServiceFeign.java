@@ -1,9 +1,12 @@
 package com.imooc.api.feign;
 
 import com.imooc.grace.result.GraceJSONResult;
+import com.imooc.pojo.bo.SearchBO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.validation.Valid;
 
 @FeignClient("user-service")
 public interface UserMicroServiceFeign {
@@ -41,10 +44,20 @@ public interface UserMicroServiceFeign {
 
     /**
      * 将当前企业提交审核的用户信息修改为 hr
+     *
      * @param hrUserId
      * @return
      */
     @PostMapping("/userinfo/changeUserToHR")
     public GraceJSONResult changeUserToHR(@RequestParam("hrUserId") String hrUserId);
+
+    /**
+     * 远程调用接口，根据 用户 id 查询用户列表
+     *
+     * @param searchBO
+     * @return
+     */
+    @PostMapping("/userinfo/list/get")
+    public GraceJSONResult getList(@RequestParam @Valid SearchBO searchBO);
 
 }

@@ -7,15 +7,22 @@ import com.imooc.enums.UserRole;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.pojo.Users;
 import com.imooc.pojo.bo.ModifyUserBO;
+import com.imooc.pojo.bo.SearchBO;
 import com.imooc.pojo.vo.UsersVO;
 import com.imooc.service.UsersService;
+import com.imooc.utils.GsonUtils;
 import com.imooc.utils.PagedGridResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.processing.SupportedOptions;
+import javax.validation.Valid;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 用户信息接口
@@ -169,6 +176,7 @@ public class UserInfoController extends BaseInfoProperties {
     }
 
     /**
+     * 将用户身份从普通用户转换为 HR
      *
      * @param hrUserId
      * @return
@@ -178,5 +186,30 @@ public class UserInfoController extends BaseInfoProperties {
 
         usersService.updateUsersToCand(hrUserId);
         return GraceJSONResult.ok();
+    }
+
+    /**
+     * 远程调用接口 查询 岗位对应的发布用户信息
+     *
+     * @param searchBO
+     * @return
+     */
+    @PostMapping("/list/get")
+    public GraceJSONResult getList(@RequestParam @Valid SearchBO searchBO) {
+
+        //  获取 hr 用户 id
+        List<Users> usersList = usersService.getByIds(searchBO.getUserIds());
+        //  将查询到到的对象进行数据脱敏 （转换成 VO） 进行返回
+        ArrayList<UsersVO> usersVOList = new ArrayList<>();
+
+        for (Users users : usersList) {
+            UsersVO usersVO = new UsersVO();
+            BeanUtils.copyProperties(users, usersVO);
+            usersVOList.add(usersVO);
+        }
+
+        //  将拷贝之后的 用户返回列表转换成 json 字符串
+        String usersListStr = GsonUtils.object2String(usersVOList);
+        return GraceJSONResult.ok(usersListStr);
     }
 }
