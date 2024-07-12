@@ -211,7 +211,21 @@ public class JobServiceImpl extends BaseInfoProperties implements JobService {
             queryWrapper.like("city", city);
         }
         if (beginSalary > 0 && endSalary > 0) {
-            queryWrapper.ge("end_salary", beginSalary);
+//            queryWrapper.ge("end_salary", beginSalary);
+            queryWrapper.and(
+                    qw -> qw.or(
+                                    //  岗位薪资 begin <= 求职薪资 begin <= 岗位薪资 end
+                                    subQW -> subQW.ge("begin_salary", beginSalary)
+                                            .le("end_salary", beginSalary)
+                                    //  岗位薪资 begin <= 岗位薪资 end <= 岗位薪资 end
+                            ).or(
+                                    subWQ -> subWQ.ge("begin_salary", endSalary))
+                                                .le("end_salary", endSalary)
+                            .or(
+                                    //  岗位薪资 begin >= 求职薪资 end 岗位薪资 end >= 求职薪资 end
+                                    subQW -> subQW.ge("begin_salary", endSalary)
+                                            .ge("end_salary", endSalary))
+            );
         }
 
         List<Job> jobList = jobMapper.selectList(queryWrapper);
