@@ -1,9 +1,12 @@
 package com.imooc.service.impl;
 
 import com.imooc.enums.DealStatus;
+import com.imooc.grace.result.GraceJSONResult;
+import com.imooc.pojo.bo.SearchReportJobBO;
 import com.imooc.repository.ReportJobRepository;
 import com.imooc.pojo.mo.ReportMO;
 import com.imooc.service.ReportService;
+import com.imooc.utils.PagedGridResult;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -45,5 +48,17 @@ public class ReportServiceImpl implements ReportService {
         ReportMO record = reportJobRepository.findByReportUserIdAndJobId(reportUserId, jobId);
         //  三元表达式 判断当前 record 是否存在
         return record == null ? false : true;
+    }
+
+    /**
+     * mongoDB 分页查询举报职位列表
+     * @param searchReportJobBO
+     * @param page
+     * @param pageSize
+     * @return
+     */
+    @Override
+    public PagedGridResult pagedReportRecordList(SearchReportJobBO searchReportJobBO, Integer page, Integer pageSize) {
+        return null;
     }
 }
