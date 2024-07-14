@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: company-service-6001
+server:
+  port: 6001
+  tomcat:
+    uri-encoding: UTF-8
+    # 这个配置设置 tomcat 服务器上传文件的时候吞吐量校验 默认超过 2M 的文件不会被捕获 -1 代表不校验文件大小
+    max-swallow-size: -1
