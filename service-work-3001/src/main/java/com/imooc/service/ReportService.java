@@ -1,5 +1,6 @@
 package com.imooc.service;
 
+import com.imooc.enums.DealStatus;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.pojo.bo.SearchReportJobBO;
 import com.imooc.pojo.mo.ReportMO;
@@ -33,4 +34,11 @@ public interface ReportService {
     public PagedGridResult pagedReportRecordList(SearchReportJobBO searchReportJobBO,
                                                  Integer page,
                                                  Integer pageSize);
+
+    /**
+     * 更新 mongoDB 和 数据库中存储的岗位状态
+     * @param reportId
+     * @param status
+     */
+    public void updateReportRecordStatus(String reportId, DealStatus status);
 }

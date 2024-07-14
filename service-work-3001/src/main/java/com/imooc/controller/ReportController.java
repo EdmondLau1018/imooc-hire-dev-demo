@@ -1,6 +1,7 @@
 package com.imooc.controller;
 
 import com.imooc.base.BaseInfoProperties;
+import com.imooc.enums.DealStatus;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.grace.result.ResponseStatusEnum;
 import com.imooc.pojo.bo.SearchReportJobBO;
@@ -91,6 +92,27 @@ public class ReportController extends BaseInfoProperties {
         PagedGridResult gridResult = reportService.pagedReportRecordList(searchReportJobBO, page, pageSize);
 
         return GraceJSONResult.ok(gridResult);
+    }
+
+
+    /**
+     * 删除职位
+     *
+     * @param reportId
+     * @return
+     */
+    @PostMapping("/deal/delete")
+    public GraceJSONResult dealDelete(String reportId) {
+
+        reportService.updateReportRecordStatus(reportId, DealStatus.DONE);
+        return GraceJSONResult.ok();
+    }
+
+    @PostMapping("/deal/ignore")
+    public GraceJSONResult dealIgnore(String reportId) {
+
+        reportService.updateReportRecordStatus(reportId, DealStatus.IGNORE);
+        return GraceJSONResult.ok();
     }
 
 }

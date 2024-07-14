@@ -1,7 +1,11 @@
 package com.imooc.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.imooc.base.BaseInfoProperties;
 import com.imooc.enums.DealStatus;
+import com.imooc.enums.JobStatus;
+import com.imooc.mapper.JobMapper;
+import com.imooc.pojo.Job;
 import com.imooc.pojo.bo.SearchReportJobBO;
 import com.imooc.pojo.mo.ReportMO;
 import com.imooc.repository.ReportJobRepository;
@@ -13,7 +17,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,9 +32,12 @@ public class ReportServiceImpl extends BaseInfoProperties implements ReportServi
 
     private final MongoTemplate mongoTemplate;
 
-    public ReportServiceImpl(ReportJobRepository reportJobRepository, MongoTemplate mongoTemplate) {
+    private final JobMapper jobMapper;
+
+    public ReportServiceImpl(ReportJobRepository reportJobRepository, MongoTemplate mongoTemplate, JobMapper jobMapper) {
         this.reportJobRepository = reportJobRepository;
         this.mongoTemplate = mongoTemplate;
+        this.jobMapper = jobMapper;
     }
 
     /**
@@ -122,6 +131,42 @@ public class ReportServiceImpl extends BaseInfoProperties implements ReportServi
         gridResult.setPage(page);
         gridResult.setRecords(count);
         return gridResult;
+    }
+
+    /**
+     * 更新 mongoDB 和 DB 中的数据内容
+     *
+     * @param reportId
+     * @param status
+     */
+    @Transactional
+    @Override
+    public void updateReportRecordStatus(String reportId, DealStatus status) {
+
+        //  添加查询条件 在 mongodb 中查询需要的数据 (使用 update 匹配)
+        Query query = new Query();
+        query.addCriteria(Criteria.where("_id").is(reportId));
+        //  更新内容（更新的字段名称和值）
+        Update update = new Update();
+        update.set("deal_status", status.type);
+        update.set("updated_time", LocalDateTime.now());
+
+        //  如果是需要处理的 修改职位为 【违规删除】即可
+        if (status == DealStatus.DONE) {
+            //  在 mongoDB 中 根据举报信息查询对应的岗位信息
+            ReportMO temp = reportJobRepository.findById(reportId).get();
+
+            //  在 DB 中更新对应的 岗位信息状态
+            String jobId = temp.getJobId();
+            Job pendingJob = new Job();
+            pendingJob.setId(jobId);
+            pendingJob.setStatus(JobStatus.DELETE.type);
+            pendingJob.setViolateReason(temp.getReportReason());
+            pendingJob.setUpdatedTime(LocalDateTime.now());
+            jobMapper.updateById(pendingJob);
+
+        }
+        mongoTemplate.updateFirst(query, update, ReportMO.class);
     }
 
     /**
