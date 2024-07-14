@@ -22,6 +22,9 @@ spring:
     listener:
       simple:
         acknowledge-mode: manual
+  # ES 配置信息
+  elasticsearch:
+    uris: http://192.168.32.100:9200
 # 服务器应用配置
 server:
   port: 2001

@@ -1,5 +1,6 @@
 package com.imooc;
 
+import io.seata.spring.boot.autoconfigure.SeataAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
@@ -11,7 +12,8 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 @SpringBootApplication(exclude = {
         MongoAutoConfiguration.class,
         MongoDataAutoConfiguration.class,
-        DataSourceAutoConfiguration.class})
+        DataSourceAutoConfiguration.class,
+        SeataAutoConfiguration.class})
 public class ESServiceApplication {
 
     public static void main(String[] args) {
