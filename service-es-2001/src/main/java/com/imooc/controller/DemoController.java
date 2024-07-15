@@ -65,6 +65,7 @@ public class DemoController {
 
     /**
      * 分页从 ES 全量查询
+     *
      * @param page
      * @param pageSize
      * @return
@@ -91,5 +92,51 @@ public class DemoController {
             list.add(content);
         }
         return GraceJSONResult.ok(list);
+    }
+
+    /**
+     * 带有条件的 ES 分页查询
+     *
+     * @param page
+     * @param pageSize
+     * @return
+     */
+    @PostMapping("/term")
+    public GraceJSONResult term(Integer page, Integer pageSize) {
+
+        if (page < 1) page = 1;
+        page--;
+
+        PageRequest pageable = PageRequest.of(page, pageSize);
+
+        // 传概念条件查询构造器
+        Query query = new NativeSearchQueryBuilder()
+                .withQuery(QueryBuilders.termQuery("sex", 1))
+                .withQuery(QueryBuilders.matchQuery("major", "信息"))
+                .withPageable(pageable)
+                .build();
+
+        //  获取查询结果
+        SearchHits<SearchResumesEO> searchHits = esTemplate.search(query, SearchResumesEO.class);
+        List<SearchResumesEO> list = getESSearchHitsList(searchHits, SearchResumesEO.class);
+
+        return GraceJSONResult.ok(list);
+    }
+
+    /**
+     * 解析 ES 查询出的 结果 返回对应的 列表 List
+     *
+     * @param searchHits
+     * @param clazz
+     * @param <T>
+     * @return
+     */
+    private <T> List<T> getESSearchHitsList(SearchHits<T> searchHits, Class<T> clazz) {
+        List<T> list = new ArrayList<>();
+        for (SearchHit<T> searchHit : searchHits) {
+            T content = searchHit.getContent();
+            list.add(content);
+        }
+        return list;
     }
 }
