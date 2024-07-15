@@ -1,6 +1,7 @@
 package com.imooc.controller;
 
 import com.imooc.grace.result.GraceJSONResult;
+import com.imooc.pojo.eo.SearchResumesEO;
 import com.imooc.pojo.eo.Stu;
 import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
@@ -28,7 +29,7 @@ public class DemoController {
      */
     @PostMapping("/createIndex")
     public GraceJSONResult createIndex() {
-        esTemplate.indexOps(Stu.class).create();
+        esTemplate.indexOps(SearchResumesEO.class).create();
         return GraceJSONResult.ok();
     }
 
