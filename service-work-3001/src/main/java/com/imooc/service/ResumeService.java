@@ -154,4 +154,14 @@ public interface ResumeService {
      * @return
      */
     public PagedGridResult searchResumes(SearchResumesBO searchResumesBO, Integer page, Integer limit);
+
+
+    /**
+     *
+     * @param searchResumesBO
+     * @param page
+     * @param limit
+     * @return
+     */
+    public PagedGridResult searchResumesByES(SearchResumesBO searchResumesBO, Integer page, Integer limit);
 }

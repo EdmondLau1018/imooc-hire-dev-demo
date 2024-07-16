@@ -3,21 +3,35 @@ package com.imooc.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.imooc.base.BaseInfoProperties;
+import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.mapper.*;
 import com.imooc.pojo.*;
 import com.imooc.pojo.bo.*;
+import com.imooc.pojo.eo.SearchResumesEO;
 import com.imooc.pojo.vo.ResumeVO;
 import com.imooc.pojo.vo.SearchResumesVO;
 import com.imooc.service.MqLocalMsgRecordService;
 import com.imooc.service.ResumeService;
 import com.imooc.utils.GsonUtils;
+import com.imooc.utils.LocalDateUtils;
 import com.imooc.utils.PagedGridResult;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -37,6 +51,8 @@ public class ResumeServiceImpl extends BaseInfoProperties implements ResumeServi
     private final ResumeExpectMapper resumeExpectMapper;
 
     private final ResumeMapperCustom resumeMapperCustom;
+
+    private ElasticsearchRestTemplate esTemplate;
 
     public ResumeServiceImpl(ResumeMapper resumeMapper, MqLocalMsgRecordService recordService, ResumeWorkExpMapper resumeWorkExpMapper, ResumeProjectExpMapper resumeProjectExpMapper, ResumeEducationMapper resumeEducationMapper, ResumeExpectMapper resumeExpectMapper, ResumeMapperCustom resumeMapperCustom) {
         this.resumeMapper = resumeMapper;
@@ -475,5 +491,155 @@ public class ResumeServiceImpl extends BaseInfoProperties implements ResumeServi
         List<SearchResumesVO> searchResumesVOS = resumeMapperCustom.searchResumesList(map);
 
         return setterPagedGrid(searchResumesVOS, page);
+    }
+
+    /**
+     * 将 数据库查询 修改成 ES 查询 代码实现
+     *
+     * @param searchResumesBO
+     * @param page
+     * @param limit
+     * @return
+     */
+    @Override
+    public PagedGridResult searchResumesByES(SearchResumesBO searchResumesBO, Integer page, Integer limit) {
+
+        //  从 BO 对象获取参数信息
+        String basicTitle = searchResumesBO.getBasicTitle();
+        String jobType = searchResumesBO.getJobType();
+        Integer beginAge = searchResumesBO.getBeginAge();
+        Integer endAge = searchResumesBO.getEndAge();
+        Integer sex = searchResumesBO.getSex();
+        Integer activeTimes = searchResumesBO.getActiveTimes();
+        Integer beginWorkExpYears = searchResumesBO.getBeginWorkExpYears();
+        Integer endWorkExpYears = searchResumesBO.getEndWorkExpYears();
+        String edu = searchResumesBO.getEdu();
+        List<String> eduList = searchResumesBO.getEduList();
+        Integer beginSalary = searchResumesBO.getBeginSalary();
+        Integer endSalary = searchResumesBO.getEndSalary();
+        String jobStatus = searchResumesBO.getJobStatus();
+
+        page--;
+        PageRequest pageable = PageRequest.of(page, limit);
+
+        //  用于区分查询条件的时候是否需要 match_all
+        boolean conditionAdd = false;
+        //  条件查询构造器 BoolQueryBuilder
+        BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder();
+        //  匹配默认搜索框
+        //  should 代表 or  must 代表 and 这个条件是针对 basicTitle 进行的匹配
+        if (StringUtils.isNotBlank(basicTitle)) {
+            boolQueryBuilder.must(QueryBuilders.boolQuery()
+                    .should(QueryBuilders.matchQuery("nickname", basicTitle))
+                    .should(QueryBuilders.matchQuery("advantage", basicTitle))
+                    .should(QueryBuilders.matchQuery("credentials", basicTitle))
+                    .should(QueryBuilders.matchQuery("skills", basicTitle))
+            );
+            //  如果进入当前分支，则代表进行条件查询，将条件查询设置为 true 不进行完全匹配
+            conditionAdd = true;
+        }
+
+        //  匹配职位类型
+        if (StringUtils.isNotBlank(jobType)) {
+            boolQueryBuilder.must(QueryBuilders.matchQuery("jobType", jobType));
+            conditionAdd = true;
+        }
+
+        // 匹配年龄
+        if (beginAge > 0 && endAge > 0) {
+            boolQueryBuilder.must(QueryBuilders.rangeQuery("age").gte(beginAge).lte(endAge));
+            conditionAdd = true;
+        }
+
+        //  匹配性别
+        if (sex != null && sex != -1) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("sex", sex));
+            conditionAdd = true;
+        }
+
+        //  匹配活跃度 当前时间 - 活跃度 = 临界节点 如果刷新时间 大于等于临界节点 说明符合条件
+        if (activeTimes != null && activeTimes > 0) {
+            LocalDateTime tempTime = LocalDateUtils.minus(LocalDateTime.now(),
+                    activeTimes,
+                    ChronoUnit.SECONDS);
+            //  时间日期格式转换
+            String timePoint = LocalDateUtils.format(tempTime, LocalDateUtils.DATETIME_PATTERN);
+            boolQueryBuilder.must(QueryBuilders.rangeQuery("refreshTime").gte(timePoint));
+            conditionAdd = true;
+        }
+
+        //  匹配工作年限
+        if (beginWorkExpYears > 0 && endWorkExpYears > 0) {
+            boolQueryBuilder.must(QueryBuilders.rangeQuery("workYears")
+                    .gte(beginWorkExpYears).lte(endWorkExpYears));
+            conditionAdd = true;
+        }
+
+        //  匹配学历
+        if (StringUtils.isNotBlank(edu)) {
+            boolQueryBuilder.must(QueryBuilders.matchPhraseQuery("education", edu));
+            conditionAdd = true;
+        }
+
+        //  匹配薪资
+        if (beginSalary > 0 && endSalary > 0) {
+
+            BoolQueryBuilder bool1 = QueryBuilders.boolQuery()
+                    .must(QueryBuilders.rangeQuery("beginSalary").lte(beginSalary))
+                    .must(QueryBuilders.rangeQuery("endSalary").gte(beginSalary));
+
+            BoolQueryBuilder bool2 = QueryBuilders.boolQuery()
+                    .must(QueryBuilders.rangeQuery("beginSalary").lte(endSalary))
+                    .must(QueryBuilders.rangeQuery("endSalary").gte(endSalary));
+
+            boolQueryBuilder.must(QueryBuilders.boolQuery()
+                    .should(bool1)
+                    .should(bool2));
+
+            conditionAdd = true;
+        }
+
+        //  匹配求职状态
+        if (StringUtils.isNotBlank(jobStatus)) {
+            boolQueryBuilder.must(QueryBuilders.matchPhraseQuery("jobStatus", jobStatus));
+            conditionAdd = true;
+        }
+
+        NativeSearchQueryBuilder builder = new NativeSearchQueryBuilder();
+
+        if (!conditionAdd) {
+            //  匹配 match_all 查询规则
+            builder.withQuery(QueryBuilders.matchAllQuery());
+        } else {
+            //  条件匹配的情况不是 false 匹配布尔类型的条件构造器
+            builder.withQuery(boolQueryBuilder);
+        }
+
+        NativeSearchQuery query = builder.withPageable(pageable).build();
+        SearchHits<SearchResumesEO> searchHits = esTemplate.search(query, SearchResumesEO.class);
+        List<SearchResumesEO> list = getESSearchHitsList(searchHits, SearchResumesEO.class);
+
+        //  封装成新的分页格式
+        PagedGridResult gridResult = new PagedGridResult();
+        gridResult.setRows(list);
+        gridResult.setPage(page + 1);
+        return gridResult;
+    }
+
+    /**
+     * 解析 ES 查询出的 结果 返回对应的 列表 List
+     *
+     * @param searchHits
+     * @param clazz
+     * @param <T>
+     * @return
+     */
+    private <T> List<T> getESSearchHitsList(SearchHits<T> searchHits, Class<T> clazz) {
+        List<T> list = new ArrayList<>();
+        for (SearchHit<T> searchHit : searchHits) {
+            T content = searchHit.getContent();
+            list.add(content);
+        }
+        return list;
     }
 }

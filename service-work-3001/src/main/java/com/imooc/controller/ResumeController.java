@@ -10,6 +10,7 @@ import com.imooc.pojo.ResumeProjectExp;
 import com.imooc.pojo.ResumeWorkExp;
 import com.imooc.pojo.bo.*;
 import com.imooc.pojo.vo.ResumeVO;
+import com.imooc.service.ResumeSearchService;
 import com.imooc.service.ResumeService;
 import com.imooc.utils.GsonUtils;
 import com.imooc.utils.LocalDateUtils;
@@ -29,8 +30,11 @@ public class ResumeController extends BaseInfoProperties {
 
     private final ResumeService resumeService;
 
-    public ResumeController(ResumeService resumeService) {
+    private final ResumeSearchService resumeSearchService;
+
+    public ResumeController(ResumeService resumeService, ResumeSearchService resumeSearchService) {
         this.resumeService = resumeService;
+        this.resumeSearchService = resumeSearchService;
     }
 
     /**
@@ -291,6 +295,8 @@ public class ResumeController extends BaseInfoProperties {
             //  刷新次数超过限制 抛出超限提示 返回错误信息
             return GraceJSONResult.errorCustom(ResponseStatusEnum.RESUME_MAX_LIMIT_ERROR);
         }
+        //  ES 重新加载简历信息
+        resumeSearchService.transformAndFlush(userId);
 
         return GraceJSONResult.ok();
     }
@@ -318,7 +324,8 @@ public class ResumeController extends BaseInfoProperties {
         List eduList = EduEnum.getEduList(eduIndex);
         searchResumesBO.setEduList(eduList);
 
-        PagedGridResult gridResult = resumeService.searchResumes(searchResumesBO, page, limit);
+//        PagedGridResult gridResult = resumeService.searchResumes(searchResumesBO, page, limit);
+        PagedGridResult gridResult = resumeService.searchResumesByES(searchResumesBO, page, limit);
 
         return GraceJSONResult.ok(gridResult);
     }
