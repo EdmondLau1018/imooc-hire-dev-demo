@@ -104,6 +104,37 @@ public class DemoController {
     }
 
     /**
+     * 单个文档对象 条件查询
+     *
+     * @return
+     */
+    @PostMapping("/get")
+    public GraceJSONResult get() {
+
+        //  构建条件对象
+        Criteria criteria = new Criteria().and("stuId").is("1001");
+        //  构建 条件查询 CriteriaQuery 对象
+        CriteriaQuery criteriaQuery = new CriteriaQuery(criteria);
+        //  使用 searchOne 查询单个对象
+        Stu stu = esTemplate.searchOne(criteriaQuery, Stu.class).getContent();
+
+        return GraceJSONResult.ok(stu);
+    }
+
+    /**
+     * 删除单个文档对象
+     * @param id
+     * @return
+     */
+    @PostMapping("/delete")
+    public GraceJSONResult deleteDocument(String id) {
+
+        //  通过 id 删除文档对象
+        String stu = esTemplate.delete(id, IndexCoordinates.of("stu"));
+        return GraceJSONResult.ok(stu);
+    }
+
+    /**
      * 分页从 ES 全量查询
      *
      * @param page
