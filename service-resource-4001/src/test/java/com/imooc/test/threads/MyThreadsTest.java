@@ -2,6 +2,7 @@ package com.imooc.test.threads;
 
 import org.junit.jupiter.api.Test;
 
+import javax.swing.text.TabExpander;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -107,6 +108,7 @@ public class MyThreadsTest {
         }).whenComplete((s, throwable) -> {
 
             System.out.println("线程任务执行完毕后获取的结果为 :" + s);
+//            return; whenComplete 没有返回结果
         }).exceptionally((throwable) -> {
 
             System.out.println("进入异常兜底方法 ，异常的信息为：" + throwable.getMessage());
@@ -114,9 +116,27 @@ public class MyThreadsTest {
             return UUID.randomUUID().toString();
         });
 
+        //  在这里获取的是 业务方法 的返回 uuid
         System.out.println("线程任务执行完毕，获得的 uuid 外部打印 ：" + completableFuture.get());
 
         System.out.println("结束运行 test ...");
+    }
+
+    @Test
+    public void testCompletable2() throws ExecutionException, InterruptedException {
+
+        CompletableFuture<String> completableFuture = CompletableFuture.supplyAsync(() -> {
+            String uuid = UUID.randomUUID().toString();
+            System.out.println("生成的 uuid 内部打印 ： " + uuid);
+            return uuid;
+        }, MyThreadPoolExecutor.threadPool).handle((s, throwable) -> {
+            //   s 指的是上个方法执行之后的返回结果
+            System.out.println("从上一个方法中获取的 uuid :" + s);
+            return "这是一个 String 类型的返回结果";
+        });
+
+        System.out.println("执行结果外部打印 -》》》》》》》》》》 ：" + completableFuture.get());
+
     }
 
     /************************************ 异步任务 顺序执行  ****************************************/
@@ -130,12 +150,35 @@ public class MyThreadsTest {
         }).thenRun(() -> {
             String uuid = UUID.randomUUID().toString();
             System.out.println("在这里生成新的 uuid 不接收参数 ..." + uuid);
+        }).thenRun(() -> {
+            System.out.println("这是顺序执行的第三个方法");
         });
 
         System.out.println(future.get());
 
     }
 
+    @Test
+    public void testThen() throws ExecutionException, InterruptedException {
+
+        CompletableFuture<Void> completableFuture = CompletableFuture.supplyAsync(() -> {
+
+            String uuid = UUID.randomUUID().toString();
+            System.out.println("supplyAsync --- 第一个方法执行生成的 UUID ：" + uuid);
+            return uuid;
+        }, MyThreadPoolExecutor.threadPool).thenApply((s) -> {
+            //  只接收一个参数 并且提供返回值
+            System.out.println("apply --- 接收到的参数 ： " + s);
+            return s;
+        }).thenAccept((s) -> {
+            // 只接收一个参数 不提供返回值
+            System.out.println("accept --- 接收到的参数： " + s);
+        }).thenRun(() -> {
+            System.out.println("不接收参数 也不提供返回值");
+        });
+
+        System.out.println(completableFuture.get());
+    }
 
     /************************************ 双重任务 组合  ****************************************/
     @Test
@@ -179,9 +222,68 @@ public class MyThreadsTest {
             System.out.println("其中有一个任务优先执行完了.....");
         });
 
-        completableFuture2.get();
+//        completableFuture2.get();
     }
 
+    /**
+     * 两个任务都执行完了 接收两个参数
+     * 没有返回值
+     */
+    @Test
+    public void testThenAcceptBoth() throws ExecutionException, InterruptedException {
+
+        CompletableFuture<String> completableFuture1 = CompletableFuture.supplyAsync(() -> {
+            String uuid = UUID.randomUUID().toString();
+            return "123";
+        }, MyThreadPoolExecutor.threadPool);
+
+        CompletableFuture<Void> completableFuture2 = CompletableFuture.supplyAsync(() -> {
+            String uuid = UUID.randomUUID().toString();
+            return "S2  :" + uuid;
+        }, MyThreadPoolExecutor.threadPool).thenAcceptBoth(completableFuture1, (s, aVoid) -> {
+            System.out.println("......." + s);
+            //  参数是 一个 completable 对象和一个 lambda 表达式
+            //  可以通过 completable 对象 那个任务对象的返回值
+            try {
+                System.out.println("应该是这么接收第一个方法的参数的： " + completableFuture1.get());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+        System.out.println(completableFuture2.get());
+    }
+
+    /**
+     * 两个任务都执行完之后才执行  可以获得两个参数 有返回值
+     * @throws ExecutionException
+     * @throws InterruptedException
+     */
+    @Test
+    public void testThenCombine() throws ExecutionException, InterruptedException {
+
+        CompletableFuture<String> completableFuture1 = CompletableFuture.supplyAsync(() -> {
+            String uuid = UUID.randomUUID().toString();
+            return "测试 123";
+        }, MyThreadPoolExecutor.threadPool);
+
+        CompletableFuture<Object> completableFuture2 = CompletableFuture.supplyAsync(() -> {
+            return "测试 567";
+        }, MyThreadPoolExecutor.threadPool).thenCombine(completableFuture1, (s, aVoid) -> {
+            String s1 = null;
+            System.out.println("s2 =========" + s);
+            try {
+                s1 = completableFuture1.get();
+                System.out.println("s1 =========== " + s1);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return s + " ||||||||" + s1;
+        });
+
+        System.out.println(completableFuture2.get());
+    }
 
     @Test
     public void testCompletableFutureThenCombine() throws Exception {
@@ -224,6 +326,6 @@ public class MyThreadsTest {
             return res;
         }, MyThreadPoolExecutor.threadPool);
 
-        CompletableFuture.allOf(completableFuture1,completableFuture2,completableFuture3);
+        CompletableFuture.allOf(completableFuture1, completableFuture2, completableFuture3);
     }
 }
