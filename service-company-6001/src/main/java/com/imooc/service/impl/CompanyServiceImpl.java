@@ -262,7 +262,7 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
                             + " else "
                             + " return 0 "
                             + " end ";
-            redis.execLuaScript(lockScript, selfLockId, distLockName);
+            redis.execLuaScript(lockScript, distLockName, selfLockId);
         }
     }
 
@@ -321,8 +321,31 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
             Thread.sleep(100);
             modifyCompanyInfo(modifyCompanyInfoBO);
         }
+    }
 
-        doModify(modifyCompanyInfoBO);
+    /**
+     * while 循环优化递归调用
+     *
+     * @param modifyCompanyInfoBO
+     */
+    @Transactional
+    public void modifyCompanyInfoTest(ModifyCompanyInfoBO modifyCompanyInfoBO) throws Exception {
+
+        String selfLockId = UUID.randomUUID().toString();
+        //  在获取分布式锁的时候 使用 while 循环优化
+        while (!redis.setnx("redis_lock", selfLockId, 30)) {
+            //  加锁失败 线程休眠一段时间之后重新抢夺 分布式锁
+            Thread.sleep(5000);
+        }
+        try {
+            //  加锁成功直接 对 企业信息进行修改
+            doModify(modifyCompanyInfoBO);
+        } finally {
+            if (redis.get("redis_lock").equalsIgnoreCase(selfLockId) && redis.get("redis_lock") != null) {
+                //  业务执行结束 删除当前分布式锁
+                redis.del("redis_lock");
+            }
+        }
     }
 
     /**
