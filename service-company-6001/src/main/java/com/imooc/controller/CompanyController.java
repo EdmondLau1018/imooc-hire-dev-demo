@@ -408,6 +408,16 @@ public class CompanyController extends BaseInfoProperties {
     /**************************************************业务分割：分布式锁测试*************************************************/
 
     /**
+     * 公平锁测试代码
+     * @return
+     */
+    @PostMapping("/fairLock")
+    public GraceJSONResult getFairLock(ModifyCompanyInfoBO modifyCompanyInfoBO) {
+        companyService.modifyCompanyInfoFairLock(modifyCompanyInfoBO);
+        return GraceJSONResult.ok();
+    }
+
+    /**
      * 测试获取 redisson 信号量的方法
      *
      * @param num
@@ -460,7 +470,6 @@ public class CompanyController extends BaseInfoProperties {
      */
     @PostMapping("/list/get")
     public GraceJSONResult getList(@RequestBody @Valid SearchBO searchBO) {
-
         //  获取企业信息列表
         List<Company> companyList = companyService.getList(searchBO);
         //  使用 VO 对象返回 只返回需要的数据

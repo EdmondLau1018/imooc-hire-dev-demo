@@ -93,6 +93,12 @@ public interface CompanyService {
      */
     public void savePhotos(ModifyCompanyInfoBO companyInfoBO);
 
+    public void modifyCompanyInfoFairLock(ModifyCompanyInfoBO modifyCompanyInfoBO);
+
+    public void modifyCompanyInfoMultiLock(ModifyCompanyInfoBO modifyCompanyInfoBO);
+
+//    public void testReadLock(INt);
+
     /**
      * 高并发请求测试读写锁
      */

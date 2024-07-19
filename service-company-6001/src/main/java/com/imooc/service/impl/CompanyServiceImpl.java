@@ -239,7 +239,7 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
         String selfLockId = UUID.randomUUID().toString();
 
         //  循环设置 redis 分布式锁
-        while (redis.setnx(distLockName, selfLockId, 30)) {
+        while (!redis.setnx(distLockName, selfLockId, 30)) {
             Thread.sleep(2000);
         }
         //  当前线程获得 redis 分布式锁 后开启自动检查是否过期机制
@@ -400,6 +400,39 @@ public class CompanyServiceImpl extends BaseInfoProperties implements CompanySer
                             .eq("company_id", companyInfoBO.getCompanyId())
             );
         }
+    }
+
+    @Override
+    public void modifyCompanyInfoFairLock(ModifyCompanyInfoBO modifyCompanyInfoBO) {
+
+        String fairLockName = "redissonFairLock";
+        //  获得公平锁
+        RLock rLock = redissonClient.getFairLock(fairLockName);
+        //  给对应的业务上锁
+        rLock.lock();
+        try {
+            //
+            doModify(modifyCompanyInfoBO);
+        } finally {
+            rLock.unlock();
+        }
+    }
+
+    @Override
+    public void modifyCompanyInfoMultiLock(ModifyCompanyInfoBO modifyCompanyInfoBO) {
+
+//        RLock lock1 = redissonClient.getLock("lock1");
+//        RLock lock2 = redissonClient.getLock("lock2");
+//        RLock lock3 = redissonClient.getLock("lock3");
+//
+//        RLock multiLock = redissonClient.getMultiLock(lock1, lock2, lock3);
+//
+//        RLock redissonLockA = redissonClientA.getLock("redisson_lock_a");
+//        RLock redissonLockB = redissonClientB.getLock("redisson_lock_a");
+//        RLock redissonLockC = redissonClientC.getLock("redisson_lock_a");
+//
+//        RLock redLock = redissonClient.getRedLock(redissonLockA, redissonLockB, redissonLockC);
+
     }
 
     /**
